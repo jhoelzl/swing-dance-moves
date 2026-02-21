@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import {
     filteredMoves,
     tagGroups,
@@ -13,11 +14,63 @@
   import FilterChips from "$lib/components/FilterChips.svelte";
   import MoveCard from "$lib/components/MoveCard.svelte";
   import { debounce } from "$lib/utils";
+  import { base } from "$app/paths";
 
   let randomMoves = $state<Move[]>([]);
   let showFilters = $state(false);
+  let searchInputValue = $state("");
+  let urlSyncReady = false;
 
   const displayMoves = $derived($showAll ? $filteredMoves : randomMoves);
+
+  // Read filters from URL on mount
+  onMount(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const tagsParam = params.get("tags");
+    if (tagsParam) {
+      const tagIds = tagsParam
+        .split(",")
+        .map(Number)
+        .filter((n) => !isNaN(n) && n > 0);
+      if (tagIds.length > 0) {
+        activeFilters.set(tagIds);
+        showFilters = true;
+        showAll.set(true);
+      }
+    }
+
+    const qParam = params.get("q");
+    if (qParam) {
+      searchQuery.set(qParam);
+      searchInputValue = qParam;
+    }
+
+    // Enable URL sync after initial state is restored
+    urlSyncReady = true;
+  });
+
+  // Sync filter/search changes back to URL
+  $effect(() => {
+    if (!urlSyncReady) return;
+
+    const filters = $activeFilters;
+    const query = $searchQuery;
+
+    const params = new URLSearchParams();
+    if (filters.length > 0) {
+      params.set("tags", filters.join(","));
+    }
+    if (query) {
+      params.set("q", query);
+    }
+
+    const search = params.toString();
+    const basePath = `${base}/` || "/";
+    const newUrl = search ? `${basePath}?${search}` : basePath;
+
+    window.history.replaceState(null, "", newUrl);
+  });
 
   function handleRandomMoves() {
     randomMoves = getRandomMoves($filteredMoves, 2);
@@ -72,6 +125,7 @@
         type="text"
         placeholder="Search moves..."
         oninput={handleSearchInput}
+        value={searchInputValue}
         class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
       />
     </div>
