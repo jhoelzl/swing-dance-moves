@@ -35,7 +35,6 @@
         .filter((n) => !isNaN(n) && n > 0);
       if (tagIds.length > 0) {
         activeFilters.set(tagIds);
-        showFilters = true;
         showAll.set(true);
       }
     }
