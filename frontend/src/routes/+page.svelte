@@ -150,7 +150,9 @@
         class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer
         {$activeFilters.length > 0
           ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
-          : 'bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 shadow-sm'}"
+          : $videoOnly
+            ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+            : 'bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 shadow-sm'}"
       >
         <svg
           class="w-4 h-4"
@@ -183,23 +185,6 @@
           Reset
         </button>
       {/if}
-
-      <!-- Video Filter Toggle -->
-      <button
-        onclick={() => videoOnly.update((v) => !v)}
-        class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer
-        {$videoOnly
-          ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'
-          : 'bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 shadow-sm'}"
-        title="Show only moves with videos"
-      >
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"
-          />
-        </svg>
-        Video
-      </button>
     </div>
 
     <div class="flex items-center gap-3">
@@ -227,7 +212,7 @@
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
           />
         </svg>
-        Random
+        Out of moves!
       </button>
     </div>
   </div>
@@ -238,6 +223,44 @@
       class="filter-panel mb-6 p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm"
     >
       <FilterChips tagGroups={$tagGroups} />
+
+      <!-- Video Filter -->
+      <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <h3
+          class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2"
+        >
+          Media
+        </h3>
+        <button
+          onclick={() => videoOnly.update((v) => !v)}
+          class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border
+          {$videoOnly
+            ? 'bg-red-500 dark:bg-red-600 text-white border-transparent shadow-sm'
+            : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800 hover:shadow-sm'}"
+        >
+          {#if $videoOnly}
+            <svg
+              class="w-3 h-3 mr-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          {/if}
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"
+            />
+          </svg>
+          YouTube Video
+        </button>
+      </div>
     </div>
   {/if}
 
