@@ -203,7 +203,7 @@
       {@render children()}
     {:else if !$isLoading}
       <div class="text-center py-24">
-        <span class="text-4xl">💃</span>
+        <span class="text-4xl">🕺</span>
         <p class="text-gray-400 dark:text-gray-500 mt-4 mb-5">
           Bitte einloggen, um Moves zu sehen.
         </p>

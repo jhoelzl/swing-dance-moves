@@ -40,7 +40,7 @@
 
 <div class="max-w-sm mx-auto mt-16">
   <div class="text-center mb-8">
-    <span class="text-4xl">💃</span>
+    <span class="text-4xl">�</span>
     <h2 class="text-xl font-bold text-gray-900 dark:text-white mt-3">
       Welcome back
     </h2>
