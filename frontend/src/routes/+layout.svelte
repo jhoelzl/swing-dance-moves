@@ -12,24 +12,16 @@
     isLoading,
   } from "$lib/stores";
   import { getAllMoves, getAllTagsGrouped } from "$lib/services/moves";
+  import { goto } from "$app/navigation";
   import { base } from "$app/paths";
 
   let { children } = $props();
 
-  onMount(async () => {
-    initDarkMode();
+  // Check if current page is the login page
+  import { page } from "$app/stores";
+  let isLoginPage = $derived($page.url.pathname.endsWith("/login"));
 
-    // Check auth state
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    isAdmin.set(!!session);
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      isAdmin.set(!!session);
-    });
-
-    // Load data
+  async function loadData() {
     try {
       const [moves, tags] = await Promise.all([
         getAllMoves(),
@@ -42,11 +34,42 @@
     } finally {
       isLoading.set(false);
     }
+  }
+
+  onMount(async () => {
+    initDarkMode();
+
+    // Check auth state
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    isAdmin.set(!!session);
+
+    if (session) {
+      await loadData();
+    } else {
+      isLoading.set(false);
+      goto(`${base}/login`);
+    }
+
+    supabase.auth.onAuthStateChange(async (_event, session) => {
+      isAdmin.set(!!session);
+      if (session) {
+        await loadData();
+      } else {
+        allMoves.set([]);
+        tagGroups.set([]);
+        goto(`${base}/login`);
+      }
+    });
   });
 
   async function handleLogout() {
     await supabase.auth.signOut();
     isAdmin.set(false);
+    allMoves.set([]);
+    tagGroups.set([]);
+    goto(`${base}/login`);
   }
 </script>
 
@@ -173,6 +196,19 @@
 
   <!-- Page Content -->
   <main class="max-w-4xl mx-auto px-4 py-6">
-    {@render children()}
+    {#if $isAdmin || isLoginPage}
+      {@render children()}
+    {:else if !$isLoading}
+      <div class="text-center py-20">
+        <p class="text-gray-500 dark:text-gray-400 mb-4">
+          Bitte einloggen, um Moves zu sehen.
+        </p>
+        <a
+          href="{base}/login"
+          class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >Zum Login</a
+        >
+      </div>
+    {/if}
   </main>
 </div>
