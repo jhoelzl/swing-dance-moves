@@ -86,7 +86,10 @@
           href="{base}/"
           class="flex items-center gap-2.5 text-gray-900 dark:text-white no-underline group"
         >
-          <span class="text-2xl group-hover:scale-110 transition-transform duration-200">💃</span>
+          <span
+            class="text-2xl group-hover:scale-110 transition-transform duration-200"
+            >💃</span
+          >
           <h1 class="text-lg font-bold tracking-tight">Swing Moves</h1>
         </a>
 

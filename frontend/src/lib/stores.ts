@@ -26,12 +26,22 @@ export const isLoading = writable<boolean>(true);
 // Show all moves vs random selection
 export const showAll = writable<boolean>(true);
 
+// Filter to show only moves with YouTube videos
+export const videoOnly = writable<boolean>(false);
+
 // Filtered and searched moves (derived)
 export const filteredMoves = derived(
-	[allMoves, activeFilters, searchQuery],
-	([$allMoves, $activeFilters, $searchQuery]) => {
+	[allMoves, activeFilters, searchQuery, videoOnly],
+	([$allMoves, $activeFilters, $searchQuery, $videoOnly]) => {
 		let result = filterMovesByTags($allMoves, $activeFilters);
 		result = searchMoves(result, $searchQuery);
+		if ($videoOnly) {
+			result = result.filter(
+				(m) =>
+					m.link &&
+					(m.link.includes('youtube.com') || m.link.includes('youtu.be'))
+			);
+		}
 		return result;
 	}
 );
@@ -50,6 +60,7 @@ export function toggleFilter(tagId: number) {
 export function clearFilters() {
 	activeFilters.set([]);
 	searchQuery.set('');
+	videoOnly.set(false);
 }
 
 // Initialize dark mode from localStorage or system preference

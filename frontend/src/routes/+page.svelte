@@ -8,6 +8,7 @@
     isLoading,
     clearFilters,
     showAll,
+    videoOnly,
   } from "$lib/stores";
   import { getRandomMoves } from "$lib/services/moves";
   import type { Move } from "$lib/types";
@@ -45,6 +46,11 @@
       searchInputValue = qParam;
     }
 
+    const videoParam = params.get("video");
+    if (videoParam === "1") {
+      videoOnly.set(true);
+    }
+
     // Enable URL sync after initial state is restored
     urlSyncReady = true;
   });
@@ -55,6 +61,7 @@
 
     const filters = $activeFilters;
     const query = $searchQuery;
+    const video = $videoOnly;
 
     const params = new URLSearchParams();
     if (filters.length > 0) {
@@ -62,6 +69,9 @@
     }
     if (query) {
       params.set("q", query);
+    }
+    if (video) {
+      params.set("video", "1");
     }
 
     const search = params.toString();
@@ -100,7 +110,9 @@
       <div
         class="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
       ></div>
-      <p class="mt-4 text-sm text-gray-400 dark:text-gray-500">Loading moves...</p>
+      <p class="mt-4 text-sm text-gray-400 dark:text-gray-500">
+        Loading moves...
+      </p>
     </div>
   </div>
 {:else}
@@ -171,19 +183,49 @@
           Reset
         </button>
       {/if}
+
+      <!-- Video Filter Toggle -->
+      <button
+        onclick={() => videoOnly.update((v) => !v)}
+        class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer
+        {$videoOnly
+          ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'
+          : 'bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 shadow-sm'}"
+        title="Show only moves with videos"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"
+          />
+        </svg>
+        Video
+      </button>
     </div>
 
     <div class="flex items-center gap-3">
-      <span class="text-xs font-medium text-gray-400 dark:text-gray-500 tabular-nums">
-        {$filteredMoves.length} {$filteredMoves.length === 1 ? 'Move' : 'Moves'}
+      <span
+        class="text-xs font-medium text-gray-400 dark:text-gray-500 tabular-nums"
+      >
+        {$filteredMoves.length}
+        {$filteredMoves.length === 1 ? "Move" : "Moves"}
       </span>
       <button
         onclick={handleRandomMoves}
         class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow cursor-pointer"
         title="Pick 2 random moves"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
         </svg>
         Random
       </button>
@@ -206,8 +248,18 @@
         onclick={handleShowAll}
         class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
         </svg>
         Show all moves
       </button>
