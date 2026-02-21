@@ -1,0 +1,81 @@
+import { writable, derived } from 'svelte/store';
+import type { Move, TagGroup } from '$lib/types';
+import { filterMovesByTags, searchMoves } from '$lib/services/moves';
+
+// All moves loaded from Supabase
+export const allMoves = writable<Move[]>([]);
+
+// All tag groups loaded from Supabase
+export const tagGroups = writable<TagGroup[]>([]);
+
+// Currently active filter tag IDs
+export const activeFilters = writable<number[]>([]);
+
+// Search query string
+export const searchQuery = writable<string>('');
+
+// Dark mode state
+export const darkMode = writable<boolean>(false);
+
+// Admin authentication state
+export const isAdmin = writable<boolean>(false);
+
+// Loading state
+export const isLoading = writable<boolean>(true);
+
+// Show all moves vs random selection
+export const showAll = writable<boolean>(true);
+
+// Filtered and searched moves (derived)
+export const filteredMoves = derived(
+	[allMoves, activeFilters, searchQuery],
+	([$allMoves, $activeFilters, $searchQuery]) => {
+		let result = filterMovesByTags($allMoves, $activeFilters);
+		result = searchMoves(result, $searchQuery);
+		return result;
+	}
+);
+
+// Toggle a tag filter
+export function toggleFilter(tagId: number) {
+	activeFilters.update((filters) => {
+		if (filters.includes(tagId)) {
+			return filters.filter((id) => id !== tagId);
+		}
+		return [...filters, tagId];
+	});
+}
+
+// Clear all filters
+export function clearFilters() {
+	activeFilters.set([]);
+	searchQuery.set('');
+}
+
+// Initialize dark mode from localStorage or system preference
+export function initDarkMode() {
+	if (typeof window === 'undefined') return;
+
+	const stored = localStorage.getItem('darkMode');
+	if (stored !== null) {
+		const isDark = stored === 'true';
+		darkMode.set(isDark);
+		document.documentElement.classList.toggle('dark', isDark);
+	} else {
+		const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		darkMode.set(prefersDark);
+		document.documentElement.classList.toggle('dark', prefersDark);
+	}
+}
+
+// Toggle dark mode
+export function toggleDarkMode() {
+	darkMode.update((current) => {
+		const next = !current;
+		if (typeof window !== 'undefined') {
+			localStorage.setItem('darkMode', String(next));
+			document.documentElement.classList.toggle('dark', next);
+		}
+		return next;
+	});
+}
