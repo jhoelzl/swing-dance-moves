@@ -13,8 +13,8 @@
 </script>
 
 <span
-	class="{colors.bg} {colors.text} inline-flex items-center rounded-full font-medium
-	{small ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-0.5 text-xs'}"
+	class="{colors.bg} {colors.text} border {colors.border} inline-flex items-center rounded-full font-medium
+	{small ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs'}"
 >
 	{tag.tag_name.trim()}
 </span>

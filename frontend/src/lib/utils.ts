@@ -1,43 +1,50 @@
-/** Map tag_label values to Tailwind CSS classes */
-export function getTagColors(label: string): { bg: string; text: string; border: string } {
-	const map: Record<string, { bg: string; text: string; border: string }> = {
+/** Map tag_label values to modern soft Tailwind CSS classes */
+export function getTagColors(label: string): { bg: string; text: string; border: string; activeBg: string } {
+	const map: Record<string, { bg: string; text: string; border: string; activeBg: string }> = {
 		success: {
-			bg: 'bg-green-500 dark:bg-green-600',
-			text: 'text-white',
-			border: 'border-green-600 dark:border-green-700'
+			bg: 'bg-emerald-50 dark:bg-emerald-950/40',
+			text: 'text-emerald-700 dark:text-emerald-300',
+			border: 'border-emerald-200 dark:border-emerald-800',
+			activeBg: 'bg-emerald-500 dark:bg-emerald-600'
 		},
 		danger: {
-			bg: 'bg-red-500 dark:bg-red-600',
-			text: 'text-white',
-			border: 'border-red-600 dark:border-red-700'
+			bg: 'bg-rose-50 dark:bg-rose-950/40',
+			text: 'text-rose-700 dark:text-rose-300',
+			border: 'border-rose-200 dark:border-rose-800',
+			activeBg: 'bg-rose-500 dark:bg-rose-600'
 		},
 		warning: {
-			bg: 'bg-yellow-500 dark:bg-yellow-600',
-			text: 'text-white',
-			border: 'border-yellow-600 dark:border-yellow-700'
+			bg: 'bg-amber-50 dark:bg-amber-950/40',
+			text: 'text-amber-700 dark:text-amber-300',
+			border: 'border-amber-200 dark:border-amber-800',
+			activeBg: 'bg-amber-500 dark:bg-amber-600'
 		},
 		primary: {
-			bg: 'bg-blue-500 dark:bg-blue-600',
-			text: 'text-white',
-			border: 'border-blue-600 dark:border-blue-700'
+			bg: 'bg-blue-50 dark:bg-blue-950/40',
+			text: 'text-blue-700 dark:text-blue-300',
+			border: 'border-blue-200 dark:border-blue-800',
+			activeBg: 'bg-blue-500 dark:bg-blue-600'
 		},
 		secondary: {
-			bg: 'bg-gray-500 dark:bg-gray-600',
-			text: 'text-white',
-			border: 'border-gray-600 dark:border-gray-700'
+			bg: 'bg-slate-100 dark:bg-slate-800/60',
+			text: 'text-slate-600 dark:text-slate-300',
+			border: 'border-slate-200 dark:border-slate-700',
+			activeBg: 'bg-slate-500 dark:bg-slate-600'
 		},
 		light: {
-			bg: 'bg-gray-200 dark:bg-gray-700',
-			text: 'text-gray-800 dark:text-gray-200',
-			border: 'border-gray-300 dark:border-gray-600'
+			bg: 'bg-gray-100 dark:bg-gray-800/60',
+			text: 'text-gray-600 dark:text-gray-300',
+			border: 'border-gray-200 dark:border-gray-700',
+			activeBg: 'bg-gray-500 dark:bg-gray-600'
 		}
 	};
 
 	return (
 		map[label] ?? {
-			bg: 'bg-gray-200 dark:bg-gray-700',
-			text: 'text-gray-800 dark:text-gray-200',
-			border: 'border-gray-300 dark:border-gray-600'
+			bg: 'bg-violet-50 dark:bg-violet-950/40',
+			text: 'text-violet-700 dark:text-violet-300',
+			border: 'border-violet-200 dark:border-violet-800',
+			activeBg: 'bg-violet-500 dark:bg-violet-600'
 		}
 	);
 }

@@ -74,27 +74,27 @@
 </script>
 
 <div
-  class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300"
+  class="min-h-screen bg-gray-50/80 dark:bg-gray-950 transition-colors duration-300"
 >
   <!-- Navigation -->
   <nav
-    class="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700"
+    class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/60 dark:border-gray-800"
   >
-    <div class="max-w-4xl mx-auto px-4 py-3">
+    <div class="max-w-3xl mx-auto px-5 py-3.5">
       <div class="flex items-center justify-between">
         <a
           href="{base}/"
-          class="flex items-center gap-2 text-gray-900 dark:text-white no-underline"
+          class="flex items-center gap-2.5 text-gray-900 dark:text-white no-underline group"
         >
-          <span class="text-xl">💃</span>
-          <h1 class="text-lg font-bold tracking-tight">Swing Dance Moves</h1>
+          <span class="text-2xl group-hover:scale-110 transition-transform duration-200">💃</span>
+          <h1 class="text-lg font-bold tracking-tight">Swing Moves</h1>
         </a>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1">
           <!-- Dark Mode Toggle -->
           <button
             onclick={toggleDarkMode}
-            class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+            class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer"
             title="Toggle Dark Mode"
           >
             {#if $darkMode}
@@ -132,7 +132,7 @@
           {#if $isAdmin}
             <a
               href="{base}/new"
-              class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
               title="Add Move"
             >
               <svg
@@ -151,7 +151,7 @@
             </a>
             <button
               onclick={handleLogout}
-              class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+              class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer"
               title="Logout"
             >
               <svg
@@ -171,8 +171,8 @@
           {:else}
             <a
               href="{base}/login"
-              class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title="Admin Login"
+              class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              title="Login"
             >
               <svg
                 class="w-5 h-5"
@@ -195,17 +195,18 @@
   </nav>
 
   <!-- Page Content -->
-  <main class="max-w-4xl mx-auto px-4 py-6">
+  <main class="max-w-3xl mx-auto px-5 py-8">
     {#if $isAdmin || isLoginPage}
       {@render children()}
     {:else if !$isLoading}
-      <div class="text-center py-20">
-        <p class="text-gray-500 dark:text-gray-400 mb-4">
+      <div class="text-center py-24">
+        <span class="text-4xl">💃</span>
+        <p class="text-gray-400 dark:text-gray-500 mt-4 mb-5">
           Bitte einloggen, um Moves zu sehen.
         </p>
         <a
           href="{base}/login"
-          class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all shadow-sm hover:shadow font-medium text-sm"
           >Zum Login</a
         >
       </div>

@@ -20,25 +20,25 @@
 	}
 </script>
 
-<div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
+<div class="move-card rounded-xl bg-white dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/50 overflow-hidden">
 	<!-- Header -->
 	<button
 		onclick={toggle}
-		class="w-full px-4 py-3 text-left flex items-start justify-between gap-2 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors cursor-pointer"
+		class="w-full px-5 py-4 text-left flex items-start justify-between gap-3 transition-colors cursor-pointer group"
 	>
 		<div class="flex-1 min-w-0">
-			<div class="flex items-baseline flex-wrap gap-1">
-				<h3 class="text-base font-semibold text-gray-900 dark:text-white">
+			<div class="flex items-baseline flex-wrap gap-x-2 gap-y-0.5">
+				<h3 class="text-[15px] font-semibold text-gray-900 dark:text-gray-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
 					{move.name.trim()}
 				</h3>
 				{#if move.synonyms}
-					<span class="text-sm text-gray-400 dark:text-gray-500">
+					<span class="text-sm text-gray-400 dark:text-gray-500 italic">
 						{move.synonyms}
 					</span>
 				{/if}
 			</div>
 			{#if move.tags && move.tags.length > 0}
-				<div class="flex flex-wrap gap-1 mt-1.5">
+				<div class="flex flex-wrap gap-1.5 mt-2">
 					{#each move.tags as tag}
 						<TagBadge {tag} small />
 					{/each}
@@ -46,12 +46,12 @@
 			{/if}
 		</div>
 
-		<div class="flex items-center gap-2 mt-1 shrink-0">
+		<div class="flex items-center gap-2 mt-0.5 shrink-0">
 			{#if $isAdmin}
 				<a
 					href="{base}/edit/{move.move_id}"
 					onclick={(e) => e.stopPropagation()}
-					class="text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 transition-colors"
+					class="p-1.5 rounded-md text-gray-300 hover:text-blue-500 hover:bg-blue-50 dark:text-gray-600 dark:hover:text-blue-400 dark:hover:bg-blue-950/30 transition-all"
 					title="Edit Move"
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@
 				</a>
 			{/if}
 			<svg
-				class="w-5 h-5 text-gray-400 dark:text-gray-500 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}"
+				class="w-4 h-4 text-gray-300 dark:text-gray-600 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}"
 				fill="none" stroke="currentColor" viewBox="0 0 24 24"
 			>
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -70,35 +70,40 @@
 
 	<!-- Body (collapsible) -->
 	{#if isOpen}
-		<div class="px-4 pb-4 border-t border-gray-100 dark:border-gray-700">
-			{#if move.description}
-				<div class="pt-3 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
-					{@html move.description.replace(/\r\n/g, '\n').replace(/<br\s*\/?>/gi, '\n')}
-				</div>
-			{/if}
+		<div class="px-5 pb-5">
+			<div class="border-t border-gray-100 dark:border-gray-700/50 pt-4">
+				{#if move.description}
+					<div class="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-line leading-relaxed">
+						{@html move.description.replace(/\r\n/g, '\n').replace(/<br\s*\/?>/gi, '\n')}
+					</div>
+				{/if}
 
-			{#if youtubeId}
-				<div class="mt-3 video-container rounded-lg overflow-hidden">
-					<iframe
-						src="https://www.youtube.com/embed/{youtubeId}"
-						title="{move.name} - YouTube"
-						frameborder="0"
-						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-						allowfullscreen
-					></iframe>
-				</div>
-			{:else if move.link}
-				<div class="mt-3">
-					<a
-						href={move.link}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 underline"
-					>
-						{move.link}
-					</a>
-				</div>
-			{/if}
+				{#if youtubeId}
+					<div class="mt-4 video-container rounded-xl overflow-hidden shadow-sm">
+						<iframe
+							src="https://www.youtube.com/embed/{youtubeId}"
+							title="{move.name} - YouTube"
+							frameborder="0"
+							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+							allowfullscreen
+						></iframe>
+					</div>
+				{:else if move.link}
+					<div class="mt-4">
+						<a
+							href={move.link}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="inline-flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+						>
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+							</svg>
+							Video ansehen
+						</a>
+					</div>
+				{/if}
+			</div>
 		</div>
 	{/if}
 </div>

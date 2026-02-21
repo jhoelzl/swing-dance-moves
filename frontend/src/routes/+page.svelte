@@ -95,20 +95,20 @@
 </svelte:head>
 
 {#if $isLoading}
-  <div class="flex items-center justify-center py-20">
+  <div class="flex items-center justify-center py-24">
     <div class="text-center">
       <div
-        class="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"
+        class="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
       ></div>
-      <p class="mt-3 text-gray-500 dark:text-gray-400">Loading moves...</p>
+      <p class="mt-4 text-sm text-gray-400 dark:text-gray-500">Loading moves...</p>
     </div>
   </div>
 {:else}
   <!-- Search -->
-  <div class="mb-4">
+  <div class="mb-5">
     <div class="relative">
       <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+        class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 dark:text-gray-600"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -125,17 +125,20 @@
         placeholder="Search moves..."
         oninput={handleSearchInput}
         value={searchInputValue}
-        class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+        class="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 dark:focus:border-blue-500 outline-none transition-all shadow-sm"
       />
     </div>
   </div>
 
-  <!-- Filter Toggle & Actions -->
-  <div class="flex items-center justify-between mb-4 gap-3">
+  <!-- Toolbar: Filter + Count + Random -->
+  <div class="flex items-center justify-between mb-5 gap-3">
     <div class="flex items-center gap-2">
       <button
         onclick={() => (showFilters = !showFilters)}
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors cursor-pointer"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer
+        {$activeFilters.length > 0
+          ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+          : 'bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 shadow-sm'}"
       >
         <svg
           class="w-4 h-4"
@@ -153,7 +156,7 @@
         Filter
         {#if $activeFilters.length > 0}
           <span
-            class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-blue-500 text-white rounded-full"
+            class="inline-flex items-center justify-center w-5 h-5 text-[11px] font-bold bg-blue-500 text-white rounded-full"
           >
             {$activeFilters.length}
           </span>
@@ -163,59 +166,67 @@
       {#if $activeFilters.length > 0}
         <button
           onclick={clearFilters}
-          class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
+          class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
         >
-          Clear
+          Reset
         </button>
       {/if}
     </div>
 
-    <div class="flex items-center gap-2">
-      <span class="text-sm text-gray-500 dark:text-gray-400">
-        {$filteredMoves.length} Moves
+    <div class="flex items-center gap-3">
+      <span class="text-xs font-medium text-gray-400 dark:text-gray-500 tabular-nums">
+        {$filteredMoves.length} {$filteredMoves.length === 1 ? 'Move' : 'Moves'}
       </span>
+      <button
+        onclick={handleRandomMoves}
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow cursor-pointer"
+        title="Pick 2 random moves"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Random
+      </button>
     </div>
   </div>
 
   <!-- Filters Panel -->
   {#if showFilters}
     <div
-      class="mb-5 p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+      class="filter-panel mb-6 p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm"
     >
       <FilterChips tagGroups={$tagGroups} />
     </div>
   {/if}
 
-  <!-- Random Moves / Show All Buttons -->
-  <div class="flex justify-center gap-3 mb-5">
-    <button
-      onclick={handleRandomMoves}
-      class="px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors shadow-sm cursor-pointer"
-    >
-      🎲 I'm out of moves!
-    </button>
-    {#if !$showAll}
+  <!-- Show All banner when in random mode -->
+  {#if !$showAll}
+    <div class="flex justify-center mb-5">
       <button
         onclick={handleShowAll}
-        class="px-5 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium text-sm transition-colors cursor-pointer"
+        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
       >
-        Show all
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        Show all moves
       </button>
-    {/if}
-  </div>
+    </div>
+  {/if}
 
   <!-- Move List -->
   {#if displayMoves.length > 0}
-    <div class="space-y-2">
+    <div class="space-y-3">
       {#each displayMoves as move (move.move_id)}
         <MoveCard {move} />
       {/each}
     </div>
   {:else}
-    <div class="text-center py-12">
-      <p class="text-gray-500 dark:text-gray-400 text-lg">No moves found!</p>
-      <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
-        Try adjusting your filters or search query.
+    <div class="text-center py-16">
+      <div class="text-4xl mb-3">🕺</div>
+      <p class="text-gray-400 dark:text-gray-500 font-medium">No moves found</p>
+      <p class="text-gray-300 dark:text-gray-600 text-sm mt-1">
+        Try adjusting your filters or search.
       </p>
     </div>
   {/if}
