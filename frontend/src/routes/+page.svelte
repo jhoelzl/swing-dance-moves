@@ -196,7 +196,7 @@
       </span>
       <button
         onclick={handleRandomMoves}
-        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow cursor-pointer"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow cursor-pointer touch-manipulation"
         title="Pick 2 random moves"
       >
         <svg
