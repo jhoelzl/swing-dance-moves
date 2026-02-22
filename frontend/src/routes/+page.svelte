@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import {
     filteredMoves,
+    allMoves,
     tagGroups,
     activeFilters,
     searchQuery,
@@ -13,7 +14,17 @@
     sortOrder,
   } from "$lib/stores";
   import type { SortOrder } from "$lib/stores";
-  import { getRandomMoves } from "$lib/services/moves";
+  import {
+    getRandomMoves,
+    getAllMoves,
+    getAllTagsGrouped,
+  } from "$lib/services/moves";
+  import {
+    exportMovesAsJson,
+    exportMovesAsCsv,
+    importMoves,
+    type ImportResult,
+  } from "$lib/services/exportImport";
   import type { Move } from "$lib/types";
   import FilterChips from "$lib/components/FilterChips.svelte";
   import MoveCard from "$lib/components/MoveCard.svelte";
@@ -25,6 +36,83 @@
   let searchInputValue = $state("");
   let expandMoves = $state(false);
   let urlSyncReady = false;
+
+  // Export/Import state
+  let showExportMenu = $state(false);
+  let importMessage = $state<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  let isImporting = $state(false);
+  let fileInput = $state<HTMLInputElement>(undefined!);
+
+  function handleExportJson() {
+    exportMovesAsJson($allMoves);
+    showExportMenu = false;
+  }
+
+  function handleExportCsv() {
+    exportMovesAsCsv($allMoves);
+    showExportMenu = false;
+  }
+
+  function triggerImport() {
+    showExportMenu = false;
+    fileInput?.click();
+  }
+
+  async function handleImportFile(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    isImporting = true;
+    importMessage = null;
+
+    try {
+      const result: ImportResult = await importMoves(file, $allMoves);
+      if (result.imported > 0) {
+        // Reload moves from DB
+        const [moves, tags] = await Promise.all([
+          getAllMoves(),
+          getAllTagsGrouped(),
+        ]);
+        allMoves.set(moves);
+        tagGroups.set(tags);
+      }
+
+      const parts: string[] = [];
+      if (result.imported > 0)
+        parts.push(
+          `${result.imported} Move${result.imported !== 1 ? "s" : ""} importiert`,
+        );
+      if (result.skipped > 0)
+        parts.push(`${result.skipped} übersprungen (bereits vorhanden)`);
+      if (result.errors.length > 0)
+        parts.push(`${result.errors.length} Fehler`);
+
+      importMessage = {
+        type:
+          result.errors.length > 0 && result.imported === 0
+            ? "error"
+            : "success",
+        text: parts.join(", "),
+      };
+    } catch (err) {
+      importMessage = {
+        type: "error",
+        text: `Import fehlgeschlagen: ${(err as Error).message}`,
+      };
+    } finally {
+      isImporting = false;
+      input.value = ""; // Reset so same file can be re-imported
+    }
+
+    // Auto-hide message after 5s
+    setTimeout(() => {
+      importMessage = null;
+    }, 5000);
+  }
 
   const sortOptions: { value: SortOrder; label: string }[] = [
     { value: "a-z", label: "A – Z" },
@@ -252,8 +340,108 @@
         </svg>
         Out of moves!
       </button>
+
+      <!-- Export/Import Menu -->
+      <div class="relative">
+        <button
+          onclick={() => (showExportMenu = !showExportMenu)}
+          class="p-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all cursor-pointer shadow-sm"
+          title="Export / Import"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+        </button>
+
+        {#if showExportMenu}
+          <!-- backdrop -->
+          <button
+            class="fixed inset-0 z-40 bg-transparent cursor-default"
+            onclick={() => (showExportMenu = false)}
+            tabindex="-1"
+            aria-label="Close menu"
+          ></button>
+          <div
+            class="absolute right-0 mt-2 w-48 z-50 rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-lg overflow-hidden"
+          >
+            <div
+              class="px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800"
+            >
+              Export
+            </div>
+            <button
+              onclick={handleExportJson}
+              class="w-full text-left px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer flex items-center gap-2"
+            >
+              <span class="text-base">📋</span> Als JSON
+            </button>
+            <button
+              onclick={handleExportCsv}
+              class="w-full text-left px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer flex items-center gap-2"
+            >
+              <span class="text-base">📊</span> Als CSV
+            </button>
+            <div
+              class="px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-t border-b border-gray-100 dark:border-gray-800"
+            >
+              Import
+            </div>
+            <button
+              onclick={triggerImport}
+              class="w-full text-left px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer flex items-center gap-2"
+            >
+              <span class="text-base">📥</span> JSON / CSV importieren
+            </button>
+          </div>
+        {/if}
+      </div>
     </div>
   </div>
+
+  <!-- Hidden file input for import -->
+  <input
+    bind:this={fileInput}
+    type="file"
+    accept=".json,.csv"
+    onchange={handleImportFile}
+    class="hidden"
+  />
+
+  <!-- Import status message -->
+  {#if importMessage}
+    <div
+      class="mb-5 px-4 py-3 rounded-xl text-sm font-medium
+        {importMessage.type === 'success'
+        ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+        : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'}"
+    >
+      {importMessage.type === "success" ? "✅" : "❌"}
+      {importMessage.text}
+    </div>
+  {/if}
+
+  {#if isImporting}
+    <div class="flex items-center justify-center py-8 mb-5">
+      <div class="text-center">
+        <div
+          class="inline-block w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
+        ></div>
+        <p class="mt-2 text-sm text-gray-400 dark:text-gray-500">
+          Importiere Moves…
+        </p>
+      </div>
+    </div>
+  {/if}
 
   <!-- Filters Panel -->
   {#if showFilters}
