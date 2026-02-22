@@ -526,7 +526,11 @@
   {#if displayMoves.length > 0}
     <div class="space-y-3">
       {#each displayMoves as move (move.move_id)}
-        <MoveCard {move} initialOpen={expandMoves} ondeleted={handleMoveDeleted} />
+        <MoveCard
+          {move}
+          initialOpen={expandMoves}
+          ondeleted={handleMoveDeleted}
+        />
       {/each}
     </div>
   {:else}
