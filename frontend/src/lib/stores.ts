@@ -42,11 +42,7 @@ export const filteredMoves = derived(
 		let result = filterMovesByTags($allMoves, $activeFilters);
 		result = searchMoves(result, $searchQuery);
 		if ($videoOnly) {
-			result = result.filter(
-				(m) =>
-					m.link &&
-					(m.link.includes('youtube.com') || m.link.includes('youtu.be'))
-			);
+			result = result.filter((m) => m.hasVideo);
 		}
 		return result;
 	}

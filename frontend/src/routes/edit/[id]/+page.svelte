@@ -20,7 +20,6 @@
     name: "",
     synonyms: "",
     description: "",
-    link: "",
     tagIds: [],
     videoRefs: [],
   });
@@ -43,7 +42,6 @@
       name: move.name,
       synonyms: move.synonyms,
       description: move.description,
-      link: move.link,
       tagIds: move.tags?.map((t) => t.tag_id) ?? [],
       videoRefs: (move.videoRefs ?? []).map((r) => ({
         video_id: r.video_id,

@@ -43,6 +43,13 @@ export async function getAllMoves(): Promise<Move[]> {
 		}
 	}
 
+	// Fetch all move-to-video mappings to know which moves have videos
+	const { data: videoMappings } = await supabase
+		.from('moves_to_videos')
+		.select('move_id');
+
+	const moveIdsWithVideo = new Set((videoMappings ?? []).map((m: any) => m.move_id));
+
 	return moves.map((move) => ({
 		...move,
 		tags: (moveTagMap.get(move.move_id) ?? []).sort((a, b) => {
@@ -51,10 +58,9 @@ export async function getAllMoves(): Promise<Move[]> {
 			const sortOrder = a.tag_sort - b.tag_sort;
 			if (sortOrder !== 0) return sortOrder;
 			return a.tag_name.localeCompare(b.tag_name);
-		})
+		}),
+		hasVideo: moveIdsWithVideo.has(move.move_id)
 	}));
-
-	// Note: videoRefs are loaded on-demand per move, not in bulk list
 }
 
 /**
@@ -124,8 +130,7 @@ export async function createMove(data: MoveFormData): Promise<Move> {
 		.insert({
 			name: data.name,
 			synonyms: data.synonyms,
-			description: data.description,
-			link: data.link
+			description: data.description
 		})
 		.select()
 		.single();
@@ -168,8 +173,7 @@ export async function updateMove(moveId: number, data: MoveFormData): Promise<Mo
 		.update({
 			name: data.name,
 			synonyms: data.synonyms,
-			description: data.description,
-			link: data.link
+			description: data.description
 		})
 		.eq('move_id', moveId)
 		.select()

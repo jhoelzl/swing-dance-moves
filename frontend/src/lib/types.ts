@@ -23,10 +23,10 @@ export interface Move {
 	name: string;
 	synonyms: string;
 	description: string;
-	link: string;
 	// Joined fields
 	tags?: Tag[];
 	videoRefs?: MoveToVideo[];
+	hasVideo?: boolean;
 }
 
 export interface MoveToTag {
@@ -76,7 +76,6 @@ export interface MoveFormData {
 	name: string;
 	synonyms: string;
 	description: string;
-	link: string;
 	tagIds: number[];
 	videoRefs: MoveVideoRef[];
 }

@@ -16,7 +16,7 @@
   let videoRefs = $state<MoveToVideo[]>([]);
   let videoRefsLoaded = $state(false);
 
-  const youtubeId = $derived(extractYouTubeId(move.link));
+  const hasVideo = $derived(move.hasVideo ?? false);
 
   async function toggle() {
     isOpen = !isOpen;
@@ -93,7 +93,7 @@
           {#each move.tags as tag}
             <TagBadge {tag} small />
           {/each}
-          {#if youtubeId}
+          {#if hasVideo}
             <span
               class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
             >
@@ -106,7 +106,7 @@
             </span>
           {/if}
         </div>
-      {:else if youtubeId}
+      {:else if hasVideo}
         <div class="flex flex-wrap gap-1.5 mt-2">
           <span
             class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
@@ -174,44 +174,6 @@
             {@html move.description
               .replace(/\r\n/g, "\n")
               .replace(/<br\s*\/?>/gi, "\n")}
-          </div>
-        {/if}
-
-        {#if youtubeId}
-          <div
-            class="mt-4 video-container rounded-xl overflow-hidden shadow-sm"
-          >
-            <iframe
-              src="https://www.youtube.com/embed/{youtubeId}"
-              title="{move.name} - YouTube"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-            ></iframe>
-          </div>
-        {:else if move.link}
-          <div class="mt-4">
-            <a
-              href={move.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-            >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
-              Video ansehen
-            </a>
           </div>
         {/if}
 

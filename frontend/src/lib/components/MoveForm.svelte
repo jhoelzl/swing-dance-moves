@@ -101,21 +101,6 @@
     ></textarea>
   </div>
 
-  <div>
-    <label
-      for="link"
-      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-      >YouTube Link</label
-    >
-    <input
-      id="link"
-      type="text"
-      bind:value={localData.link}
-      class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-      placeholder="https://www.youtube.com/watch?v=..."
-    />
-  </div>
-
   <!-- Tags grouped by type -->
   <div class="space-y-4">
     <span class="block text-sm font-medium text-gray-700 dark:text-gray-300"

@@ -14,7 +14,6 @@
     name: "",
     synonyms: "",
     description: "",
-    link: "",
     tagIds: [],
     videoRefs: [],
   });
