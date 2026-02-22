@@ -83,8 +83,8 @@ export function searchMoves(moves: Move[], query: string): Move[] {
 	return moves.filter(
 		(move) =>
 			move.name.toLowerCase().includes(q) ||
-			move.synonyms.toLowerCase().includes(q) ||
-			move.description.toLowerCase().includes(q)
+			(move.synonyms?.toLowerCase().includes(q) ?? false) ||
+			(move.description?.toLowerCase().includes(q) ?? false)
 	);
 }
 

@@ -94,6 +94,6 @@ export function searchVideos(videos: Video[], query: string): Video[] {
 	return videos.filter(
 		(v) =>
 			v.title.toLowerCase().includes(q) ||
-			v.description.toLowerCase().includes(q)
+			(v.description?.toLowerCase().includes(q) ?? false)
 	);
 }
