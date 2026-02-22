@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { VideoFormData } from "$lib/types";
+  import { base } from "$app/paths";
 
   interface Props {
     formData: VideoFormData;
@@ -83,7 +84,7 @@
       {loading ? "Speichern..." : "Video speichern"}
     </button>
     <a
-      href="/videos"
+      href="{base}/videos"
       class="px-5 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium text-sm transition-colors no-underline"
     >
       Abbrechen
