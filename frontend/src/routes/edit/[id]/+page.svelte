@@ -34,6 +34,12 @@
       return;
     }
 
+    if (isNaN(moveId)) {
+      addToast("Ungültige Move-ID", "error");
+      goto(`${base}/`);
+      return;
+    }
+
     const move = await getMoveById(moveId);
     if (!move) {
       goto(`${base}/`);

@@ -33,6 +33,12 @@
       return;
     }
 
+    if (isNaN(videoId)) {
+      addToast("Ungültige Video-ID", "error");
+      goto(`${base}/videos`);
+      return;
+    }
+
     const video = await getVideoById(videoId);
     if (!video) {
       goto(`${base}/videos`);
