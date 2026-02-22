@@ -57,7 +57,9 @@
       goto(`${base}/login`);
     }
 
-    supabase.auth.onAuthStateChange(async (_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       isAdmin.set(!!session);
       if (session) {
         await loadData();
@@ -68,6 +70,11 @@
         goto(`${base}/login`);
       }
     });
+
+    // Cleanup subscription on component destroy to prevent memory leak
+    return () => {
+      subscription.unsubscribe();
+    };
   });
 
   async function handleLogout() {
