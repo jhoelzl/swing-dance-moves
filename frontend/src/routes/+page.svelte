@@ -3,6 +3,7 @@
   import {
     filteredMoves,
     allMoves,
+    allVideos,
     tagGroups,
     activeFilters,
     searchQuery,
@@ -19,6 +20,7 @@
     getAllMoves,
     getAllTagsGrouped,
   } from "$lib/services/moves";
+  import { getAllVideos } from "$lib/services/videos";
   import {
     exportMovesAsJson,
     exportMovesAsCsv,
@@ -31,6 +33,17 @@
   import SkeletonCard from "$lib/components/SkeletonCard.svelte";
   import { debounce } from "$lib/utils";
   import { base } from "$app/paths";
+
+  async function handleMoveDeleted() {
+    const [moves, tags, videos] = await Promise.all([
+      getAllMoves(),
+      getAllTagsGrouped(),
+      getAllVideos(),
+    ]);
+    allMoves.set(moves);
+    tagGroups.set(tags);
+    allVideos.set(videos);
+  }
 
   let randomMoves = $state<Move[]>([]);
   let showFilters = $state(false);
@@ -513,7 +526,7 @@
   {#if displayMoves.length > 0}
     <div class="space-y-3">
       {#each displayMoves as move (move.move_id)}
-        <MoveCard {move} initialOpen={expandMoves} />
+        <MoveCard {move} initialOpen={expandMoves} ondeleted={handleMoveDeleted} />
       {/each}
     </div>
   {:else}

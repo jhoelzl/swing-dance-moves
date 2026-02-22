@@ -2,21 +2,26 @@
   import type { Move, MoveToVideo } from "$lib/types";
   import TagBadge from "./TagBadge.svelte";
   import { extractYouTubeId, timecodeToSeconds } from "$lib/utils";
-  import { isAdmin } from "$lib/stores";
+  import { isAdmin, addToast } from "$lib/stores";
   import { base } from "$app/paths";
   import { supabase } from "$lib/supabase";
+  import { deleteMove } from "$lib/services/moves";
   import DOMPurify from "dompurify";
+  import ConfirmModal from "./ConfirmModal.svelte";
 
   interface Props {
     move: Move;
     initialOpen?: boolean;
+    ondeleted?: () => void;
   }
 
-  let { move, initialOpen = false }: Props = $props();
+  let { move, initialOpen = false, ondeleted }: Props = $props();
 
   let isOpen = $state(initialOpen);
   let videoRefs = $state<MoveToVideo[]>([]);
   let videoRefsLoaded = $state(false);
+  let deleting = $state(false);
+  let showDeleteConfirm = $state(false);
 
   const hasVideo = $derived(move.hasVideo ?? false);
 
@@ -52,6 +57,21 @@
         console.error("Failed to load video refs:", err);
       }
       videoRefsLoaded = true;
+    }
+  }
+
+  async function handleDelete() {
+    deleting = true;
+    showDeleteConfirm = false;
+    try {
+      await deleteMove(move.move_id);
+      addToast("Move erfolgreich gelöscht");
+      ondeleted?.();
+    } catch (err) {
+      console.error("Failed to delete move:", err);
+      addToast("Fehler beim Löschen des Moves", "error");
+    } finally {
+      deleting = false;
     }
   }
 
@@ -196,6 +216,20 @@
           </div>
         {/if}
 
+        {#if $isAdmin}
+          <div
+            class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50 flex justify-end"
+          >
+            <button
+              onclick={() => (showDeleteConfirm = true)}
+              disabled={deleting}
+              class="text-xs text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {deleting ? "Löschen..." : "Move löschen"}
+            </button>
+          </div>
+        {/if}
+
         <!-- Linked Video References -->
         {#if videoRefs.length > 0}
           <div
@@ -262,3 +296,12 @@
     </div>
   {/if}
 </div>
+
+<ConfirmModal
+  open={showDeleteConfirm}
+  title="Move löschen"
+  message="Soll dieser Move wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden."
+  confirmLabel="Löschen"
+  onconfirm={handleDelete}
+  oncancel={() => (showDeleteConfirm = false)}
+/>
