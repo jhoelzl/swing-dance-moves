@@ -42,7 +42,7 @@
     formData = {
       title: video.title,
       url: video.url,
-      description: video.description,
+      description: video.description ?? "",
     };
     loaded = true;
   });

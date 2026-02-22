@@ -42,8 +42,8 @@
 
     formData = {
       name: move.name,
-      synonyms: move.synonyms,
-      description: move.description,
+      synonyms: move.synonyms ?? "",
+      description: move.description ?? "",
       tagIds: move.tags?.map((t) => t.tag_id) ?? [],
       videoRefs: (move.videoRefs ?? []).map((r) => ({
         video_id: r.video_id,
