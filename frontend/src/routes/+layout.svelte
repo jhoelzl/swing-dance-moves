@@ -141,9 +141,9 @@
           <!-- Admin Login/Logout -->
           {#if $isAdmin}
             <a
-              href="{base}/new"
+              href="{base}/{$activeTab === 'videos' ? 'videos/new' : 'new'}"
               class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-              title="Add Move"
+              title={$activeTab === "videos" ? "Add Video" : "Add Move"}
             >
               <svg
                 class="w-5 h-5"
