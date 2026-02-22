@@ -4,6 +4,7 @@
   import { isAdmin, addToast } from "$lib/stores";
   import { base } from "$app/paths";
   import { supabase } from "$lib/supabase";
+  import { deleteVideo } from "$lib/services/videos";
   import ConfirmModal from "./ConfirmModal.svelte";
 
   interface LinkedMove {
@@ -140,16 +141,12 @@
     deleting = true;
     showDeleteConfirm = false;
     try {
-      // Delete references first
-      await supabase
-        .from("moves_to_videos")
-        .delete()
-        .eq("video_id", video.video_id);
-      await supabase.from("videos").delete().eq("video_id", video.video_id);
+      await deleteVideo(video.video_id);
       addToast("Video erfolgreich gelöscht");
       ondeleted?.();
     } catch (err) {
       console.error("Failed to delete video:", err);
+      addToast("Fehler beim Löschen des Videos", "error");
     } finally {
       deleting = false;
     }
