@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Video } from "$lib/types";
-  import { extractYouTubeId } from "$lib/utils";
+  import { extractYouTubeId, timecodeToSeconds } from "$lib/utils";
   import { isAdmin } from "$lib/stores";
   import { base } from "$app/paths";
   import { supabase } from "$lib/supabase";
@@ -10,6 +10,13 @@
     move_name: string;
     start_time: string;
     end_time: string;
+  }
+
+  // Parsed description segment: either plain text or a clickable timestamp
+  interface DescSegment {
+    type: "text" | "timestamp";
+    value: string; // display text
+    seconds?: number; // only for timestamp segments
   }
 
   interface Props {
@@ -23,8 +30,67 @@
   let deleting = $state(false);
   let linkedMoves = $state<LinkedMove[]>([]);
   let linkedMovesLoaded = $state(false);
+  let currentStartTime = $state(0);
+  // Increment key to force iframe reload when seeking
+  let embedKey = $state(0);
 
   const youtubeId = $derived(extractYouTubeId(video.url));
+
+  const embedUrl = $derived(() => {
+    if (!youtubeId) return "";
+    let url = `https://www.youtube.com/embed/${youtubeId}`;
+    if (currentStartTime > 0) url += `?start=${currentStartTime}`;
+    return url;
+  });
+
+  /**
+   * Parse description text and identify timestamp patterns like "5:10", "1:30:05"
+   * at the beginning of lines. Returns segments for rendering.
+   */
+  function parseDescription(text: string): DescSegment[] {
+    if (!text) return [];
+    const segments: DescSegment[] = [];
+    // Match timestamps at start of line: e.g. "5:10", "17:10", "1:30:05"
+    const regex = /(^|\n)(\d{1,2}:\d{2}(?::\d{2})?)/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = regex.exec(text)) !== null) {
+      const prefix = match[1]; // newline or empty
+      const timestamp = match[2];
+      const matchStart = match.index + prefix.length;
+
+      // Add text before this timestamp
+      if (matchStart > lastIndex) {
+        segments.push({
+          type: "text",
+          value: text.slice(lastIndex, matchStart),
+        });
+      }
+
+      segments.push({
+        type: "timestamp",
+        value: timestamp,
+        seconds: timecodeToSeconds(timestamp),
+      });
+
+      lastIndex = matchStart + timestamp.length;
+    }
+
+    // Remaining text
+    if (lastIndex < text.length) {
+      segments.push({ type: "text", value: text.slice(lastIndex) });
+    }
+
+    return segments;
+  }
+
+  const descriptionSegments = $derived(parseDescription(video.description));
+
+  function seekTo(seconds: number) {
+    currentStartTime = seconds;
+    embedKey++;
+  }
 
   async function toggle() {
     isOpen = !isOpen;
@@ -163,19 +229,36 @@
           <div
             class="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-line leading-relaxed mb-4"
           >
-            {video.description}
+            {#each descriptionSegments as seg}
+              {#if seg.type === "timestamp" && youtubeId}
+                <button
+                  onclick={() => seekTo(seg.seconds!)}
+                  class="inline-flex items-center gap-0.5 font-mono text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-1.5 py-0.5 rounded transition-colors cursor-pointer border-none text-sm"
+                  title="Springe zu {seg.value}"
+                >
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  {seg.value}
+                </button>
+              {:else}
+                {seg.value}
+              {/if}
+            {/each}
           </div>
         {/if}
 
         {#if youtubeId}
           <div class="video-container rounded-xl overflow-hidden shadow-sm">
-            <iframe
-              src="https://www.youtube.com/embed/{youtubeId}"
-              title="{video.title} - YouTube"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-            ></iframe>
+            {#key embedKey}
+              <iframe
+                src={embedUrl()}
+                title="{video.title} - YouTube"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            {/key}
           </div>
         {:else if video.url}
           <div>
