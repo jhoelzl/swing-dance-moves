@@ -21,8 +21,8 @@ export interface Tag {
 export interface Move {
 	move_id: number;
 	name: string;
-	synonyms: string;
-	description: string;
+	synonyms: string | null;
+	description: string | null;
 	// Joined fields
 	tags?: Tag[];
 	videoRefs?: MoveToVideo[];
@@ -39,7 +39,7 @@ export interface Video {
 	video_id: number;
 	title: string;
 	url: string;
-	description: string;
+	description: string | null;
 	created_at: string;
 }
 
