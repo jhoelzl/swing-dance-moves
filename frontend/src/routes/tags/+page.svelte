@@ -670,7 +670,10 @@
               >
                 <div class="flex items-center gap-3">
                   <span
-                    class="{getTagColors(tag.tag_label).bg} {getTagColors(tag.tag_label).text} border {getTagColors(tag.tag_label).border} inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+                    class="{getTagColors(tag.tag_label).bg} {getTagColors(
+                      tag.tag_label,
+                    ).text} border {getTagColors(tag.tag_label)
+                      .border} inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
                   >
                     {tag.tag_name.trim()}
                   </span>
