@@ -29,7 +29,7 @@
       // Reload all videos
       const videos = await getAllVideos();
       allVideos.set(videos);
-      addToast("Video erfolgreich erstellt");
+      addToast("Video created successfully");
       goto(`${base}/videos`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to create video";
@@ -40,7 +40,7 @@
 </script>
 
 <svelte:head>
-  <title>Neues Video – Swing Dance Moves</title>
+  <title>New Video – Swing Dance Moves</title>
 </svelte:head>
 
 <div class="max-w-2xl mx-auto">
@@ -55,11 +55,6 @@
       </div>
     {/if}
 
-    <VideoForm
-      {formData}
-      onsubmit={handleSubmit}
-      {loading}
-      title="Neues Video"
-    />
+    <VideoForm {formData} onsubmit={handleSubmit} {loading} title="New Video" />
   </div>
 </div>

@@ -32,7 +32,7 @@
     <label
       for="title"
       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-      >Titel</label
+      >Title</label
     >
     <input
       id="title"
@@ -40,7 +40,7 @@
       bind:value={localData.title}
       required
       class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-      placeholder="z.B. Lindy Hop Workshop Tag 1"
+      placeholder="e.g. Lindy Hop Workshop Day 1"
     />
   </div>
 
@@ -64,14 +64,14 @@
     <label
       for="description"
       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-      >Beschreibung</label
+      >Description</label
     >
     <textarea
       id="description"
       bind:value={localData.description}
       rows="3"
       class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-y"
-      placeholder="Optionale Beschreibung..."
+      placeholder="Optional description..."
     ></textarea>
   </div>
 
@@ -81,13 +81,13 @@
       disabled={loading}
       class="px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white font-medium text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
     >
-      {loading ? "Speichern..." : "Video speichern"}
+      {loading ? "Saving..." : "Save Video"}
     </button>
     <a
       href="{base}/videos"
       class="px-5 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium text-sm transition-colors no-underline"
     >
-      Abbrechen
+      Cancel
     </a>
   </div>
 </form>

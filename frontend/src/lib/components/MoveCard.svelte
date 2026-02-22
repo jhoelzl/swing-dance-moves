@@ -65,11 +65,11 @@
     showDeleteConfirm = false;
     try {
       await deleteMove(move.move_id);
-      addToast("Move erfolgreich gelöscht");
+      addToast("Move deleted successfully");
       ondeleted?.();
     } catch (err) {
       console.error("Failed to delete move:", err);
-      addToast("Fehler beim Löschen des Moves", "error");
+      addToast("Failed to delete move", "error");
     } finally {
       deleting = false;
     }
@@ -225,7 +225,7 @@
               disabled={deleting}
               class="text-xs text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50"
             >
-              {deleting ? "Löschen..." : "Move löschen"}
+              {deleting ? "Deleting..." : "Delete Move"}
             </button>
           </div>
         {/if}
@@ -238,7 +238,7 @@
             <h4
               class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2"
             >
-              Verknüpfte Videos
+              Linked Videos
             </h4>
             <div class="space-y-3">
               {#each videoRefs as ref}
@@ -299,9 +299,9 @@
 
 <ConfirmModal
   open={showDeleteConfirm}
-  title="Move löschen"
-  message="Soll dieser Move wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden."
-  confirmLabel="Löschen"
+  title="Delete Move"
+  message="Are you sure you want to delete this move? This action cannot be undone."
+  confirmLabel="Delete"
   onconfirm={handleDelete}
   oncancel={() => (showDeleteConfirm = false)}
 />

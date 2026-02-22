@@ -94,7 +94,7 @@
       </svg>
       <input
         type="text"
-        placeholder="Videos suchen..."
+        placeholder="Search videos..."
         oninput={handleSearchInput}
         value={searchInputValue}
         class="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 dark:focus:border-blue-500 outline-none transition-all shadow-sm"
@@ -171,7 +171,7 @@
               d="M12 4v16m8-8H4"
             />
           </svg>
-          Neues Video
+          New Video
         </a>
       {/if}
     </div>
@@ -185,7 +185,7 @@
       <h3
         class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3"
       >
-        Move-Verknüpfung
+        Move Link
       </h3>
       <div class="flex flex-wrap gap-2">
         <button
@@ -195,7 +195,7 @@
             ? 'bg-blue-500 dark:bg-blue-600 text-white border-transparent shadow-sm'
             : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:shadow-sm'}"
         >
-          Alle
+          All
         </button>
         <button
           onclick={() =>
@@ -218,7 +218,7 @@
               d="M13 10V3L4 14h7v7l9-11h-7z"
             />
           </svg>
-          Mit Moves
+          With Moves
         </button>
         <button
           onclick={() =>
@@ -242,7 +242,7 @@
               d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          Ohne Moves
+          Without Moves
         </button>
       </div>
     </div>
@@ -259,10 +259,10 @@
     <div class="text-center py-16">
       <div class="text-4xl mb-3">🎬</div>
       <p class="text-gray-400 dark:text-gray-500 font-medium">
-        Keine Videos gefunden
+        No videos found
       </p>
       <p class="text-gray-300 dark:text-gray-600 text-sm mt-1">
-        Füge ein neues Video hinzu oder passe deine Suche an.
+        Add a new video or adjust your search.
       </p>
     </div>
   {/if}

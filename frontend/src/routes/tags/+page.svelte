@@ -18,12 +18,12 @@
 
   // Available label colors for the color picker
   const labelOptions = [
-    { value: "success", name: "Grün" },
-    { value: "danger", name: "Rot" },
-    { value: "warning", name: "Gelb" },
-    { value: "primary", name: "Blau" },
-    { value: "secondary", name: "Grau" },
-    { value: "light", name: "Hell" },
+    { value: "success", name: "Green" },
+    { value: "danger", name: "Red" },
+    { value: "warning", name: "Yellow" },
+    { value: "primary", name: "Blue" },
+    { value: "secondary", name: "Gray" },
+    { value: "light", name: "Light" },
   ];
 
   // ── State ──
@@ -83,7 +83,7 @@
       groups = await getAllTagsGrouped();
     } catch (err) {
       console.error("Failed to load tags:", err);
-      showStatus("error", "Fehler beim Laden der Tags.");
+      showStatus("error", "Failed to load tags.");
     } finally {
       loading = false;
     }
@@ -117,9 +117,9 @@
       });
       editingTypeId = null;
       await reloadAll();
-      showStatus("success", "Kategorie aktualisiert.");
+      showStatus("success", "Category updated.");
     } catch (err) {
-      showStatus("error", `Fehler: ${(err as Error).message}`);
+      showStatus("error", `Error: ${(err as Error).message}`);
     }
   }
 
@@ -127,14 +127,14 @@
     const tagCount =
       groups.find((g) => g.tagType.tag_type_id === tt.tag_type_id)?.tags
         .length ?? 0;
-    confirmMessage = `Kategorie "${tt.tag_type_name}" löschen? ${tagCount > 0 ? `${tagCount} Tag(s) werden ebenfalls gelöscht.` : ""}`;
+    confirmMessage = `Delete category "${tt.tag_type_name}"? ${tagCount > 0 ? `${tagCount} tag(s) will also be deleted.` : ""}`;
     confirmAction = async () => {
       try {
         await deleteTagType(tt.tag_type_id);
         await reloadAll();
-        showStatus("success", `Kategorie "${tt.tag_type_name}" gelöscht.`);
+        showStatus("success", `Category "${tt.tag_type_name}" deleted.`);
       } catch (err) {
-        showStatus("error", `Fehler: ${(err as Error).message}`);
+        showStatus("error", `Error: ${(err as Error).message}`);
       }
     };
     showConfirm = true;
@@ -153,9 +153,9 @@
       newTypeSortOrder = 0;
       showNewType = false;
       await reloadAll();
-      showStatus("success", "Neue Kategorie erstellt.");
+      showStatus("success", "New category created.");
     } catch (err) {
-      showStatus("error", `Fehler: ${(err as Error).message}`);
+      showStatus("error", `Error: ${(err as Error).message}`);
     }
   }
 
@@ -184,21 +184,21 @@
       });
       editingTagId = null;
       await reloadAll();
-      showStatus("success", "Tag aktualisiert.");
+      showStatus("success", "Tag updated.");
     } catch (err) {
-      showStatus("error", `Fehler: ${(err as Error).message}`);
+      showStatus("error", `Error: ${(err as Error).message}`);
     }
   }
 
   function confirmDeleteTag(tag: Tag) {
-    confirmMessage = `Tag "${tag.tag_name}" löschen? Zuordnungen zu Moves werden ebenfalls entfernt.`;
+    confirmMessage = `Delete tag "${tag.tag_name}"? Move associations will also be removed.`;
     confirmAction = async () => {
       try {
         await deleteTag(tag.tag_id);
         await reloadAll();
-        showStatus("success", `Tag "${tag.tag_name}" gelöscht.`);
+        showStatus("success", `Tag "${tag.tag_name}" deleted.`);
       } catch (err) {
-        showStatus("error", `Fehler: ${(err as Error).message}`);
+        showStatus("error", `Error: ${(err as Error).message}`);
       }
     };
     showConfirm = true;
@@ -228,9 +228,9 @@
       });
       addingTagToTypeId = null;
       await reloadAll();
-      showStatus("success", "Neuen Tag erstellt.");
+      showStatus("success", "New tag created.");
     } catch (err) {
-      showStatus("error", `Fehler: ${(err as Error).message}`);
+      showStatus("error", `Error: ${(err as Error).message}`);
     }
   }
 
@@ -243,7 +243,7 @@
 </script>
 
 <svelte:head>
-  <title>Tags verwalten – Swing Moves</title>
+  <title>Manage Tags – Swing Moves</title>
 </svelte:head>
 
 {#if loading}
@@ -273,9 +273,7 @@
 
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
-    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-      Tags verwalten
-    </h2>
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Manage Tags</h2>
     <button
       onclick={() => (showNewType = !showNewType)}
       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow cursor-pointer"
@@ -293,7 +291,7 @@
           d="M12 4v16m8-8H4"
         />
       </svg>
-      Neue Kategorie
+      New Category
     </button>
   </div>
 
@@ -303,7 +301,7 @@
       class="mb-6 p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm"
     >
       <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">
-        Neue Kategorie erstellen
+        Create New Category
       </h3>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
@@ -333,7 +331,7 @@
         <div>
           <label
             class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-            >Reihenfolge</label
+            >Order</label
           >
           <input
             type="number"
@@ -347,13 +345,13 @@
           onclick={saveNewType}
           class="px-4 py-2 text-sm font-medium rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors cursor-pointer"
         >
-          Erstellen
+          Create
         </button>
         <button
           onclick={() => (showNewType = false)}
           class="px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
         >
-          Abbrechen
+          Cancel
         </button>
       </div>
     </div>
@@ -395,7 +393,7 @@
               <div>
                 <label
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                  >Reihenfolge</label
+                  >Order</label
                 >
                 <input
                   type="number"
@@ -409,13 +407,13 @@
                 onclick={saveEditType}
                 class="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors cursor-pointer"
               >
-                Speichern
+                Save
               </button>
               <button
                 onclick={cancelEditType}
                 class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
               >
-                Abbrechen
+                Cancel
               </button>
             </div>
           </div>
@@ -440,7 +438,7 @@
               <button
                 onclick={() => startEditType(group.tagType)}
                 class="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all cursor-pointer"
-                title="Kategorie bearbeiten"
+                title="Edit category"
               >
                 <svg
                   class="w-4 h-4"
@@ -459,7 +457,7 @@
               <button
                 onclick={() => startAddTag(group.tagType.tag_type_id)}
                 class="p-1.5 rounded-lg text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-950/40 transition-all cursor-pointer"
-                title="Tag hinzufügen"
+                title="Add tag"
               >
                 <svg
                   class="w-4 h-4"
@@ -478,7 +476,7 @@
               <button
                 onclick={() => confirmDeleteType(group.tagType)}
                 class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all cursor-pointer"
-                title="Kategorie löschen"
+                title="Delete category"
               >
                 <svg
                   class="w-4 h-4"
@@ -512,14 +510,14 @@
                 <input
                   type="text"
                   bind:value={newTagName}
-                  placeholder="Tag-Name"
+                  placeholder="Tag name"
                   class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </div>
               <div>
                 <label
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                  >Farbe</label
+                  >Color</label
                 >
                 <select
                   bind:value={newTagLabel}
@@ -545,7 +543,7 @@
               <div>
                 <label
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                  >Reihenfolge</label
+                  >Order</label
                 >
                 <input
                   type="number"
@@ -557,7 +555,7 @@
             <!-- Color Preview -->
             <div class="mt-3 flex items-center gap-3">
               <span class="text-xs text-gray-500 dark:text-gray-400"
-                >Vorschau:</span
+                >Preview:</span
               >
               <span
                 class="{newTagPreviewColors.bg} {newTagPreviewColors.text} border {newTagPreviewColors.border} inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
@@ -570,13 +568,13 @@
                 onclick={saveNewTag}
                 class="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors cursor-pointer"
               >
-                Erstellen
+                Create
               </button>
               <button
                 onclick={cancelAddTag}
                 class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
               >
-                Abbrechen
+                Cancel
               </button>
             </div>
           </div>
@@ -603,7 +601,7 @@
                   <div>
                     <label
                       class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                      >Farbe</label
+                      >Color</label
                     >
                     <select
                       bind:value={editTagLabel}
@@ -628,7 +626,7 @@
                   <div>
                     <label
                       class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                      >Reihenfolge</label
+                      >Order</label
                     >
                     <input
                       type="number"
@@ -640,7 +638,7 @@
                 <!-- Color Preview -->
                 <div class="mt-3 flex items-center gap-3">
                   <span class="text-xs text-gray-500 dark:text-gray-400"
-                    >Vorschau:</span
+                    >Preview:</span
                   >
                   <span
                     class="{editTagPreviewColors.bg} {editTagPreviewColors.text} border {editTagPreviewColors.border} inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
@@ -653,13 +651,13 @@
                     onclick={saveEditTag}
                     class="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors cursor-pointer"
                   >
-                    Speichern
+                    Save
                   </button>
                   <button
                     onclick={cancelEditTag}
                     class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
                   >
-                    Abbrechen
+                    Cancel
                   </button>
                 </div>
               </div>
@@ -687,7 +685,7 @@
                   <button
                     onclick={() => startEditTag(tag)}
                     class="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all cursor-pointer"
-                    title="Tag bearbeiten"
+                    title="Edit tag"
                   >
                     <svg
                       class="w-3.5 h-3.5"
@@ -706,7 +704,7 @@
                   <button
                     onclick={() => confirmDeleteTag(tag)}
                     class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all cursor-pointer"
-                    title="Tag löschen"
+                    title="Delete tag"
                   >
                     <svg
                       class="w-3.5 h-3.5"
@@ -730,7 +728,7 @@
           {#if group.tags.length === 0}
             <div class="px-4 py-6 text-center">
               <p class="text-sm text-gray-400 dark:text-gray-500">
-                Keine Tags in dieser Kategorie.
+                No tags in this category.
               </p>
             </div>
           {/if}
@@ -742,10 +740,10 @@
       <div class="text-center py-16">
         <div class="text-4xl mb-3">🏷️</div>
         <p class="text-gray-400 dark:text-gray-500 font-medium">
-          Noch keine Tag-Kategorien vorhanden.
+          No tag categories yet.
         </p>
         <p class="text-gray-300 dark:text-gray-600 text-sm mt-1">
-          Erstelle eine neue Kategorie, um Tags zu verwalten.
+          Create a new category to manage tags.
         </p>
       </div>
     {/if}

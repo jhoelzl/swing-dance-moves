@@ -142,11 +142,11 @@
     showDeleteConfirm = false;
     try {
       await deleteVideo(video.video_id);
-      addToast("Video erfolgreich gelöscht");
+      addToast("Video deleted successfully");
       ondeleted?.();
     } catch (err) {
       console.error("Failed to delete video:", err);
-      addToast("Fehler beim Löschen des Videos", "error");
+      addToast("Failed to delete video", "error");
     } finally {
       deleting = false;
     }
@@ -239,7 +239,7 @@
                 <button
                   onclick={() => seekTo(seg.seconds!)}
                   class="inline-flex items-center gap-0.5 font-mono text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-1.5 py-0.5 rounded transition-colors cursor-pointer border-none text-sm"
-                  title="Springe zu {seg.value}"
+                  title="Jump to {seg.value}"
                 >
                   <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
@@ -286,7 +286,7 @@
                   d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                 />
               </svg>
-              Video ansehen
+              Watch Video
             </a>
           </div>
         {/if}
@@ -299,7 +299,7 @@
             <h4
               class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2"
             >
-              Verknüpfte Moves
+              Linked Moves
             </h4>
             <div class="space-y-1.5">
               {#each linkedMoves as lm}
@@ -361,7 +361,7 @@
               disabled={deleting}
               class="text-xs text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50"
             >
-              {deleting ? "Löschen..." : "Video löschen"}
+              {deleting ? "Deleting..." : "Delete Video"}
             </button>
           </div>
         {/if}
@@ -372,9 +372,9 @@
 
 <ConfirmModal
   open={showDeleteConfirm}
-  title="Video löschen"
-  message="Soll dieses Video wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden."
-  confirmLabel="Löschen"
+  title="Delete Video"
+  message="Are you sure you want to delete this video? This action cannot be undone."
+  confirmLabel="Delete"
   onconfirm={handleDelete}
   oncancel={() => (showDeleteConfirm = false)}
 />

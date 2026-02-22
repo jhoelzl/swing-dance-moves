@@ -11,10 +11,10 @@
 
   let {
     open,
-    title = "Bestätigung",
+    title = "Confirmation",
     message,
-    confirmLabel = "Löschen",
-    cancelLabel = "Abbrechen",
+    confirmLabel = "Delete",
+    cancelLabel = "Cancel",
     onconfirm,
     oncancel,
   }: Props = $props();

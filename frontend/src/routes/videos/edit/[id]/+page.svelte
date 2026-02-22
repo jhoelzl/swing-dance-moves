@@ -34,7 +34,7 @@
     }
 
     if (isNaN(videoId)) {
-      addToast("Ungültige Video-ID", "error");
+      addToast("Invalid video ID", "error");
       goto(`${base}/videos`);
       return;
     }
@@ -60,7 +60,7 @@
       await updateVideo(videoId, data);
       const videos = await getAllVideos();
       allVideos.set(videos);
-      addToast("Video erfolgreich aktualisiert");
+      addToast("Video updated successfully");
       goto(`${base}/videos`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to update video";
@@ -76,7 +76,7 @@
       await deleteVideo(videoId);
       const videos = await getAllVideos();
       allVideos.set(videos);
-      addToast("Video erfolgreich gelöscht");
+      addToast("Video deleted successfully");
       goto(`${base}/videos`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to delete video";
@@ -87,7 +87,7 @@
 </script>
 
 <svelte:head>
-  <title>Video bearbeiten – Swing Dance Moves</title>
+  <title>Edit Video – Swing Dance Moves</title>
 </svelte:head>
 
 <div class="max-w-2xl mx-auto">
@@ -107,7 +107,7 @@
         {formData}
         onsubmit={handleSubmit}
         {loading}
-        title="Video bearbeiten"
+        title="Edit Video"
       />
 
       <div
@@ -118,7 +118,7 @@
           disabled={deleting}
           class="px-4 py-2 rounded-lg bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
         >
-          {deleting ? "Löschen..." : "Video löschen"}
+          {deleting ? "Deleting..." : "Delete Video"}
         </button>
       </div>
     {:else}
@@ -133,9 +133,9 @@
 
 <ConfirmModal
   open={showDeleteConfirm}
-  title="Video löschen"
-  message="Soll dieses Video wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden."
-  confirmLabel="Löschen"
+  title="Delete Video"
+  message="Are you sure you want to delete this video? This action cannot be undone."
+  confirmLabel="Delete"
   onconfirm={handleDelete}
   oncancel={() => (showDeleteConfirm = false)}
 />

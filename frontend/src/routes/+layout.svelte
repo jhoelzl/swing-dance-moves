@@ -42,8 +42,7 @@
     } catch (err) {
       console.error("Failed to load data:", err);
       loadError = true;
-      loadErrorMessage =
-        err instanceof Error ? err.message : "Unbekannter Fehler";
+      loadErrorMessage = err instanceof Error ? err.message : "Unknown error";
     } finally {
       isLoading.set(false);
     }
@@ -117,11 +116,11 @@
     >
       <div class="text-5xl mb-4">😵</div>
       <h1 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">
-        Laden fehlgeschlagen
+        Loading Failed
       </h1>
       <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-2">
-        Die Daten konnten nicht geladen werden. Bitte prüfe deine
-        Internetverbindung und versuche es erneut.
+        Data could not be loaded. Please check your internet connection and try
+        again.
       </p>
       {#if loadErrorMessage}
         <p
@@ -147,7 +146,7 @@
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
           />
         </svg>
-        Erneut versuchen
+        Try Again
       </button>
     </div>
   </div>
@@ -160,16 +159,16 @@
     >
       <div class="text-5xl mb-4">⚠️</div>
       <h1 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">
-        Konfigurationsfehler
+        Configuration Error
       </h1>
       <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4">
-        Die Supabase-Umgebungsvariablen sind nicht konfiguriert. Die App kann
-        keine Verbindung zur Datenbank herstellen.
+        The Supabase environment variables are not configured. The app cannot
+        connect to the database.
       </p>
       <div
         class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-left text-xs font-mono text-gray-700 dark:text-gray-300"
       >
-        <p class="mb-1">Erstelle eine <strong>.env</strong>-Datei:</p>
+        <p class="mb-1">Create a <strong>.env</strong> file:</p>
         <p class="text-red-500 dark:text-red-400">
           VITE_SUPABASE_URL=https://...
         </p>
@@ -405,12 +404,12 @@
         <div class="text-center py-24">
           <span class="text-4xl">🕺</span>
           <p class="text-gray-400 dark:text-gray-500 mt-4 mb-5">
-            Bitte einloggen, um Moves zu sehen.
+            Please sign in to view moves.
           </p>
           <a
             href="{base}/login"
             class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all shadow-sm hover:shadow font-medium text-sm"
-            >Zum Login</a
+            >Sign In</a
           >
         </div>
       {/if}

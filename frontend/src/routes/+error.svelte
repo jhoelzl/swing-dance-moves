@@ -10,14 +10,14 @@
     <div class="text-5xl mb-4">😵</div>
     <h1 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">
       {$page.status} – {$page.status === 404
-        ? "Seite nicht gefunden"
-        : "Etwas ist schiefgelaufen"}
+        ? "Page not found"
+        : "Something went wrong"}
     </h1>
     <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-2">
       {#if $page.status === 404}
-        Die angeforderte Seite existiert nicht oder wurde verschoben.
+        The requested page does not exist or has been moved.
       {:else}
-        Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.
+        An unexpected error occurred. Please try again.
       {/if}
     </p>
     {#if $page.error?.message}
@@ -45,7 +45,7 @@
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
           />
         </svg>
-        Erneut versuchen
+        Try Again
       </button>
       <a
         href="{base}/"
@@ -64,7 +64,7 @@
             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"
           />
         </svg>
-        Zur Startseite
+        Go to Home
       </a>
     </div>
   </div>

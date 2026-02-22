@@ -38,7 +38,7 @@
 
   async function handlePasswordReset() {
     if (!email) {
-      error = "Bitte zuerst eine E-Mail-Adresse eingeben.";
+      error = "Please enter an email address first.";
       return;
     }
     error = "";
@@ -54,7 +54,7 @@
         resetSent = true;
       }
     } catch {
-      error = "Fehler beim Senden der Reset-E-Mail.";
+      error = "Failed to send password reset email.";
     } finally {
       resetLoading = false;
     }
@@ -91,7 +91,7 @@
       <div
         class="mb-4 p-3 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200/80 dark:border-green-900/50 text-green-600 dark:text-green-400 text-sm"
       >
-        Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet.
+        A password reset email has been sent.
       </div>
     {/if}
 
@@ -133,9 +133,7 @@
             type="button"
             onclick={() => (showPassword = !showPassword)}
             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
-            aria-label={showPassword
-              ? "Passwort verbergen"
-              : "Passwort anzeigen"}
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {#if showPassword}
               <svg
@@ -192,7 +190,7 @@
         disabled={resetLoading}
         class="text-xs text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer disabled:opacity-50"
       >
-        {resetLoading ? "Sende..." : "Passwort vergessen?"}
+        {resetLoading ? "Sending..." : "Forgot password?"}
       </button>
     </div>
   </div>

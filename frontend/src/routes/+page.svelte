@@ -98,12 +98,12 @@
       const parts: string[] = [];
       if (result.imported > 0)
         parts.push(
-          `${result.imported} Move${result.imported !== 1 ? "s" : ""} importiert`,
+          `${result.imported} move${result.imported !== 1 ? "s" : ""} imported`,
         );
       if (result.skipped > 0)
-        parts.push(`${result.skipped} übersprungen (bereits vorhanden)`);
+        parts.push(`${result.skipped} skipped (already exists)`);
       if (result.errors.length > 0)
-        parts.push(`${result.errors.length} Fehler`);
+        parts.push(`${result.errors.length} error(s)`);
 
       importMessage = {
         type:
@@ -115,7 +115,7 @@
     } catch (err) {
       importMessage = {
         type: "error",
-        text: `Import fehlgeschlagen: ${(err as Error).message}`,
+        text: `Import failed: ${(err as Error).message}`,
       };
     } finally {
       isImporting = false;
@@ -131,8 +131,8 @@
   const sortOptions: { value: SortOrder; label: string }[] = [
     { value: "a-z", label: "A – Z" },
     { value: "z-a", label: "Z – A" },
-    { value: "newest", label: "Neueste" },
-    { value: "oldest", label: "Älteste" },
+    { value: "newest", label: "Newest" },
+    { value: "oldest", label: "Oldest" },
   ];
 
   const displayMoves = $derived($showAll ? $filteredMoves : randomMoves);
@@ -390,13 +390,13 @@
               onclick={handleExportJson}
               class="w-full text-left px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer flex items-center gap-2"
             >
-              <span class="text-base">📋</span> Als JSON
+              <span class="text-base">📋</span> As JSON
             </button>
             <button
               onclick={handleExportCsv}
               class="w-full text-left px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer flex items-center gap-2"
             >
-              <span class="text-base">📊</span> Als CSV
+              <span class="text-base">📊</span> As CSV
             </button>
             <div
               class="px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-t border-b border-gray-100 dark:border-gray-800"
@@ -407,7 +407,7 @@
               onclick={triggerImport}
               class="w-full text-left px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer flex items-center gap-2"
             >
-              <span class="text-base">📥</span> JSON / CSV importieren
+              <span class="text-base">📥</span> Import JSON / CSV
             </button>
           </div>
         {/if}
@@ -444,7 +444,7 @@
           class="inline-block w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
         ></div>
         <p class="mt-2 text-sm text-gray-400 dark:text-gray-500">
-          Importiere Moves…
+          Importing moves…
         </p>
       </div>
     </div>

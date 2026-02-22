@@ -30,7 +30,7 @@
       // Reload all moves
       const moves = await getAllMoves();
       allMoves.set(moves);
-      addToast("Move erfolgreich erstellt");
+      addToast("Move created successfully");
       goto(`${base}/`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to create move";

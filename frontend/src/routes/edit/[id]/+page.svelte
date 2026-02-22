@@ -35,7 +35,7 @@
     }
 
     if (isNaN(moveId)) {
-      addToast("Ungültige Move-ID", "error");
+      addToast("Invalid move ID", "error");
       goto(`${base}/`);
       return;
     }
@@ -67,7 +67,7 @@
       await updateMove(moveId, data);
       const moves = await getAllMoves();
       allMoves.set(moves);
-      addToast("Move erfolgreich aktualisiert");
+      addToast("Move updated successfully");
       goto(`${base}/`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to update move";
@@ -83,7 +83,7 @@
       await deleteMove(moveId);
       const moves = await getAllMoves();
       allMoves.set(moves);
-      addToast("Move erfolgreich gelöscht");
+      addToast("Move deleted successfully");
       goto(`${base}/`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to delete move";
@@ -139,9 +139,9 @@
 
 <ConfirmModal
   open={showDeleteConfirm}
-  title="Move löschen"
-  message="Soll dieser Move wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden."
-  confirmLabel="Löschen"
+  title="Delete Move"
+  message="Are you sure you want to delete this move? This action cannot be undone."
+  confirmLabel="Delete"
   onconfirm={handleDelete}
   oncancel={() => (showDeleteConfirm = false)}
 />
