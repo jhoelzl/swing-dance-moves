@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Video } from "$lib/types";
   import { extractYouTubeId, timecodeToSeconds } from "$lib/utils";
-  import { isAdmin } from "$lib/stores";
+  import { isAdmin, addToast } from "$lib/stores";
   import { base } from "$app/paths";
   import { supabase } from "$lib/supabase";
   import ConfirmModal from "./ConfirmModal.svelte";
@@ -146,6 +146,7 @@
         .delete()
         .eq("video_id", video.video_id);
       await supabase.from("videos").delete().eq("video_id", video.video_id);
+      addToast("Video erfolgreich gelöscht");
       ondeleted?.();
     } catch (err) {
       console.error("Failed to delete video:", err);

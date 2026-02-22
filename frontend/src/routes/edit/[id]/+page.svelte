@@ -3,7 +3,7 @@
   import { goto } from "$app/navigation";
   import { base } from "$app/paths";
   import { page } from "$app/stores";
-  import { isAdmin, tagGroups, allMoves } from "$lib/stores";
+  import { isAdmin, tagGroups, allMoves, addToast } from "$lib/stores";
   import {
     getMoveById,
     updateMove,
@@ -61,6 +61,7 @@
       await updateMove(moveId, data);
       const moves = await getAllMoves();
       allMoves.set(moves);
+      addToast("Move erfolgreich aktualisiert");
       goto(`${base}/`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to update move";
@@ -76,6 +77,7 @@
       await deleteMove(moveId);
       const moves = await getAllMoves();
       allMoves.set(moves);
+      addToast("Move erfolgreich gelöscht");
       goto(`${base}/`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to delete move";

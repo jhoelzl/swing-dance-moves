@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { base } from "$app/paths";
-  import { isAdmin, tagGroups, allMoves } from "$lib/stores";
+  import { isAdmin, tagGroups, allMoves, addToast } from "$lib/stores";
   import { createMove, getAllMoves } from "$lib/services/moves";
   import type { MoveFormData } from "$lib/types";
   import MoveForm from "$lib/components/MoveForm.svelte";
@@ -30,6 +30,7 @@
       // Reload all moves
       const moves = await getAllMoves();
       allMoves.set(moves);
+      addToast("Move erfolgreich erstellt");
       goto(`${base}/`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to create move";

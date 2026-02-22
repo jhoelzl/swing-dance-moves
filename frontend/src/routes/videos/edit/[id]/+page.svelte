@@ -3,7 +3,7 @@
   import { goto } from "$app/navigation";
   import { base } from "$app/paths";
   import { page } from "$app/stores";
-  import { isAdmin, allVideos, activeTab } from "$lib/stores";
+  import { isAdmin, allVideos, activeTab, addToast } from "$lib/stores";
   import {
     getVideoById,
     updateVideo,
@@ -54,6 +54,7 @@
       await updateVideo(videoId, data);
       const videos = await getAllVideos();
       allVideos.set(videos);
+      addToast("Video erfolgreich aktualisiert");
       goto(`${base}/videos`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to update video";
@@ -69,6 +70,7 @@
       await deleteVideo(videoId);
       const videos = await getAllVideos();
       allVideos.set(videos);
+      addToast("Video erfolgreich gelöscht");
       goto(`${base}/videos`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to delete video";

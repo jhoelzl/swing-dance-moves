@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { base } from "$app/paths";
-  import { isAdmin, allVideos, activeTab } from "$lib/stores";
+  import { isAdmin, allVideos, activeTab, addToast } from "$lib/stores";
   import { createVideo, getAllVideos } from "$lib/services/videos";
   import type { VideoFormData } from "$lib/types";
   import VideoForm from "$lib/components/VideoForm.svelte";
@@ -29,6 +29,7 @@
       // Reload all videos
       const videos = await getAllVideos();
       allVideos.set(videos);
+      addToast("Video erfolgreich erstellt");
       goto(`${base}/videos`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to create video";

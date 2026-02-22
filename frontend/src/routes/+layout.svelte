@@ -2,6 +2,7 @@
   import "../app.css";
   import { onMount } from "svelte";
   import { supabase, supabaseConfigError } from "$lib/supabase";
+  import Toast from "$lib/components/Toast.svelte";
   import {
     darkMode,
     toggleDarkMode,
@@ -359,3 +360,5 @@
     </main>
   </div>
 {/if}
+
+<Toast />

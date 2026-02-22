@@ -111,3 +111,30 @@ export function toggleDarkMode() {
 		return next;
 	});
 }
+
+// Toast notification system
+export type ToastType = 'success' | 'error' | 'info';
+
+export interface ToastMessage {
+	id: number;
+	text: string;
+	type: ToastType;
+}
+
+let toastCounter = 0;
+export const toasts = writable<ToastMessage[]>([]);
+
+/**
+ * Show a toast notification. Auto-dismisses after the given duration.
+ */
+export function addToast(text: string, type: ToastType = 'success', duration = 3500) {
+	const id = ++toastCounter;
+	toasts.update((t) => [...t, { id, text, type }]);
+	if (typeof window !== 'undefined') {
+		setTimeout(() => removeToast(id), duration);
+	}
+}
+
+export function removeToast(id: number) {
+	toasts.update((t) => t.filter((toast) => toast.id !== id));
+}
