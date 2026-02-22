@@ -21,6 +21,7 @@
   let randomMoves = $state<Move[]>([]);
   let showFilters = $state(false);
   let searchInputValue = $state("");
+  let expandMoves = $state(false);
   let urlSyncReady = false;
 
   const displayMoves = $derived($showAll ? $filteredMoves : randomMoves);
@@ -46,6 +47,11 @@
     if (qParam) {
       searchQuery.set(qParam);
       searchInputValue = qParam;
+    }
+
+    const expandParam = params.get("expand");
+    if (expandParam === "1") {
+      expandMoves = true;
     }
 
     const videoParam = params.get("video");
@@ -170,16 +176,16 @@
           />
         </svg>
         Filter
-        {#if $activeFilters.length > 0}
+        {#if $activeFilters.length > 0 || $videoOnly}
           <span
             class="inline-flex items-center justify-center w-5 h-5 text-[11px] font-bold bg-blue-500 text-white rounded-full"
           >
-            {$activeFilters.length}
+            {$activeFilters.length + ($videoOnly ? 1 : 0)}
           </span>
         {/if}
       </button>
 
-      {#if $activeFilters.length > 0}
+      {#if $activeFilters.length > 0 || $videoOnly}
         <button
           onclick={clearFilters}
           class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
@@ -295,7 +301,7 @@
   {#if displayMoves.length > 0}
     <div class="space-y-3">
       {#each displayMoves as move (move.move_id)}
-        <MoveCard {move} />
+        <MoveCard {move} initialOpen={expandMoves} />
       {/each}
     </div>
   {:else}

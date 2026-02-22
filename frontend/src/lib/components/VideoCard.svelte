@@ -304,7 +304,9 @@
             <div class="space-y-1.5">
               {#each linkedMoves as lm}
                 <a
-                  href="{base}/?q={encodeURIComponent(lm.move_name.trim())}"
+                  href="{base}/?q={encodeURIComponent(
+                    lm.move_name.trim(),
+                  )}&expand=1"
                   class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:border-blue-200 dark:hover:border-blue-800 transition-all no-underline group/move"
                 >
                   <svg

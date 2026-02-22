@@ -8,11 +8,12 @@
 
   interface Props {
     move: Move;
+    initialOpen?: boolean;
   }
 
-  let { move }: Props = $props();
+  let { move, initialOpen = false }: Props = $props();
 
-  let isOpen = $state(false);
+  let isOpen = $state(initialOpen);
   let videoRefs = $state<MoveToVideo[]>([]);
   let videoRefsLoaded = $state(false);
 
