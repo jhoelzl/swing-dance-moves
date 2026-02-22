@@ -240,6 +240,13 @@ export async function deleteMove(moveId: number): Promise<void> {
 
 	if (tagError) throw tagError;
 
+	const { error: videoError } = await supabase
+		.from('moves_to_videos')
+		.delete()
+		.eq('move_id', moveId);
+
+	if (videoError) throw videoError;
+
 	const { error } = await supabase.from('moves').delete().eq('move_id', moveId);
 
 	if (error) throw error;
