@@ -28,6 +28,7 @@
   import type { Move } from "$lib/types";
   import FilterChips from "$lib/components/FilterChips.svelte";
   import MoveCard from "$lib/components/MoveCard.svelte";
+  import SkeletonCard from "$lib/components/SkeletonCard.svelte";
   import { debounce } from "$lib/utils";
   import { base } from "$app/paths";
 
@@ -222,15 +223,8 @@
 </svelte:head>
 
 {#if $isLoading}
-  <div class="flex items-center justify-center py-24">
-    <div class="text-center">
-      <div
-        class="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
-      ></div>
-      <p class="mt-4 text-sm text-gray-400 dark:text-gray-500">
-        Loading moves...
-      </p>
-    </div>
+  <div class="py-2">
+    <SkeletonCard count={5} variant="move" />
   </div>
 {:else}
   <!-- Search -->

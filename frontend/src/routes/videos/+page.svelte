@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { allVideos, isLoading, isAdmin, activeTab } from "$lib/stores";
+  import SkeletonCard from "$lib/components/SkeletonCard.svelte";
   import { searchVideos } from "$lib/services/videos";
   import type { Video } from "$lib/types";
   import VideoCard from "$lib/components/VideoCard.svelte";
@@ -71,15 +72,8 @@
 </svelte:head>
 
 {#if $isLoading}
-  <div class="flex items-center justify-center py-24">
-    <div class="text-center">
-      <div
-        class="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
-      ></div>
-      <p class="mt-4 text-sm text-gray-400 dark:text-gray-500">
-        Loading videos...
-      </p>
-    </div>
+  <div class="py-2">
+    <SkeletonCard count={4} variant="video" />
   </div>
 {:else}
   <!-- Search -->
