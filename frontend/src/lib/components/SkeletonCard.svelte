@@ -40,7 +40,9 @@
           </div>
         {:else}
           <div class="mt-2">
-            <div class="h-3 w-3/4 rounded-md bg-gray-100 dark:bg-gray-700/50"></div>
+            <div
+              class="h-3 w-3/4 rounded-md bg-gray-100 dark:bg-gray-700/50"
+            ></div>
           </div>
         {/if}
       </div>

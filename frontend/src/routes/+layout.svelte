@@ -25,6 +25,10 @@
   import { page } from "$app/stores";
   let isLoginPage = $derived($page.url.pathname.endsWith("/login"));
 
+  // Error state for failed data loading
+  let loadError = $state(false);
+  let loadErrorMessage = $state("");
+
   async function loadData() {
     try {
       const [moves, tags, videos] = await Promise.all([
@@ -37,6 +41,9 @@
       allVideos.set(videos);
     } catch (err) {
       console.error("Failed to load data:", err);
+      loadError = true;
+      loadErrorMessage =
+        err instanceof Error ? err.message : "Unbekannter Fehler";
     } finally {
       isLoading.set(false);
     }
@@ -84,6 +91,13 @@
     };
   });
 
+  async function retryLoad() {
+    loadError = false;
+    loadErrorMessage = "";
+    isLoading.set(true);
+    await loadData();
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut();
     isAdmin.set(false);
@@ -94,7 +108,50 @@
   }
 </script>
 
-{#if supabaseConfigError}
+{#if loadError}
+  <div
+    class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-6"
+  >
+    <div
+      class="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-red-200 dark:border-red-800 p-8 text-center"
+    >
+      <div class="text-5xl mb-4">😵</div>
+      <h1 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">
+        Laden fehlgeschlagen
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-2">
+        Die Daten konnten nicht geladen werden. Bitte prüfe deine
+        Internetverbindung und versuche es erneut.
+      </p>
+      {#if loadErrorMessage}
+        <p
+          class="text-xs text-gray-400 dark:text-gray-500 font-mono bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 mb-5"
+        >
+          {loadErrorMessage}
+        </p>
+      {/if}
+      <button
+        onclick={retryLoad}
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors cursor-pointer"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
+        </svg>
+        Erneut versuchen
+      </button>
+    </div>
+  </div>
+{:else if supabaseConfigError}
   <div
     class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-6"
   >
