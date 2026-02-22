@@ -12,10 +12,12 @@
   } from "$lib/services/videos";
   import type { VideoFormData } from "$lib/types";
   import VideoForm from "$lib/components/VideoForm.svelte";
+  import ConfirmModal from "$lib/components/ConfirmModal.svelte";
 
   let loading = $state(false);
   let deleting = $state(false);
   let error = $state("");
+  let showDeleteConfirm = $state(false);
   let formData = $state<VideoFormData>({
     title: "",
     url: "",
@@ -61,8 +63,8 @@
   }
 
   async function handleDelete() {
-    if (!confirm("Video wirklich löschen?")) return;
     deleting = true;
+    showDeleteConfirm = false;
     try {
       await deleteVideo(videoId);
       const videos = await getAllVideos();
@@ -104,7 +106,7 @@
         class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end"
       >
         <button
-          onclick={handleDelete}
+          onclick={() => (showDeleteConfirm = true)}
           disabled={deleting}
           class="px-4 py-2 rounded-lg bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
         >
@@ -120,3 +122,12 @@
     {/if}
   </div>
 </div>
+
+<ConfirmModal
+  open={showDeleteConfirm}
+  title="Video löschen"
+  message="Soll dieses Video wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden."
+  confirmLabel="Löschen"
+  onconfirm={handleDelete}
+  oncancel={() => (showDeleteConfirm = false)}
+/>

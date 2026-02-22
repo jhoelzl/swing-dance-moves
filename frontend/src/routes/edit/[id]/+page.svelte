@@ -12,10 +12,12 @@
   } from "$lib/services/moves";
   import type { MoveFormData } from "$lib/types";
   import MoveForm from "$lib/components/MoveForm.svelte";
+  import ConfirmModal from "$lib/components/ConfirmModal.svelte";
 
   let loading = $state(false);
   let deleting = $state(false);
   let error = $state("");
+  let showDeleteConfirm = $state(false);
   let formData = $state<MoveFormData>({
     name: "",
     synonyms: "",
@@ -68,8 +70,8 @@
   }
 
   async function handleDelete() {
-    if (!confirm("Are you sure you want to delete this move?")) return;
     deleting = true;
+    showDeleteConfirm = false;
     try {
       await deleteMove(moveId);
       const moves = await getAllMoves();
@@ -110,7 +112,7 @@
 
       <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button
-          onclick={handleDelete}
+          onclick={() => (showDeleteConfirm = true)}
           disabled={deleting}
           class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 disabled:bg-red-400 text-white font-medium text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
         >
@@ -126,3 +128,12 @@
     {/if}
   </div>
 </div>
+
+<ConfirmModal
+  open={showDeleteConfirm}
+  title="Move löschen"
+  message="Soll dieser Move wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden."
+  confirmLabel="Löschen"
+  onconfirm={handleDelete}
+  oncancel={() => (showDeleteConfirm = false)}
+/>

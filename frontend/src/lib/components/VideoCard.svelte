@@ -4,6 +4,7 @@
   import { isAdmin } from "$lib/stores";
   import { base } from "$app/paths";
   import { supabase } from "$lib/supabase";
+  import ConfirmModal from "./ConfirmModal.svelte";
 
   interface LinkedMove {
     move_id: number;
@@ -30,6 +31,7 @@
   let deleting = $state(false);
   let linkedMoves = $state<LinkedMove[]>([]);
   let linkedMovesLoaded = $state(false);
+  let showDeleteConfirm = $state(false);
   let currentStartTime = $state(0);
   let shouldAutoplay = $state(false);
   // Increment key to force iframe reload when seeking
@@ -135,8 +137,8 @@
   }
 
   async function handleDelete() {
-    if (!confirm("Video wirklich löschen?")) return;
     deleting = true;
+    showDeleteConfirm = false;
     try {
       // Delete references first
       await supabase
@@ -357,7 +359,7 @@
             class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50 flex justify-end"
           >
             <button
-              onclick={handleDelete}
+              onclick={() => (showDeleteConfirm = true)}
               disabled={deleting}
               class="text-xs text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50"
             >
@@ -369,3 +371,12 @@
     </div>
   {/if}
 </div>
+
+<ConfirmModal
+  open={showDeleteConfirm}
+  title="Video löschen"
+  message="Soll dieses Video wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden."
+  confirmLabel="Löschen"
+  onconfirm={handleDelete}
+  oncancel={() => (showDeleteConfirm = false)}
+/>

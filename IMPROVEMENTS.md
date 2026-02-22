@@ -6,10 +6,6 @@ Empfohlene Verbesserungen, priorisiert nach Wichtigkeit.
 
 ## 🔴 Hoch – Sicherheit & Stabilität
 
-Video mit von_bis zeitstempel speichern für den move
-
-dann och übersicht aller videos und die dazgehörigen moves
-EInbindung de Vides von iCLoud
 
 ### 1. HTML-Sanitization in MoveCard
 `{@html move.description}` rendert unescaped HTML aus der DB. Falls bösartiger HTML/JS in die Beschreibung gelangt, wird er ausgeführt (XSS).
@@ -34,10 +30,6 @@ EInbindung de Vides von iCLoud
 ### 5. Toast-Benachrichtigungen
 Nach Erstellen/Bearbeiten/Löschen eines Moves gibt es kein visuelles Feedback — nur ein stiller Redirect.
 - **Lösung:** Einfache Toast-Komponente für Erfolgs-/Fehlermeldungen.
-
-### 6. Bestätigungs-Modal statt `confirm()`
-Der Browser-native `confirm()`-Dialog beim Löschen sieht unprofessionell aus.
-- **Lösung:** Eigenes Modal mit Styling passend zum Design.
 
 ### 7. Sortierung der Moves
 Aktuell keine Option zum Sortieren (alphabetisch, zuletzt hinzugefügt, etc.).
