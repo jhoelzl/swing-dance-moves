@@ -5,6 +5,13 @@
   import { base } from "$app/paths";
   import { supabase } from "$lib/supabase";
 
+  interface LinkedMove {
+    move_id: number;
+    move_name: string;
+    start_time: string;
+    end_time: string;
+  }
+
   interface Props {
     video: Video;
     ondeleted?: () => void;
@@ -14,11 +21,46 @@
 
   let isOpen = $state(false);
   let deleting = $state(false);
+  let linkedMoves = $state<LinkedMove[]>([]);
+  let linkedMovesLoaded = $state(false);
 
   const youtubeId = $derived(extractYouTubeId(video.url));
 
-  function toggle() {
+  async function toggle() {
     isOpen = !isOpen;
+
+    // Lazy-load linked moves when opening
+    if (isOpen && !linkedMovesLoaded) {
+      try {
+        const { data: mappings } = await supabase
+          .from("moves_to_videos")
+          .select("*")
+          .eq("video_id", video.video_id);
+
+        if (mappings && mappings.length > 0) {
+          const moveIds = mappings.map((m: any) => m.move_id);
+          const { data: moves } = await supabase
+            .from("moves")
+            .select("move_id, name")
+            .in("move_id", moveIds);
+
+          const moveMap = new Map<number, string>();
+          for (const m of moves ?? []) {
+            moveMap.set(m.move_id, m.name);
+          }
+
+          linkedMoves = mappings.map((m: any) => ({
+            move_id: m.move_id,
+            move_name: moveMap.get(m.move_id) ?? "Unknown",
+            start_time: m.start_time ?? "",
+            end_time: m.end_time ?? "",
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to load linked moves:", err);
+      }
+      linkedMovesLoaded = true;
+    }
   }
 
   async function handleDelete() {
@@ -158,6 +200,51 @@
               </svg>
               Video ansehen
             </a>
+          </div>
+        {/if}
+
+        <!-- Linked Moves -->
+        {#if linkedMoves.length > 0}
+          <div
+            class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50"
+          >
+            <h4
+              class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2"
+            >
+              Verknüpfte Moves
+            </h4>
+            <div class="space-y-1.5">
+              {#each linkedMoves as lm}
+                <div
+                  class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800"
+                >
+                  <svg
+                    class="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                  <span
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >{lm.move_name}</span
+                  >
+                  {#if lm.start_time}
+                    <span
+                      class="text-[11px] font-mono text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded"
+                    >
+                      {lm.start_time}{lm.end_time ? ` – ${lm.end_time}` : ""}
+                    </span>
+                  {/if}
+                </div>
+              {/each}
+            </div>
           </div>
         {/if}
 
