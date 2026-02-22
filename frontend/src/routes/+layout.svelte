@@ -1,7 +1,7 @@
 <script lang="ts">
   import "../app.css";
   import { onMount } from "svelte";
-  import { supabase } from "$lib/supabase";
+  import { supabase, supabaseConfigError } from "$lib/supabase";
   import {
     darkMode,
     toggleDarkMode,
@@ -43,6 +43,12 @@
 
   onMount(async () => {
     initDarkMode();
+
+    // Abort initialization if Supabase credentials are missing
+    if (supabaseConfigError) {
+      isLoading.set(false);
+      return;
+    }
 
     // Check auth state
     const {
@@ -87,71 +93,120 @@
   }
 </script>
 
-<div
-  class="min-h-screen bg-gray-50/80 dark:bg-gray-950 transition-colors duration-300"
->
-  <!-- Navigation -->
-  <nav
-    class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/60 dark:border-gray-800"
+{#if supabaseConfigError}
+  <div
+    class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-6"
   >
-    <div class="max-w-3xl mx-auto px-5 py-3.5">
-      <div class="flex items-center justify-between">
-        <a
-          href="{base}/"
-          class="flex items-center gap-2.5 text-gray-900 dark:text-white no-underline group"
-        >
-          <span
-            class="text-2xl group-hover:scale-110 transition-transform duration-200"
-            >💃</span
+    <div
+      class="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-red-200 dark:border-red-800 p-8 text-center"
+    >
+      <div class="text-5xl mb-4">⚠️</div>
+      <h1 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">
+        Konfigurationsfehler
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4">
+        Die Supabase-Umgebungsvariablen sind nicht konfiguriert. Die App kann
+        keine Verbindung zur Datenbank herstellen.
+      </p>
+      <div
+        class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-left text-xs font-mono text-gray-700 dark:text-gray-300"
+      >
+        <p class="mb-1">Erstelle eine <strong>.env</strong>-Datei:</p>
+        <p class="text-red-500 dark:text-red-400">
+          VITE_SUPABASE_URL=https://...
+        </p>
+        <p class="text-red-500 dark:text-red-400">
+          VITE_SUPABASE_ANON_KEY=eyJ...
+        </p>
+      </div>
+    </div>
+  </div>
+{:else}
+  <div
+    class="min-h-screen bg-gray-50/80 dark:bg-gray-950 transition-colors duration-300"
+  >
+    <!-- Navigation -->
+    <nav
+      class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/60 dark:border-gray-800"
+    >
+      <div class="max-w-3xl mx-auto px-5 py-3.5">
+        <div class="flex items-center justify-between">
+          <a
+            href="{base}/"
+            class="flex items-center gap-2.5 text-gray-900 dark:text-white no-underline group"
           >
-          <h1 class="text-lg font-bold tracking-tight">Swing Moves</h1>
-        </a>
+            <span
+              class="text-2xl group-hover:scale-110 transition-transform duration-200"
+              >💃</span
+            >
+            <h1 class="text-lg font-bold tracking-tight">Swing Moves</h1>
+          </a>
 
-        <div class="flex items-center gap-1">
-          <!-- Dark Mode Toggle -->
-          <button
-            onclick={toggleDarkMode}
-            class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer"
-            title="Toggle Dark Mode"
-          >
-            {#if $darkMode}
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                />
-              </svg>
-            {:else}
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                />
-              </svg>
-            {/if}
-          </button>
+          <div class="flex items-center gap-1">
+            <!-- Dark Mode Toggle -->
+            <button
+              onclick={toggleDarkMode}
+              class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer"
+              title="Toggle Dark Mode"
+            >
+              {#if $darkMode}
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
+                </svg>
+              {:else}
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                  />
+                </svg>
+              {/if}
+            </button>
 
-          <!-- Admin Login/Logout -->
-          {#if $isAdmin}
-            {#if $activeTab !== "tags"}
-              <a
-                href="{base}/{$activeTab === 'videos' ? 'videos/new' : 'new'}"
-                class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                title={$activeTab === "videos" ? "Add Video" : "Add Move"}
+            <!-- Admin Login/Logout -->
+            {#if $isAdmin}
+              {#if $activeTab !== "tags"}
+                <a
+                  href="{base}/{$activeTab === 'videos' ? 'videos/new' : 'new'}"
+                  class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                  title={$activeTab === "videos" ? "Add Video" : "Add Move"}
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </a>
+              {/if}
+              <button
+                onclick={handleLogout}
+                class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer"
+                title="Logout"
               >
                 <svg
                   class="w-5 h-5"
@@ -163,38 +218,55 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M12 4v16m8-8H4"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+              </button>
+            {:else}
+              <a
+                href="{base}/login"
+                class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                title="Login"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                 </svg>
               </a>
             {/if}
-            <button
-              onclick={handleLogout}
-              class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer"
-              title="Logout"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-            </button>
-          {:else}
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      {#if $isAdmin && !isLoginPage}
+        <div class="max-w-3xl mx-auto px-5">
+          <div
+            class="flex gap-1 border-t border-gray-100 dark:border-gray-800 pt-2"
+          >
             <a
-              href="{base}/login"
-              class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-              title="Login"
+              href="{base}/"
+              onclick={(e) => {
+                e.preventDefault();
+                activeTab.set("moves");
+                goto(`${base}/`);
+              }}
+              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
+            {$activeTab === 'moves'
+                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
             >
               <svg
-                class="w-5 h-5"
+                class="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -203,123 +275,87 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                 />
               </svg>
+              Moves
             </a>
-          {/if}
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab Navigation -->
-    {#if $isAdmin && !isLoginPage}
-      <div class="max-w-3xl mx-auto px-5">
-        <div
-          class="flex gap-1 border-t border-gray-100 dark:border-gray-800 pt-2"
-        >
-          <a
-            href="{base}/"
-            onclick={(e) => {
-              e.preventDefault();
-              activeTab.set("moves");
-              goto(`${base}/`);
-            }}
-            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
-            {$activeTab === 'moves'
-              ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
-          >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-              />
-            </svg>
-            Moves
-          </a>
-          <a
-            href="{base}/videos"
-            onclick={(e) => {
-              e.preventDefault();
-              activeTab.set("videos");
-              goto(`${base}/videos`);
-            }}
-            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
+            <a
+              href="{base}/videos"
+              onclick={(e) => {
+                e.preventDefault();
+                activeTab.set("videos");
+                goto(`${base}/videos`);
+              }}
+              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
             {$activeTab === 'videos'
-              ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
-          >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
-            Videos
-          </a>
-          <a
-            href="{base}/tags"
-            onclick={(e) => {
-              e.preventDefault();
-              activeTab.set("tags");
-              goto(`${base}/tags`);
-            }}
-            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+              Videos
+            </a>
+            <a
+              href="{base}/tags"
+              onclick={(e) => {
+                e.preventDefault();
+                activeTab.set("tags");
+                goto(`${base}/tags`);
+              }}
+              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
             {$activeTab === 'tags'
-              ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
-          >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"
-              />
-            </svg>
-            Tags
-          </a>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"
+                />
+              </svg>
+              Tags
+            </a>
+          </div>
         </div>
-      </div>
-    {/if}
-  </nav>
+      {/if}
+    </nav>
 
-  <!-- Page Content -->
-  <main class="max-w-3xl mx-auto px-5 py-8">
-    {#if $isAdmin || isLoginPage}
-      {@render children()}
-    {:else if !$isLoading}
-      <div class="text-center py-24">
-        <span class="text-4xl">🕺</span>
-        <p class="text-gray-400 dark:text-gray-500 mt-4 mb-5">
-          Bitte einloggen, um Moves zu sehen.
-        </p>
-        <a
-          href="{base}/login"
-          class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all shadow-sm hover:shadow font-medium text-sm"
-          >Zum Login</a
-        >
-      </div>
-    {/if}
-  </main>
-</div>
+    <!-- Page Content -->
+    <main class="max-w-3xl mx-auto px-5 py-8">
+      {#if $isAdmin || isLoginPage}
+        {@render children()}
+      {:else if !$isLoading}
+        <div class="text-center py-24">
+          <span class="text-4xl">🕺</span>
+          <p class="text-gray-400 dark:text-gray-500 mt-4 mb-5">
+            Bitte einloggen, um Moves zu sehen.
+          </p>
+          <a
+            href="{base}/login"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all shadow-sm hover:shadow font-medium text-sm"
+            >Zum Login</a
+          >
+        </div>
+      {/if}
+    </main>
+  </div>
+{/if}
