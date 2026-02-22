@@ -16,10 +16,11 @@
   let derivedFormData = $derived(formData);
   let localData = $state<MoveFormData>({ ...formData });
 
-  // Keep in sync when formData changes
+  // Keep in sync when formData changes (avoid reading localData to prevent re-trigger loop)
   $effect(() => {
-    localData = { ...derivedFormData };
-    if (!localData.videoRefs) localData.videoRefs = [];
+    const newData = { ...derivedFormData };
+    if (!newData.videoRefs) newData.videoRefs = [];
+    localData = newData;
   });
 
   function toggleTag(tagId: number) {
