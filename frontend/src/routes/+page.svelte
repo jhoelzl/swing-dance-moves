@@ -9,6 +9,7 @@
     clearFilters,
     showAll,
     videoOnly,
+    activeTab,
   } from "$lib/stores";
   import { getRandomMoves } from "$lib/services/moves";
   import type { Move } from "$lib/types";
@@ -26,6 +27,7 @@
 
   // Read filters from URL on mount
   onMount(() => {
+    activeTab.set("moves");
     const params = new URLSearchParams(window.location.search);
 
     const tagsParam = params.get("tags");

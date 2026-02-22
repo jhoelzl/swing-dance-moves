@@ -1,5 +1,5 @@
 import { supabase } from '$lib/supabase';
-import type { Move, Tag, TagGroup, TagType, MoveFormData } from '$lib/types';
+import type { Move, Tag, TagGroup, TagType, MoveFormData, MoveToVideo, Video } from '$lib/types';
 
 /**
  * Fetch all moves with their associated tags.
@@ -53,6 +53,8 @@ export async function getAllMoves(): Promise<Move[]> {
 			return a.tag_name.localeCompare(b.tag_name);
 		})
 	}));
+
+	// Note: videoRefs are loaded on-demand per move, not in bulk list
 }
 
 /**
@@ -141,6 +143,19 @@ export async function createMove(data: MoveFormData): Promise<Move> {
 		if (tagError) throw tagError;
 	}
 
+	// Insert video references
+	if (data.videoRefs && data.videoRefs.length > 0) {
+		const { error: vidError } = await supabase.from('moves_to_videos').insert(
+			data.videoRefs.map((ref) => ({
+				move_id: move.move_id,
+				video_id: ref.video_id,
+				start_time: ref.start_time,
+				end_time: ref.end_time
+			}))
+		);
+		if (vidError) throw vidError;
+	}
+
 	return move as Move;
 }
 
@@ -179,6 +194,27 @@ export async function updateMove(moveId: number, data: MoveFormData): Promise<Mo
 			}))
 		);
 		if (tagError) throw tagError;
+	}
+
+	// Delete old video references
+	const { error: delVidError } = await supabase
+		.from('moves_to_videos')
+		.delete()
+		.eq('move_id', moveId);
+
+	if (delVidError) throw delVidError;
+
+	// Insert new video references
+	if (data.videoRefs && data.videoRefs.length > 0) {
+		const { error: vidError } = await supabase.from('moves_to_videos').insert(
+			data.videoRefs.map((ref) => ({
+				move_id: moveId,
+				video_id: ref.video_id,
+				start_time: ref.start_time,
+				end_time: ref.end_time
+			}))
+		);
+		if (vidError) throw vidError;
 	}
 
 	return move as Move;
@@ -227,5 +263,30 @@ export async function getMoveById(moveId: number): Promise<Move | null> {
 
 	const moveTags = (mappings ?? []).map((m) => tagMap.get(m.tag_id)).filter(Boolean) as Tag[];
 
-	return { ...move, tags: moveTags } as Move;
+	// Fetch video references
+	const { data: videoMappings } = await supabase
+		.from('moves_to_videos')
+		.select('*')
+		.eq('move_id', moveId);
+
+	let videoRefs: MoveToVideo[] = [];
+	if (videoMappings && videoMappings.length > 0) {
+		const videoIds = videoMappings.map((m) => m.video_id);
+		const { data: videos } = await supabase
+			.from('videos')
+			.select('*')
+			.in('video_id', videoIds);
+
+		const videoMap = new Map<number, Video>();
+		for (const v of videos ?? []) {
+			videoMap.set(v.video_id, v as Video);
+		}
+
+		videoRefs = videoMappings.map((m) => ({
+			...m,
+			video: videoMap.get(m.video_id)
+		})) as MoveToVideo[];
+	}
+
+	return { ...move, tags: moveTags, videoRefs } as Move;
 }

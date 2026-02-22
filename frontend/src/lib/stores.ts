@@ -1,9 +1,15 @@
 import { writable, derived } from 'svelte/store';
-import type { Move, TagGroup } from '$lib/types';
+import type { Move, TagGroup, Video } from '$lib/types';
 import { filterMovesByTags, searchMoves } from '$lib/services/moves';
+
+// Active tab: 'moves' | 'videos'
+export const activeTab = writable<'moves' | 'videos'>('moves');
 
 // All moves loaded from Supabase
 export const allMoves = writable<Move[]>([]);
+
+// All videos loaded from Supabase
+export const allVideos = writable<Video[]>([]);
 
 // All tag groups loaded from Supabase
 export const tagGroups = writable<TagGroup[]>([]);

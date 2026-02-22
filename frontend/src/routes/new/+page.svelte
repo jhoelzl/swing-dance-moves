@@ -16,6 +16,7 @@
     description: "",
     link: "",
     tagIds: [],
+    videoRefs: [],
   });
 
   onMount(() => {

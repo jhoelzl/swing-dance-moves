@@ -8,10 +8,13 @@
     initDarkMode,
     isAdmin,
     allMoves,
+    allVideos,
     tagGroups,
     isLoading,
+    activeTab,
   } from "$lib/stores";
   import { getAllMoves, getAllTagsGrouped } from "$lib/services/moves";
+  import { getAllVideos } from "$lib/services/videos";
   import { goto } from "$app/navigation";
   import { base } from "$app/paths";
 
@@ -23,12 +26,14 @@
 
   async function loadData() {
     try {
-      const [moves, tags] = await Promise.all([
+      const [moves, tags, videos] = await Promise.all([
         getAllMoves(),
         getAllTagsGrouped(),
+        getAllVideos(),
       ]);
       allMoves.set(moves);
       tagGroups.set(tags);
+      allVideos.set(videos);
     } catch (err) {
       console.error("Failed to load data:", err);
     } finally {
@@ -59,6 +64,7 @@
       } else {
         allMoves.set([]);
         tagGroups.set([]);
+        allVideos.set([]);
         goto(`${base}/login`);
       }
     });
@@ -69,6 +75,7 @@
     isAdmin.set(false);
     allMoves.set([]);
     tagGroups.set([]);
+    allVideos.set([]);
     goto(`${base}/login`);
   }
 </script>
@@ -195,6 +202,70 @@
         </div>
       </div>
     </div>
+
+    <!-- Tab Navigation -->
+    {#if $isAdmin && !isLoginPage}
+      <div class="max-w-3xl mx-auto px-5">
+        <div
+          class="flex gap-1 border-t border-gray-100 dark:border-gray-800 pt-2"
+        >
+          <a
+            href="{base}/"
+            onclick={(e) => {
+              e.preventDefault();
+              activeTab.set("moves");
+              goto(`${base}/`);
+            }}
+            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
+            {$activeTab === 'moves'
+              ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
+            </svg>
+            Moves
+          </a>
+          <a
+            href="{base}/videos"
+            onclick={(e) => {
+              e.preventDefault();
+              activeTab.set("videos");
+              goto(`${base}/videos`);
+            }}
+            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
+            {$activeTab === 'videos'
+              ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+              />
+            </svg>
+            Videos
+          </a>
+        </div>
+      </div>
+    {/if}
   </nav>
 
   <!-- Page Content -->

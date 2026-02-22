@@ -26,12 +26,43 @@ export interface Move {
 	link: string;
 	// Joined fields
 	tags?: Tag[];
+	videoRefs?: MoveToVideo[];
 }
 
 export interface MoveToTag {
 	id: number;
 	move_id: number;
 	tag_id: number;
+}
+
+export interface Video {
+	video_id: number;
+	title: string;
+	url: string;
+	description: string;
+	created_at: string;
+}
+
+export interface MoveToVideo {
+	id: number;
+	move_id: number;
+	video_id: number;
+	start_time: string; // e.g. '10:01'
+	end_time: string;   // e.g. '10:30'
+	// Joined field
+	video?: Video;
+}
+
+export interface VideoFormData {
+	title: string;
+	url: string;
+	description: string;
+}
+
+export interface MoveVideoRef {
+	video_id: number;
+	start_time: string;
+	end_time: string;
 }
 
 // Grouped tags for UI display
@@ -47,6 +78,7 @@ export interface MoveFormData {
 	description: string;
 	link: string;
 	tagIds: number[];
+	videoRefs: MoveVideoRef[];
 }
 
 // Database schema type for Supabase client
@@ -72,6 +104,16 @@ export interface Database {
 				Row: MoveToTag;
 				Insert: Omit<MoveToTag, 'id'> & { id?: number };
 				Update: Partial<MoveToTag>;
+			};
+			videos: {
+				Row: Video;
+				Insert: Omit<Video, 'video_id' | 'created_at'> & { video_id?: number; created_at?: string };
+				Update: Partial<Video>;
+			};
+			moves_to_videos: {
+				Row: MoveToVideo;
+				Insert: Omit<MoveToVideo, 'id'> & { id?: number };
+				Update: Partial<MoveToVideo>;
 			};
 		};
 		Views: Record<string, never>;

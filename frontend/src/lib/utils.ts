@@ -71,3 +71,13 @@ export function debounce<T extends (...args: unknown[]) => void>(fn: T, ms: numb
 		timer = setTimeout(() => fn(...args), ms);
 	}) as T;
 }
+
+/** Convert timecode string (e.g. "10:01" or "1:30:05") to seconds */
+export function timecodeToSeconds(timecode: string): number {
+	if (!timecode || !timecode.trim()) return 0;
+	const parts = timecode.trim().split(':').map(Number);
+	if (parts.some(isNaN)) return 0;
+	if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+	if (parts.length === 2) return parts[0] * 60 + parts[1];
+	return parts[0];
+}

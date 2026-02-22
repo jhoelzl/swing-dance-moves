@@ -1,9 +1,10 @@
 <script lang="ts">
-  import type { Move } from "$lib/types";
+  import type { Move, MoveToVideo } from "$lib/types";
   import TagBadge from "./TagBadge.svelte";
-  import { extractYouTubeId } from "$lib/utils";
+  import { extractYouTubeId, timecodeToSeconds } from "$lib/utils";
   import { isAdmin } from "$lib/stores";
   import { base } from "$app/paths";
+  import { supabase } from "$lib/supabase";
 
   interface Props {
     move: Move;
@@ -12,11 +13,57 @@
   let { move }: Props = $props();
 
   let isOpen = $state(false);
+  let videoRefs = $state<MoveToVideo[]>([]);
+  let videoRefsLoaded = $state(false);
 
   const youtubeId = $derived(extractYouTubeId(move.link));
 
-  function toggle() {
+  async function toggle() {
     isOpen = !isOpen;
+
+    // Lazy-load video references when opening
+    if (isOpen && !videoRefsLoaded) {
+      try {
+        const { data: mappings } = await supabase
+          .from("moves_to_videos")
+          .select("*")
+          .eq("move_id", move.move_id);
+
+        if (mappings && mappings.length > 0) {
+          const videoIds = mappings.map((m: any) => m.video_id);
+          const { data: videos } = await supabase
+            .from("videos")
+            .select("*")
+            .in("video_id", videoIds);
+
+          const videoMap = new Map();
+          for (const v of videos ?? []) {
+            videoMap.set(v.video_id, v);
+          }
+
+          videoRefs = mappings.map((m: any) => ({
+            ...m,
+            video: videoMap.get(m.video_id),
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to load video refs:", err);
+      }
+      videoRefsLoaded = true;
+    }
+  }
+
+  function getYoutubeEmbedUrl(url: string, startTime?: string): string {
+    const id = extractYouTubeId(url);
+    if (!id) return "";
+    let embedUrl = `https://www.youtube.com/embed/${id}`;
+    const params: string[] = [];
+    if (startTime) {
+      const seconds = timecodeToSeconds(startTime);
+      if (seconds > 0) params.push(`start=${seconds}`);
+    }
+    if (params.length > 0) embedUrl += `?${params.join("&")}`;
+    return embedUrl;
   }
 </script>
 
@@ -165,6 +212,69 @@
               </svg>
               Video ansehen
             </a>
+          </div>
+        {/if}
+
+        <!-- Linked Video References -->
+        {#if videoRefs.length > 0}
+          <div
+            class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50"
+          >
+            <h4
+              class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2"
+            >
+              Verknüpfte Videos
+            </h4>
+            <div class="space-y-3">
+              {#each videoRefs as ref}
+                {#if ref.video}
+                  <div
+                    class="rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 p-3"
+                  >
+                    <div class="flex items-center gap-2 mb-2">
+                      <svg
+                        class="w-3.5 h-3.5 text-red-500"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"
+                        />
+                      </svg>
+                      <span
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >{ref.video.title}</span
+                      >
+                      {#if ref.start_time}
+                        <span
+                          class="text-[11px] font-mono text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded"
+                        >
+                          {ref.start_time}{ref.end_time
+                            ? ` – ${ref.end_time}`
+                            : ""}
+                        </span>
+                      {/if}
+                    </div>
+                    {#if extractYouTubeId(ref.video.url)}
+                      <div
+                        class="video-container rounded-lg overflow-hidden shadow-sm"
+                      >
+                        <iframe
+                          src={getYoutubeEmbedUrl(
+                            ref.video.url,
+                            ref.start_time,
+                          )}
+                          title={ref.video.title}
+                          frameborder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowfullscreen
+                        ></iframe>
+                      </div>
+                    {/if}
+                  </div>
+                {/if}
+              {/each}
+            </div>
           </div>
         {/if}
       </div>
