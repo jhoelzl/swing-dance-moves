@@ -31,6 +31,7 @@
   let linkedMoves = $state<LinkedMove[]>([]);
   let linkedMovesLoaded = $state(false);
   let currentStartTime = $state(0);
+  let shouldAutoplay = $state(false);
   // Increment key to force iframe reload when seeking
   let embedKey = $state(0);
 
@@ -39,7 +40,10 @@
   const embedUrl = $derived(() => {
     if (!youtubeId) return "";
     let url = `https://www.youtube.com/embed/${youtubeId}`;
-    if (currentStartTime > 0) url += `?start=${currentStartTime}`;
+    const params: string[] = [];
+    if (currentStartTime > 0) params.push(`start=${currentStartTime}`);
+    if (shouldAutoplay) params.push("autoplay=1");
+    if (params.length > 0) url += `?${params.join("&")}`;
     return url;
   });
 
@@ -89,6 +93,7 @@
 
   function seekTo(seconds: number) {
     currentStartTime = seconds;
+    shouldAutoplay = true;
     embedKey++;
   }
 
@@ -298,8 +303,9 @@
             </h4>
             <div class="space-y-1.5">
               {#each linkedMoves as lm}
-                <div
-                  class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800"
+                <a
+                  href="{base}/?q={encodeURIComponent(lm.move_name.trim())}"
+                  class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:border-blue-200 dark:hover:border-blue-800 transition-all no-underline group/move"
                 >
                   <svg
                     class="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0"
@@ -315,7 +321,7 @@
                     />
                   </svg>
                   <span
-                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/move:text-blue-600 dark:group-hover/move:text-blue-400 transition-colors"
                     >{lm.move_name}</span
                   >
                   {#if lm.start_time}
@@ -325,7 +331,20 @@
                       {lm.start_time}{lm.end_time ? ` – ${lm.end_time}` : ""}
                     </span>
                   {/if}
-                </div>
+                  <svg
+                    class="w-3 h-3 text-gray-300 dark:text-gray-600 group-hover/move:text-blue-400 ml-auto shrink-0 transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </a>
               {/each}
             </div>
           </div>
