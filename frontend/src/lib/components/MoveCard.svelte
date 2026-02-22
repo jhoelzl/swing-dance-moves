@@ -5,6 +5,7 @@
   import { isAdmin } from "$lib/stores";
   import { base } from "$app/paths";
   import { supabase } from "$lib/supabase";
+  import DOMPurify from "dompurify";
 
   interface Props {
     move: Move;
@@ -172,9 +173,26 @@
           <div
             class="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-line leading-relaxed"
           >
-            {@html move.description
-              .replace(/\r\n/g, "\n")
-              .replace(/<br\s*\/?>/gi, "\n")}
+            {@html DOMPurify.sanitize(
+              move.description
+                .replace(/\r\n/g, "\n")
+                .replace(/<br\s*\/?>/gi, "\n"),
+              {
+                ALLOWED_TAGS: [
+                  "b",
+                  "i",
+                  "em",
+                  "strong",
+                  "a",
+                  "br",
+                  "p",
+                  "ul",
+                  "ol",
+                  "li",
+                ],
+                ALLOWED_ATTR: ["href", "target", "rel"],
+              },
+            )}
           </div>
         {/if}
 
