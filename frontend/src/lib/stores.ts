@@ -32,18 +32,37 @@ export const isLoading = writable<boolean>(true);
 // Show all moves vs random selection
 export const showAll = writable<boolean>(true);
 
+// Sort order for moves
+export type SortOrder = 'a-z' | 'z-a' | 'newest' | 'oldest';
+export const sortOrder = writable<SortOrder>('a-z');
+
 // Filter to show only moves with YouTube videos
 export const videoOnly = writable<boolean>(false);
 
-// Filtered and searched moves (derived)
+// Filtered, searched, and sorted moves (derived)
 export const filteredMoves = derived(
-	[allMoves, activeFilters, searchQuery, videoOnly],
-	([$allMoves, $activeFilters, $searchQuery, $videoOnly]) => {
+	[allMoves, activeFilters, searchQuery, videoOnly, sortOrder],
+	([$allMoves, $activeFilters, $searchQuery, $videoOnly, $sortOrder]) => {
 		let result = filterMovesByTags($allMoves, $activeFilters);
 		result = searchMoves(result, $searchQuery);
 		if ($videoOnly) {
 			result = result.filter((m) => m.hasVideo);
 		}
+		// Sort
+		result = [...result].sort((a, b) => {
+			switch ($sortOrder) {
+				case 'a-z':
+					return a.name.localeCompare(b.name, 'de');
+				case 'z-a':
+					return b.name.localeCompare(a.name, 'de');
+				case 'newest':
+					return b.move_id - a.move_id;
+				case 'oldest':
+					return a.move_id - b.move_id;
+				default:
+					return 0;
+			}
+		});
 		return result;
 	}
 );

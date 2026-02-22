@@ -10,7 +10,9 @@
     showAll,
     videoOnly,
     activeTab,
+    sortOrder,
   } from "$lib/stores";
+  import type { SortOrder } from "$lib/stores";
   import { getRandomMoves } from "$lib/services/moves";
   import type { Move } from "$lib/types";
   import FilterChips from "$lib/components/FilterChips.svelte";
@@ -24,12 +26,25 @@
   let expandMoves = $state(false);
   let urlSyncReady = false;
 
+  const sortOptions: { value: SortOrder; label: string }[] = [
+    { value: "a-z", label: "A – Z" },
+    { value: "z-a", label: "Z – A" },
+    { value: "newest", label: "Neueste" },
+    { value: "oldest", label: "Älteste" },
+  ];
+
   const displayMoves = $derived($showAll ? $filteredMoves : randomMoves);
 
   // Read filters from URL on mount
   onMount(() => {
     activeTab.set("moves");
     const params = new URLSearchParams(window.location.search);
+
+    // Restore sort order from localStorage
+    const storedSort = localStorage.getItem("sortOrder");
+    if (storedSort && ["a-z", "z-a", "newest", "oldest"].includes(storedSort)) {
+      sortOrder.set(storedSort as SortOrder);
+    }
 
     const tagsParam = params.get("tags");
     if (tagsParam) {
@@ -96,6 +111,12 @@
 
   function handleShowAll() {
     showAll.set(true);
+  }
+
+  function handleSortChange(e: Event) {
+    const value = (e.target as HTMLSelectElement).value as SortOrder;
+    sortOrder.set(value);
+    localStorage.setItem("sortOrder", value);
   }
 
   const debouncedSearch = debounce((value: string) => {
@@ -196,6 +217,15 @@
     </div>
 
     <div class="flex items-center gap-3">
+      <select
+        onchange={handleSortChange}
+        value={$sortOrder}
+        class="px-3 py-2 text-xs font-medium rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-500 dark:text-gray-400 outline-none cursor-pointer shadow-sm appearance-none pr-7 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239CA3AF%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.168l3.71-3.938a.75.75%200%20111.08%201.04l-4.25%204.5a.75.75%200%2001-1.08%200l-4.25-4.5a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1rem]"
+      >
+        {#each sortOptions as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
       <span
         class="text-xs font-medium text-gray-400 dark:text-gray-500 tabular-nums"
       >
