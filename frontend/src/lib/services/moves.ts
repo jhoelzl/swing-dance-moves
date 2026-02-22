@@ -89,11 +89,16 @@ export function searchMoves(moves: Move[], query: string): Move[] {
 }
 
 /**
- * Get random moves from a list.
+ * Get random moves from a list using Fisher-Yates shuffle
+ * for uniform distribution.
  */
 export function getRandomMoves(moves: Move[], count: number): Move[] {
-	const shuffled = [...moves].sort(() => Math.random() - 0.5);
-	return shuffled.slice(0, count);
+	const arr = [...moves];
+	for (let i = arr.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[arr[i], arr[j]] = [arr[j], arr[i]];
+	}
+	return arr.slice(0, count);
 }
 
 /**
