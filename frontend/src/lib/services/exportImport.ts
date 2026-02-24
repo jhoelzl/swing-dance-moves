@@ -126,6 +126,57 @@ export function exportMovesAsCsv(moves: Move[]) {
 	downloadBlob(blob, `swing-moves-${timestamp()}.csv`);
 }
 
+// ── Full Database Export ──
+
+export interface FullExportPayload {
+	version: 2;
+	exported_at: string;
+	tag_types: any[];
+	tags: any[];
+	moves: any[];
+	moves_to_tags: any[];
+	videos: any[];
+	moves_to_videos: any[];
+}
+
+/**
+ * Export ALL database tables as a single JSON file.
+ * Includes: tag_types, tags, moves, moves_to_tags, videos, moves_to_videos
+ */
+export async function exportAllData() {
+	const [tagTypesRes, tagsRes, movesRes, movesToTagsRes, videosRes, movesToVideosRes] =
+		await Promise.all([
+			supabase.from('tag_types').select('*').order('sort_order'),
+			supabase.from('tags').select('*').order('tag_sort'),
+			supabase.from('moves').select('*').order('name'),
+			supabase.from('moves_to_tags').select('*'),
+			supabase.from('videos').select('*').order('created_at'),
+			supabase.from('moves_to_videos').select('*'),
+		]);
+
+	// Check for errors
+	for (const res of [tagTypesRes, tagsRes, movesRes, movesToTagsRes, videosRes, movesToVideosRes]) {
+		if (res.error) throw res.error;
+	}
+
+	const payload: FullExportPayload = {
+		version: 2,
+		exported_at: new Date().toISOString(),
+		tag_types: tagTypesRes.data ?? [],
+		tags: tagsRes.data ?? [],
+		moves: movesRes.data ?? [],
+		moves_to_tags: movesToTagsRes.data ?? [],
+		videos: videosRes.data ?? [],
+		moves_to_videos: movesToVideosRes.data ?? [],
+	};
+
+	const json = JSON.stringify(payload, null, 2);
+	const blob = new Blob([json], { type: 'application/json' });
+	downloadBlob(blob, `swing-dance-backup-${timestamp()}.json`);
+
+	return payload;
+}
+
 // ── Import ──
 
 /**

@@ -3,6 +3,7 @@
   import { isAdmin } from "$lib/stores";
   import { goto } from "$app/navigation";
   import { base } from "$app/paths";
+  import { t } from "$lib/i18n";
 
   let email = $state("");
   let password = $state("");
@@ -30,7 +31,7 @@
         goto(`${base}/`);
       }
     } catch (err) {
-      error = "An unexpected error occurred.";
+      error = t("unexpected_error");
     } finally {
       loading = false;
     }
@@ -38,7 +39,7 @@
 
   async function handlePasswordReset() {
     if (!email) {
-      error = "Please enter an email address first.";
+      error = t("enter_email_first");
       return;
     }
     error = "";
@@ -54,7 +55,7 @@
         resetSent = true;
       }
     } catch {
-      error = "Failed to send password reset email.";
+      error = t("reset_failed");
     } finally {
       resetLoading = false;
     }
@@ -69,10 +70,10 @@
   <div class="text-center mb-8">
     <span class="text-4xl">🔐</span>
     <h2 class="text-xl font-bold text-gray-900 dark:text-white mt-3">
-      Welcome back
+      {t("welcome_back")}
     </h2>
     <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">
-      Sign in to access your moves
+      {t("sign_in_subtitle")}
     </p>
   </div>
 
@@ -91,7 +92,7 @@
       <div
         class="mb-4 p-3 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200/80 dark:border-green-900/50 text-green-600 dark:text-green-400 text-sm"
       >
-        A password reset email has been sent.
+        {t("reset_email_sent")}
       </div>
     {/if}
 
@@ -100,7 +101,7 @@
         <label
           for="email"
           class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider"
-          >Email</label
+          >{t("email")}</label
         >
         <input
           id="email"
@@ -117,7 +118,7 @@
         <label
           for="password"
           class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider"
-          >Password</label
+          >{t("password")}</label
         >
         <div class="relative">
           <input
@@ -179,7 +180,7 @@
         disabled={loading}
         class="w-full py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white font-medium text-sm transition-all shadow-sm hover:shadow cursor-pointer disabled:cursor-not-allowed mt-2"
       >
-        {loading ? "Signing in..." : "Sign in"}
+        {loading ? t("signing_in") : t("sign_in_button")}
       </button>
     </form>
 
@@ -190,7 +191,7 @@
         disabled={resetLoading}
         class="text-xs text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer disabled:opacity-50"
       >
-        {resetLoading ? "Sending..." : "Forgot password?"}
+        {resetLoading ? t("sending") : t("forgot_password")}
       </button>
     </div>
   </div>

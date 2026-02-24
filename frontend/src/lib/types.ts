@@ -65,6 +65,16 @@ export interface MoveVideoRef {
 	end_time: string;
 }
 
+// User settings stored in Supabase
+export interface UserSettings {
+	id: number;
+	user_id: string;
+	language: 'de' | 'en';
+	random_moves_count: number;
+	created_at: string;
+	updated_at: string;
+}
+
 // Grouped tags for UI display
 export interface TagGroup {
 	tagType: TagType;
@@ -115,6 +125,11 @@ export interface Database {
 				Update: Partial<MoveToVideo>;
 			};
 		};
+			user_settings: {
+				Row: UserSettings;
+				Insert: Omit<UserSettings, 'id' | 'created_at' | 'updated_at'> & { id?: number; created_at?: string; updated_at?: string };
+				Update: Partial<Omit<UserSettings, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
+			};
 		Views: Record<string, never>;
 		Functions: Record<string, never>;
 		Enums: Record<string, never>;

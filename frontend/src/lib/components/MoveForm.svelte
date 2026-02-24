@@ -3,6 +3,7 @@
   import type { TagGroup, MoveFormData, Video, MoveVideoRef } from "$lib/types";
   import { allVideos } from "$lib/stores";
   import { onMount } from "svelte";
+  import { t } from "$lib/i18n";
 
   interface Props {
     formData: MoveFormData;
@@ -76,14 +77,14 @@
     <label
       for="synonyms"
       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-      >Synonyms</label
+      >{t("synonyms")}</label
     >
     <input
       id="synonyms"
       type="text"
       bind:value={localData.synonyms}
       class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-      placeholder="Other names for this move"
+      placeholder={t("other_names_placeholder")}
     />
   </div>
 
@@ -91,14 +92,14 @@
     <label
       for="description"
       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-      >Description</label
+      >{t("description")}</label
     >
     <textarea
       id="description"
       bind:value={localData.description}
       rows="4"
       class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-y"
-      placeholder="Detailed description for leaders"
+      placeholder={t("description_placeholder")}
     ></textarea>
   </div>
 
@@ -139,7 +140,7 @@
   <div class="space-y-3">
     <div class="flex items-center justify-between">
       <span class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >Video References</span
+        >{t("video_references")}</span
       >
       <button
         type="button"
@@ -159,7 +160,7 @@
             d="M12 4v16m8-8H4"
           />
         </svg>
-        Add Video
+        {t("add_video_ref")}
       </button>
     </div>
 
@@ -174,7 +175,7 @@
                 bind:value={ref.video_id}
                 class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
               >
-                <option value={0}>Select video...</option>
+                <option value={0}>{t("select_video")}</option>
                 {#each $allVideos as video}
                   <option value={video.video_id}>{video.title}</option>
                 {/each}
@@ -183,7 +184,7 @@
                 <div class="flex-1">
                   <label
                     class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5"
-                    >Start (optional)</label
+                    >{t("start_optional")}</label
                   >
                   <input
                     type="text"
@@ -195,7 +196,7 @@
                 <div class="flex-1">
                   <label
                     class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5"
-                    >End (optional)</label
+                    >{t("end_optional")}</label
                   >
                   <input
                     type="text"
@@ -210,7 +211,7 @@
               type="button"
               onclick={() => removeVideoRef(i)}
               class="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all cursor-pointer mt-1"
-              title="Remove"
+              title={t("remove")}
             >
               <svg
                 class="w-4 h-4"
@@ -231,7 +232,7 @@
       {/each}
     {:else}
       <p class="text-xs text-gray-400 dark:text-gray-500">
-        No videos linked. Click "Add Video" to create a reference.
+        {t("no_videos_linked")}
       </p>
     {/if}
   </div>
@@ -242,13 +243,13 @@
       disabled={loading}
       class="px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white font-medium text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
     >
-      {loading ? "Saving..." : "Save Move"}
+      {loading ? t("saving") : t("save_move")}
     </button>
     <a
       href="{base}/"
       class="px-5 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium text-sm transition-colors no-underline"
     >
-      Cancel
+      {t("cancel")}
     </a>
   </div>
 </form>

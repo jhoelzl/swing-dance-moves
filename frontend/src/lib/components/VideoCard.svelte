@@ -6,6 +6,7 @@
   import { supabase } from "$lib/supabase";
   import { deleteVideo } from "$lib/services/videos";
   import ConfirmModal from "./ConfirmModal.svelte";
+  import { t } from "$lib/i18n";
 
   interface LinkedMove {
     move_id: number;
@@ -142,11 +143,11 @@
     showDeleteConfirm = false;
     try {
       await deleteVideo(video.video_id);
-      addToast("Video deleted successfully");
+      addToast(t("video_deleted"));
       ondeleted?.();
     } catch (err) {
       console.error("Failed to delete video:", err);
-      addToast("Failed to delete video", "error");
+      addToast(t("video_delete_failed"), "error");
     } finally {
       deleting = false;
     }
@@ -191,7 +192,7 @@
           href="{base}/videos/edit/{video.video_id}"
           onclick={(e) => e.stopPropagation()}
           class="p-1.5 rounded-md text-gray-300 hover:text-blue-500 hover:bg-blue-50 dark:text-gray-600 dark:hover:text-blue-400 dark:hover:bg-blue-950/30 transition-all"
-          title="Edit Video"
+          title={t("edit_video")}
         >
           <svg
             class="w-4 h-4"
@@ -286,7 +287,7 @@
                   d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                 />
               </svg>
-              Watch Video
+              {t("watch_video")}
             </a>
           </div>
         {/if}
@@ -299,7 +300,7 @@
             <h4
               class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2"
             >
-              Linked Moves
+              {t("linked_moves")}
             </h4>
             <div class="space-y-1.5">
               {#each linkedMoves as lm}
@@ -361,7 +362,7 @@
               disabled={deleting}
               class="text-xs text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50"
             >
-              {deleting ? "Deleting..." : "Delete Video"}
+              {deleting ? t("deleting") : t("delete_video")}
             </button>
           </div>
         {/if}
@@ -372,9 +373,9 @@
 
 <ConfirmModal
   open={showDeleteConfirm}
-  title="Delete Video"
-  message="Are you sure you want to delete this video? This action cannot be undone."
-  confirmLabel="Delete"
+  title={t("delete_video")}
+  message={t("confirm_delete_video")}
+  confirmLabel={t("delete")}
   onconfirm={handleDelete}
   oncancel={() => (showDeleteConfirm = false)}
 />

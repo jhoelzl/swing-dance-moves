@@ -9,6 +9,7 @@ Stand: Februar 2026
 
 - **Sortierung der Moves** – Sortier-Dropdown (a-z, z-a, newest, oldest) in der Toolbar mit `localStorage`-Persistierung.
 - **Fisher-Yates Shuffle** – Korrekte gleichmäßige Verteilung in `getRandomMoves()`.
+- **User Settings** – Settings-Seite mit konfigurierbarer Sprache (de/en) und Anzahl Random Moves (1–5), gespeichert in `user_settings`-Tabelle in Supabase.
 - **Login-Seite** – `autocomplete`-Attribute, Passwort-Sichtbarkeit-Toggle, Passwort-Vergessen-Link.
 - **Export/Import** – Moves als JSON/CSV exportieren und importieren mit Deduplizierung.
 - **Cancel-Links mit base path** – MoveForm und VideoForm nutzen `{base}/` für GitHub Pages.

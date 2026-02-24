@@ -13,6 +13,7 @@
   import type { VideoFormData } from "$lib/types";
   import VideoForm from "$lib/components/VideoForm.svelte";
   import ConfirmModal from "$lib/components/ConfirmModal.svelte";
+  import { t } from "$lib/i18n";
 
   let loading = $state(false);
   let deleting = $state(false);
@@ -34,7 +35,7 @@
     }
 
     if (isNaN(videoId)) {
-      addToast("Invalid video ID", "error");
+      addToast(t("invalid_video_id"), "error");
       goto(`${base}/videos`);
       return;
     }
@@ -60,10 +61,10 @@
       await updateVideo(videoId, data);
       const videos = await getAllVideos();
       allVideos.set(videos);
-      addToast("Video updated successfully");
+      addToast(t("video_updated"));
       goto(`${base}/videos`);
     } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to update video";
+      error = err instanceof Error ? err.message : t("failed_update_video");
     } finally {
       loading = false;
     }
@@ -76,10 +77,10 @@
       await deleteVideo(videoId);
       const videos = await getAllVideos();
       allVideos.set(videos);
-      addToast("Video deleted successfully");
+      addToast(t("video_deleted"));
       goto(`${base}/videos`);
     } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to delete video";
+      error = err instanceof Error ? err.message : t("failed_delete_video");
     } finally {
       deleting = false;
     }
@@ -107,7 +108,7 @@
         {formData}
         onsubmit={handleSubmit}
         {loading}
-        title="Edit Video"
+        title={t("edit_video_title")}
       />
 
       <div
@@ -118,7 +119,7 @@
           disabled={deleting}
           class="px-4 py-2 rounded-lg bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
         >
-          {deleting ? "Deleting..." : "Delete Video"}
+          {deleting ? t("deleting") : t("delete_video")}
         </button>
       </div>
     {:else}
@@ -133,9 +134,9 @@
 
 <ConfirmModal
   open={showDeleteConfirm}
-  title="Delete Video"
-  message="Are you sure you want to delete this video? This action cannot be undone."
-  confirmLabel="Delete"
+  title={t("delete_video")}
+  message={t("confirm_delete_video")}
+  confirmLabel={t("delete")}
   onconfirm={handleDelete}
   oncancel={() => (showDeleteConfirm = false)}
 />

@@ -6,6 +6,7 @@
   import { createVideo, getAllVideos } from "$lib/services/videos";
   import type { VideoFormData } from "$lib/types";
   import VideoForm from "$lib/components/VideoForm.svelte";
+  import { t } from "$lib/i18n";
 
   let loading = $state(false);
   let error = $state("");
@@ -29,10 +30,10 @@
       // Reload all videos
       const videos = await getAllVideos();
       allVideos.set(videos);
-      addToast("Video created successfully");
+      addToast(t("video_created"));
       goto(`${base}/videos`);
     } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to create video";
+      error = err instanceof Error ? err.message : t("failed_create_video");
     } finally {
       loading = false;
     }
@@ -55,6 +56,11 @@
       </div>
     {/if}
 
-    <VideoForm {formData} onsubmit={handleSubmit} {loading} title="New Video" />
+    <VideoForm
+      {formData}
+      onsubmit={handleSubmit}
+      {loading}
+      title={t("new_video_title")}
+    />
   </div>
 </div>

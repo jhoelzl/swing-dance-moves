@@ -1,9 +1,9 @@
 import { writable, derived } from 'svelte/store';
-import type { Move, TagGroup, Video } from '$lib/types';
+import type { Move, TagGroup, Video, UserSettings } from '$lib/types';
 import { filterMovesByTags, searchMoves } from '$lib/services/moves';
 
-// Active tab: 'moves' | 'videos' | 'tags'
-export const activeTab = writable<'moves' | 'videos' | 'tags'>('moves');
+// Active tab: 'moves' | 'videos' | 'tags' | 'settings'
+export const activeTab = writable<'moves' | 'videos' | 'tags' | 'settings'>('moves');
 
 // All moves loaded from Supabase
 export const allMoves = writable<Move[]>([]);
@@ -28,6 +28,9 @@ export const isAdmin = writable<boolean>(false);
 
 // Loading state
 export const isLoading = writable<boolean>(true);
+
+// User settings (loaded from Supabase)
+export const userSettings = writable<UserSettings | null>(null);
 
 // Show all moves vs random selection
 export const showAll = writable<boolean>(true);

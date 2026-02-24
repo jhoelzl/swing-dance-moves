@@ -15,15 +15,46 @@
   import { getTagColors } from "$lib/utils";
   import type { Tag, TagType, TagGroup } from "$lib/types";
   import ConfirmModal from "$lib/components/ConfirmModal.svelte";
+  import { t } from "$lib/i18n";
 
   // Available label colors for the color picker
   const labelOptions = [
-    { value: "success", name: "Green" },
-    { value: "danger", name: "Red" },
-    { value: "warning", name: "Yellow" },
-    { value: "primary", name: "Blue" },
-    { value: "secondary", name: "Gray" },
-    { value: "light", name: "Light" },
+    {
+      value: "success",
+      get name() {
+        return t("color_green");
+      },
+    },
+    {
+      value: "danger",
+      get name() {
+        return t("color_red");
+      },
+    },
+    {
+      value: "warning",
+      get name() {
+        return t("color_yellow");
+      },
+    },
+    {
+      value: "primary",
+      get name() {
+        return t("color_blue");
+      },
+    },
+    {
+      value: "secondary",
+      get name() {
+        return t("color_gray");
+      },
+    },
+    {
+      value: "light",
+      get name() {
+        return t("color_light");
+      },
+    },
   ];
 
   // ── State ──
@@ -83,7 +114,7 @@
       groups = await getAllTagsGrouped();
     } catch (err) {
       console.error("Failed to load tags:", err);
-      showStatus("error", "Failed to load tags.");
+      showStatus("error", t("failed_load_tags"));
     } finally {
       loading = false;
     }
@@ -117,7 +148,7 @@
       });
       editingTypeId = null;
       await reloadAll();
-      showStatus("success", "Category updated.");
+      showStatus("success", t("category_updated"));
     } catch (err) {
       showStatus("error", `Error: ${(err as Error).message}`);
     }
@@ -127,12 +158,12 @@
     const tagCount =
       groups.find((g) => g.tagType.tag_type_id === tt.tag_type_id)?.tags
         .length ?? 0;
-    confirmMessage = `Delete category "${tt.tag_type_name}"? ${tagCount > 0 ? `${tagCount} tag(s) will also be deleted.` : ""}`;
+    confirmMessage = `${t("confirm_delete_category")} "${tt.tag_type_name}"? ${tagCount > 0 ? `${tagCount} ${t("tags_also_deleted")}` : ""}`;
     confirmAction = async () => {
       try {
         await deleteTagType(tt.tag_type_id);
         await reloadAll();
-        showStatus("success", `Category "${tt.tag_type_name}" deleted.`);
+        showStatus("success", `${t("category_deleted")}`);
       } catch (err) {
         showStatus("error", `Error: ${(err as Error).message}`);
       }
@@ -153,7 +184,7 @@
       newTypeSortOrder = 0;
       showNewType = false;
       await reloadAll();
-      showStatus("success", "New category created.");
+      showStatus("success", t("new_category_created"));
     } catch (err) {
       showStatus("error", `Error: ${(err as Error).message}`);
     }
@@ -184,19 +215,19 @@
       });
       editingTagId = null;
       await reloadAll();
-      showStatus("success", "Tag updated.");
+      showStatus("success", t("tag_updated"));
     } catch (err) {
       showStatus("error", `Error: ${(err as Error).message}`);
     }
   }
 
   function confirmDeleteTag(tag: Tag) {
-    confirmMessage = `Delete tag "${tag.tag_name}"? Move associations will also be removed.`;
+    confirmMessage = `${t("confirm_delete_tag_msg")} "${tag.tag_name}"?`;
     confirmAction = async () => {
       try {
         await deleteTag(tag.tag_id);
         await reloadAll();
-        showStatus("success", `Tag "${tag.tag_name}" deleted.`);
+        showStatus("success", `${t("tag_deleted")}`);
       } catch (err) {
         showStatus("error", `Error: ${(err as Error).message}`);
       }
@@ -228,7 +259,7 @@
       });
       addingTagToTypeId = null;
       await reloadAll();
-      showStatus("success", "New tag created.");
+      showStatus("success", t("new_tag_created"));
     } catch (err) {
       showStatus("error", `Error: ${(err as Error).message}`);
     }
@@ -253,7 +284,7 @@
         class="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
       ></div>
       <p class="mt-4 text-sm text-gray-400 dark:text-gray-500">
-        Loading tags...
+        {t("loading_tags")}
       </p>
     </div>
   </div>
@@ -273,7 +304,9 @@
 
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
-    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Manage Tags</h2>
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+      {t("manage_tags")}
+    </h2>
     <button
       onclick={() => (showNewType = !showNewType)}
       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow cursor-pointer"
@@ -291,7 +324,7 @@
           d="M12 4v16m8-8H4"
         />
       </svg>
-      New Category
+      {t("new_category")}
     </button>
   </div>
 
@@ -301,7 +334,7 @@
       class="mb-6 p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm"
     >
       <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">
-        Create New Category
+        {t("create_new_category")}
       </h3>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
@@ -319,7 +352,7 @@
         <div>
           <label
             class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-            >CSS-Klasse (optional)</label
+            >CSS-Klasse ({t("css_optional").split(" ")[1] || "optional"})</label
           >
           <input
             type="text"
@@ -345,13 +378,13 @@
           onclick={saveNewType}
           class="px-4 py-2 text-sm font-medium rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors cursor-pointer"
         >
-          Create
+          {t("create")}
         </button>
         <button
           onclick={() => (showNewType = false)}
           class="px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
         >
-          Cancel
+          {t("cancel")}
         </button>
       </div>
     </div>
@@ -407,13 +440,13 @@
                 onclick={saveEditType}
                 class="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors cursor-pointer"
               >
-                Save
+                {t("save")}
               </button>
               <button
                 onclick={cancelEditType}
                 class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
               >
-                Cancel
+                {t("cancel")}
               </button>
             </div>
           </div>
@@ -430,15 +463,16 @@
                 class="text-[11px] text-gray-400 dark:text-gray-500 tabular-nums"
               >
                 {group.tags.length}
-                {group.tags.length === 1 ? "Tag" : "Tags"} · Pos {group.tagType
-                  .sort_order}
+                {group.tags.length === 1 ? t("tag_singular") : t("tags_plural")}
+                · {t("pos")}
+                {group.tagType.sort_order}
               </span>
             </div>
             <div class="flex items-center gap-1">
               <button
                 onclick={() => startEditType(group.tagType)}
                 class="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all cursor-pointer"
-                title="Edit category"
+                title={t("edit_category")}
               >
                 <svg
                   class="w-4 h-4"
@@ -457,7 +491,7 @@
               <button
                 onclick={() => startAddTag(group.tagType.tag_type_id)}
                 class="p-1.5 rounded-lg text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-950/40 transition-all cursor-pointer"
-                title="Add tag"
+                title={t("add_tag")}
               >
                 <svg
                   class="w-4 h-4"
@@ -476,7 +510,7 @@
               <button
                 onclick={() => confirmDeleteType(group.tagType)}
                 class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all cursor-pointer"
-                title="Delete category"
+                title={t("delete_category")}
               >
                 <svg
                   class="w-4 h-4"
@@ -510,14 +544,14 @@
                 <input
                   type="text"
                   bind:value={newTagName}
-                  placeholder="Tag name"
+                  placeholder={t("tag_name_placeholder")}
                   class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </div>
               <div>
                 <label
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                  >Color</label
+                  >{t("color")}</label
                 >
                 <select
                   bind:value={newTagLabel}
@@ -531,7 +565,7 @@
               <div>
                 <label
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                  >CSS (optional)</label
+                  >{t("css_optional")}</label
                 >
                 <input
                   type="text"
@@ -555,7 +589,7 @@
             <!-- Color Preview -->
             <div class="mt-3 flex items-center gap-3">
               <span class="text-xs text-gray-500 dark:text-gray-400"
-                >Preview:</span
+                >{t("preview")}:</span
               >
               <span
                 class="{newTagPreviewColors.bg} {newTagPreviewColors.text} border {newTagPreviewColors.border} inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
@@ -568,13 +602,13 @@
                 onclick={saveNewTag}
                 class="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors cursor-pointer"
               >
-                Create
+                {t("create")}
               </button>
               <button
                 onclick={cancelAddTag}
                 class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
               >
-                Cancel
+                {t("cancel")}
               </button>
             </div>
           </div>
@@ -601,7 +635,7 @@
                   <div>
                     <label
                       class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                      >Color</label
+                      >{t("color")}</label
                     >
                     <select
                       bind:value={editTagLabel}
@@ -638,7 +672,7 @@
                 <!-- Color Preview -->
                 <div class="mt-3 flex items-center gap-3">
                   <span class="text-xs text-gray-500 dark:text-gray-400"
-                    >Preview:</span
+                    >{t("preview")}:</span
                   >
                   <span
                     class="{editTagPreviewColors.bg} {editTagPreviewColors.text} border {editTagPreviewColors.border} inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
@@ -651,13 +685,13 @@
                     onclick={saveEditTag}
                     class="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors cursor-pointer"
                   >
-                    Save
+                    {t("save")}
                   </button>
                   <button
                     onclick={cancelEditTag}
                     class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
                   >
-                    Cancel
+                    {t("cancel")}
                   </button>
                 </div>
               </div>
@@ -678,14 +712,15 @@
                   <span
                     class="text-[11px] text-gray-400 dark:text-gray-500 tabular-nums"
                   >
-                    Pos {tag.tag_sort} · {tag.tag_label}
+                    {t("pos")}
+                    {tag.tag_sort} · {tag.tag_label}
                   </span>
                 </div>
                 <div class="flex items-center gap-1">
                   <button
                     onclick={() => startEditTag(tag)}
                     class="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all cursor-pointer"
-                    title="Edit tag"
+                    title={t("edit_tag")}
                   >
                     <svg
                       class="w-3.5 h-3.5"
@@ -704,7 +739,7 @@
                   <button
                     onclick={() => confirmDeleteTag(tag)}
                     class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all cursor-pointer"
-                    title="Delete tag"
+                    title={t("delete_tag")}
                   >
                     <svg
                       class="w-3.5 h-3.5"
@@ -728,7 +763,7 @@
           {#if group.tags.length === 0}
             <div class="px-4 py-6 text-center">
               <p class="text-sm text-gray-400 dark:text-gray-500">
-                No tags in this category.
+                {t("no_tags_category")}
               </p>
             </div>
           {/if}
@@ -740,10 +775,10 @@
       <div class="text-center py-16">
         <div class="text-4xl mb-3">🏷️</div>
         <p class="text-gray-400 dark:text-gray-500 font-medium">
-          No tag categories yet.
+          {t("no_categories_yet")}
         </p>
         <p class="text-gray-300 dark:text-gray-600 text-sm mt-1">
-          Create a new category to manage tags.
+          {t("create_category_hint")}
         </p>
       </div>
     {/if}

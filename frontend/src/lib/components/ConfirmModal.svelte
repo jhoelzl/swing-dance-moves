@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { t } from "$lib/i18n";
+
   interface Props {
     open: boolean;
     title?: string;
@@ -11,10 +13,10 @@
 
   let {
     open,
-    title = "Confirmation",
+    title = t("confirmation"),
     message,
-    confirmLabel = "Delete",
-    cancelLabel = "Cancel",
+    confirmLabel = t("delete"),
+    cancelLabel = t("cancel"),
     onconfirm,
     oncancel,
   }: Props = $props();

@@ -9,6 +9,7 @@
   import { debounce } from "$lib/utils";
   import { base } from "$app/paths";
   import { supabase } from "$lib/supabase";
+  import { t } from "$lib/i18n";
 
   let searchQuery = $state("");
   let searchInputValue = $state("");
@@ -94,7 +95,7 @@
       </svg>
       <input
         type="text"
-        placeholder="Search videos..."
+        placeholder={t("search_videos")}
         oninput={handleSearchInput}
         value={searchInputValue}
         class="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 dark:focus:border-blue-500 outline-none transition-all shadow-sm"
@@ -125,7 +126,7 @@
             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
           />
         </svg>
-        Filter
+        {t("filter")}
         {#if moveFilter !== "all"}
           <span
             class="inline-flex items-center justify-center w-5 h-5 text-[11px] font-bold bg-blue-500 text-white rounded-full"
@@ -140,7 +141,7 @@
           onclick={clearFilters}
           class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
         >
-          Reset
+          {t("reset")}
         </button>
       {/if}
     </div>
@@ -150,7 +151,7 @@
         class="text-xs font-medium text-gray-400 dark:text-gray-500 tabular-nums"
       >
         {displayVideos().length}
-        {displayVideos().length === 1 ? "Video" : "Videos"}
+        {displayVideos().length === 1 ? t("video_singular") : t("video_plural")}
       </span>
 
       {#if $isAdmin}
@@ -171,7 +172,7 @@
               d="M12 4v16m8-8H4"
             />
           </svg>
-          New Video
+          {t("new_video")}
         </a>
       {/if}
     </div>
@@ -185,7 +186,7 @@
       <h3
         class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3"
       >
-        Move Link
+        {t("move_link")}
       </h3>
       <div class="flex flex-wrap gap-2">
         <button
@@ -195,7 +196,7 @@
             ? 'bg-blue-500 dark:bg-blue-600 text-white border-transparent shadow-sm'
             : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:shadow-sm'}"
         >
-          All
+          {t("all")}
         </button>
         <button
           onclick={() =>
@@ -218,7 +219,7 @@
               d="M13 10V3L4 14h7v7l9-11h-7z"
             />
           </svg>
-          With Moves
+          {t("with_moves")}
         </button>
         <button
           onclick={() =>
@@ -242,7 +243,7 @@
               d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          Without Moves
+          {t("without_moves")}
         </button>
       </div>
     </div>
@@ -259,10 +260,10 @@
     <div class="text-center py-16">
       <div class="text-4xl mb-3">🎬</div>
       <p class="text-gray-400 dark:text-gray-500 font-medium">
-        No videos found
+        {t("no_videos_found")}
       </p>
       <p class="text-gray-300 dark:text-gray-600 text-sm mt-1">
-        Add a new video or adjust your search.
+        {t("adjust_filters")}
       </p>
     </div>
   {/if}

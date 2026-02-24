@@ -13,6 +13,7 @@
   import type { MoveFormData } from "$lib/types";
   import MoveForm from "$lib/components/MoveForm.svelte";
   import ConfirmModal from "$lib/components/ConfirmModal.svelte";
+  import { t } from "$lib/i18n";
 
   let loading = $state(false);
   let deleting = $state(false);
@@ -35,7 +36,7 @@
     }
 
     if (isNaN(moveId)) {
-      addToast("Invalid move ID", "error");
+      addToast(t("invalid_move_id"), "error");
       goto(`${base}/`);
       return;
     }
@@ -67,10 +68,10 @@
       await updateMove(moveId, data);
       const moves = await getAllMoves();
       allMoves.set(moves);
-      addToast("Move updated successfully");
+      addToast(t("move_updated"));
       goto(`${base}/`);
     } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to update move";
+      error = err instanceof Error ? err.message : t("failed_update_move");
     } finally {
       loading = false;
     }
@@ -83,10 +84,10 @@
       await deleteMove(moveId);
       const moves = await getAllMoves();
       allMoves.set(moves);
-      addToast("Move deleted successfully");
+      addToast(t("move_deleted"));
       goto(`${base}/`);
     } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to delete move";
+      error = err instanceof Error ? err.message : t("failed_delete_move");
     } finally {
       deleting = false;
     }
@@ -115,7 +116,7 @@
         tagGroups={$tagGroups}
         onsubmit={handleSubmit}
         {loading}
-        title="Edit Move"
+        title={t("edit_move_title")}
       />
 
       <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -124,7 +125,7 @@
           disabled={deleting}
           class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 disabled:bg-red-400 text-white font-medium text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
         >
-          {deleting ? "Deleting..." : "Delete Move"}
+          {deleting ? t("deleting") : t("delete_move")}
         </button>
       </div>
     {:else}
@@ -139,9 +140,9 @@
 
 <ConfirmModal
   open={showDeleteConfirm}
-  title="Delete Move"
-  message="Are you sure you want to delete this move? This action cannot be undone."
-  confirmLabel="Delete"
+  title={t("delete_move")}
+  message={t("confirm_delete_move")}
+  confirmLabel={t("delete")}
   onconfirm={handleDelete}
   oncancel={() => (showDeleteConfirm = false)}
 />

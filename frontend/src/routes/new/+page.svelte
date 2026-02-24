@@ -6,6 +6,7 @@
   import { createMove, getAllMoves } from "$lib/services/moves";
   import type { MoveFormData } from "$lib/types";
   import MoveForm from "$lib/components/MoveForm.svelte";
+  import { t } from "$lib/i18n";
 
   let loading = $state(false);
   let error = $state("");
@@ -30,10 +31,10 @@
       // Reload all moves
       const moves = await getAllMoves();
       allMoves.set(moves);
-      addToast("Move created successfully");
+      addToast(t("move_created"));
       goto(`${base}/`);
     } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to create move";
+      error = err instanceof Error ? err.message : t("failed_create_move");
     } finally {
       loading = false;
     }
@@ -61,7 +62,7 @@
       tagGroups={$tagGroups}
       onsubmit={handleSubmit}
       {loading}
-      title="Add New Move"
+      title={t("add_new_move")}
     />
   </div>
 </div>
