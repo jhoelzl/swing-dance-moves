@@ -21,7 +21,7 @@
   // Set of video IDs that have at least one linked move
   let videoIdsWithMoves = $state<Set<number>>(new Set());
 
-  const displayVideos = $derived(() => {
+  const displayVideos = $derived.by(() => {
     let result = searchVideos($allVideos, searchQuery);
     if (moveFilter === "with-moves") {
       result = result.filter((v) => videoIdsWithMoves.has(v.video_id));
@@ -150,8 +150,8 @@
       <span
         class="text-xs font-medium text-gray-400 dark:text-gray-500 tabular-nums"
       >
-        {displayVideos().length}
-        {displayVideos().length === 1 ? t("video_singular") : t("video_plural")}
+        {displayVideos.length}
+        {displayVideos.length === 1 ? t("video_singular") : t("video_plural")}
       </span>
 
       {#if $isAdmin}
@@ -250,9 +250,9 @@
   {/if}
 
   <!-- Video List -->
-  {#if displayVideos().length > 0}
+  {#if displayVideos.length > 0}
     <div class="space-y-3">
-      {#each displayVideos() as video (video.video_id)}
+      {#each displayVideos as video (video.video_id)}
         <VideoCard {video} ondeleted={handleVideoDeleted} />
       {/each}
     </div>

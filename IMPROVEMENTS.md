@@ -33,27 +33,23 @@ Stand: Juli 2025
 - **"Out of moves!" Tab** – Eigener Tab mit zufälligen Moves, kompakter mobiler Toolbar (Filter + Shuffle), Tag-Filter, Video-Only-Filter.
 - **i18n-System** – Vollständiges Übersetzungssystem mit de/en Dictionary und `t()`-Funktion, gesteuert über User Settings.
 - **VideoCard Löschung über Service Layer** – `handleDelete` in VideoCard nutzt `deleteVideo()` aus dem Service.
+- **`$derived.by` in Videos-Seite** – `displayVideos` korrigiert von `$derived(() => ...)` zu `$derived.by(() => ...)`, Template-Zugriffe ohne `()`.
 
 ---
 
 ## 🔴 Hoch – Bugs & Code-Qualität
 
-### 1. `$derived` statt `$derived.by` in Videos-Seite
-`displayVideos` verwendet `$derived(() => { ... })`, was eine **Funktion als Wert** ergibt statt das Ergebnis. Die Funktion wird bei jedem Template-Zugriff (`displayVideos().length`, `{#each displayVideos()}`) erneut ausgewertet — dreifache Berechnung pro Render.
-- **Datei:** `routes/videos/+page.svelte`
-- **Lösung:** `$derived.by(() => { ... })` verwenden, Template-Zugriffe auf `displayVideos` ohne `()`.
-
-### 2. VideoCard/MoveCard umgehen den Service Layer bei toggle()
+### 1. VideoCard/MoveCard umgehen den Service Layer bei toggle()
 `toggle()` in beiden Komponenten macht direkte Supabase-Queries (`supabase.from("moves_to_videos")...`) statt über den Service Layer zu gehen.
 - **Dateien:** `lib/components/VideoCard.svelte`, `lib/components/MoveCard.svelte`
 - **Lösung:** Service-Funktionen `getVideoRefsForMove(moveId)` und `getMovesForVideo(videoId)` erstellen und in den Komponenten verwenden.
 
-### 3. Unbenutzter `showAll` Store
+### 2. Unbenutzter `showAll` Store
 `showAll` in `stores.ts` wird exportiert, aber nirgendwo in der Codebase verwendet (toter Code nach Refactoring).
 - **Datei:** `lib/stores.ts`
 - **Lösung:** `export const showAll = writable<boolean>(true)` entfernen.
 
-### 4. Unbenutzter `onMount` Import in MoveForm
+### 3. Unbenutzter `onMount` Import in MoveForm
 `import { onMount } from 'svelte'` wird importiert, aber nie verwendet.
 - **Datei:** `lib/components/MoveForm.svelte`
 - **Lösung:** Import entfernen.
@@ -62,41 +58,41 @@ Stand: Juli 2025
 
 ## 🟡 Mittel – UX & Funktionalität
 
-### 5. Favoriten / Persönliche Lesezeichen
+### 4. Favoriten / Persönliche Lesezeichen
 Moves als Favorit markieren, damit man seine meistgenutzten Moves schnell findet.
 - **Lösung:** Favoriten in `localStorage` speichern, Stern-Icon auf MoveCard, Filter für Favoriten.
 
-### 6. Share-Button für einzelne Moves
+### 5. Share-Button für einzelne Moves
 Einen Move direkt teilen (URL, WhatsApp, Copy-to-Clipboard).
 - **Lösung:** Web Share API oder Copy-to-Clipboard-Link auf MoveCard.
 
-### 7. Keyboard Shortcuts
+### 6. Keyboard Shortcuts
 Keine Tastaturkürzel vorhanden.
 - `/` → Suche fokussieren
 - `r` → Random Moves shufflen
 - `Esc` → Filter/Dropdown schließen
 
-### 8. Input-Validierung in MoveForm/VideoForm
+### 7. Input-Validierung in MoveForm/VideoForm
 Name-Feld hat nur `required`, aber keine Mindestlängen-Validierung. YouTube-URL wird nicht validiert.
 - Name: mindestens 2 Zeichen (`minlength`)
 - YouTube-URL: Validierung via `extractYouTubeId()` mit Fehlermeldung
 - YouTube-Vorschau beim Erstellen/Bearbeiten anzeigen
 
-### 9. Export-Dropdown: Escape zum Schließen
+### 8. Export-Dropdown: Escape zum Schließen
 Das Export/Import-Menü nutzt einen unsichtbaren Backdrop-Button zum Schließen, reagiert aber nicht auf Escape-Taste.
 - **Datei:** `routes/+page.svelte`
 - **Lösung:** Keydown-Listener für Escape hinzufügen.
 
-### 10. handleMoveDeleted lädt unnötig Tags und Videos neu
+### 9. handleMoveDeleted lädt unnötig Tags und Videos neu
 Nach Move-Löschung werden Tags und Videos komplett neu geladen, obwohl sich nur die Moves geändert haben.
 - **Datei:** `routes/+page.svelte`
 - **Lösung:** Nur `getAllMoves()` aufrufen statt alle drei Datensätze.
 
-### 11. Praxis-Modus mit Timer
+### 10. Praxis-Modus mit Timer
 Timer-basierter Modus im "Out of moves!"-Tab: alle X Sekunden einen neuen zufälligen Move anzeigen — ideal zum Üben.
 - **Lösung:** Timer-Button in der Random-Toolbar mit einstellbarer Sekunden-Zahl. Könnte `userSettings` für Interval nutzen.
 
-### 12. Dynamisches `lang`-Attribut
+### 11. Dynamisches `lang`-Attribut
 `app.html` hat `lang="en"` hardcodiert, obwohl i18n voll implementiert ist. Das `lang`-Attribut wird nicht dynamisch an die gewählte Sprache angepasst.
 - **Datei:** `src/app.html`
 - **Lösung:** `<html lang>` via `document.documentElement.lang` in `+layout.svelte` reaktiv setzen basierend auf `userSettings.language`.
@@ -105,29 +101,29 @@ Timer-basierter Modus im "Out of moves!"-Tab: alle X Sekunden einen neuen zufäl
 
 ## 🟢 Mittel – Accessibility (a11y)
 
-### 13. ARIA-Attribute ergänzen
+### 12. ARIA-Attribute ergänzen
 - `aria-expanded` auf MoveCard/VideoCard Toggle-Buttons
 - `aria-pressed` auf FilterChips-Buttons
 - `aria-label` auf Icon-only-Buttons (Dark Mode, Logout, Export, Shuffle)
 - `aria-hidden="true"` auf dekorativen SVG-Icons
 - `aria-live="polite"` Region für Move-Count, Suchergebnisse und Random-Moves-Bereich
 
-### 14. Skip-to-Content Link
+### 13. Skip-to-Content Link
 Fehlender „Skip to main content"-Link in `+layout.svelte` für Keyboard-Navigation.
 
-### 15. Focus-Visible Styling
+### 14. Focus-Visible Styling
 Inputs haben `focus:ring-2`, aber Buttons und Links haben keine expliziten Focus-Styles.
 - **Lösung:** `focus-visible:ring-2 focus-visible:ring-blue-500` global auf interaktive Elemente in `app.css`.
 
-### 16. Prefers-Reduced-Motion
+### 15. Prefers-Reduced-Motion
 Animationen (Card-Hover-Transition, Filter-Panel-Slide, Toast-Slide) werden nicht deaktiviert für User mit Motion-Sensitivity.
 - **Lösung:** `@media (prefers-reduced-motion: reduce)` in `app.css` mit `transition: none` und `animation: none`.
 
-### 17. Interaktive Elemente verschachtelt
+### 16. Interaktive Elemente verschachtelt
 In `MoveCard.svelte` und `VideoCard.svelte` befindet sich der Edit-Link `<a>` innerhalb des Toggle-`<button>`. Interaktive Elemente in interaktiven Elementen sind ein A11y-Antipattern.
 - **Lösung:** Edit-Link außerhalb des Buttons platzieren, z.B. in einer separaten Action-Bar.
 
-### 18. ConfirmModal: role, aria-modal, Focus-Trap
+### 17. ConfirmModal: role, aria-modal, Focus-Trap
 Das Modal hat weder `role="dialog"`, `aria-modal="true"` noch `aria-labelledby`. Kein Focus-Trapping — Tab navigiert hinter das Modal. Focus wird nicht automatisch ins Modal gesetzt.
 - **Datei:** `lib/components/ConfirmModal.svelte`
 - **Lösung:** ARIA-Attribute ergänzen, Focus-Trap implementieren, Focus beim Öffnen auf Cancel-Button setzen.
@@ -136,25 +132,25 @@ Das Modal hat weder `role="dialog"`, `aria-modal="true"` noch `aria-labelledby`.
 
 ## 🔵 Mittel – Performance
 
-### 19. Supabase-Queries optimieren
+### 18. Supabase-Queries optimieren
 `getAllMoves()` macht **4 separate Queries** (moves, moves_to_tags, tags mit tag_types, moves_to_videos). Ein einziger Join-Query wäre effizienter:
 ```ts
 supabase.from('moves').select('*, moves_to_tags(*, tags(*, tag_types(*))), moves_to_videos(*)')
 ```
 
-### 20. YouTube Lazy Loading
+### 19. YouTube Lazy Loading
 YouTube iFrames in `MoveCard.svelte` und `VideoCard.svelte` haben kein `loading="lazy"` Attribut.
 - **Lösung:** `loading="lazy"` auf iFrames setzen oder [lite-youtube-embed](https://github.com/paulirish/lite-youtube-embed) verwenden.
 
-### 21. Doppelter API-Call in Tags-Seite
+### 20. Doppelter API-Call in Tags-Seite
 `reloadAll()` in `tags/+page.svelte` ruft `loadGroups()` → `getAllTagsGrouped()` auf und danach **nochmal** `getAllTagsGrouped()` für den Store-Update.
 - **Lösung:** Ergebnis aus `loadGroups()` direkt für den Store-Update verwenden.
 
-### 22. Kein Caching / Invalidation-Strategie
+### 21. Kein Caching / Invalidation-Strategie
 Nach jeder Mutation (Create/Update/Delete) werden **alle Moves komplett neu geladen** (`getAllMoves()`).
 - **Lösung:** Optimistische Updates oder selektives Invalidieren statt komplettes Neuladen.
 
-### 23. Pagination / Virtual Scrolling
+### 22. Pagination / Virtual Scrolling
 Bei vielen Moves werden alle gleichzeitig gerendert. Bei 100+ Moves leidet die Performance.
 - **Lösung:** Virtual Scrolling (z.B. `svelte-virtual-list`) oder einfache Pagination.
 
@@ -162,45 +158,45 @@ Bei vielen Moves werden alle gleichzeitig gerendert. Bei 100+ Moves leidet die P
 
 ## ⚪ Niedrig – Nice-to-Have & Code-Qualität
 
-### 24. Doppelter Video-Badge-Code in MoveCard
+### 23. Doppelter Video-Badge-Code in MoveCard
 Der Video-Badge HTML-Code in `MoveCard.svelte` ist zweimal nahezu identisch (einmal mit Tags, einmal ohne Tags).
 - **Lösung:** In ein Svelte-Snippet `{#snippet videoBadge()}` oder eine separate Komponente auslagern.
 
-### 25. Duplizierte Delete-Patterns
+### 24. Duplizierte Delete-Patterns
 Delete-Logik (State, Handler, ConfirmModal) ist in 4 Dateien nahezu identisch: MoveCard, VideoCard, edit/[id], videos/edit/[id].
 - **Lösung:** In einen wiederverwendbaren Composable oder eine Wrapper-Komponente auslagern.
 
-### 26. System-Dark-Mode Listener
+### 25. System-Dark-Mode Listener
 `initDarkMode()` liest die System-Präferenz nur einmal. Wenn der User sein System auf Dark/Light umstellt, reagiert die App nicht.
 - **Lösung:** `matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ...)`.
 
-### 27. Supabase-Typen bereinigen
+### 26. Supabase-Typen bereinigen
 Mehrfach `as any`-Casts und `@ts-expect-error` in `tags.ts` und `moves.ts` deuten auf fehlerhafte `Database`-Typdefinitionen hin.
 - **Lösung:** Typen in `types.ts` mit `supabase gen types` neu generieren oder manuell korrigieren.
 
-### 28. Inkonsistente Fehlerbehandlung
+### 27. Inkonsistente Fehlerbehandlung
 Manche Stellen werfen Fehler weiter (`throw error`), manche loggen nur (`console.error`), manche zeigen eine Fehlermeldung. Kein einheitliches Pattern.
 - **Lösung:** Konsistentes Error-Handling einführen: Service-Layer wirft, UI-Layer zeigt Toast.
 
-### 29. CI/CD verbessern
+### 28. CI/CD verbessern
 - `npm run check` (Svelte-Check + TypeScript) in den Build-Workflow einbauen
 - Lighthouse CI für Performance-Monitoring
 
-### 30. Tests einführen
+### 29. Tests einführen
 Aktuell gibt es keine Tests.
 - **Vitest** für Unit-Tests (`searchMoves`, `extractYouTubeId`, `debounce`, `getRandomMoves`)
 - **@testing-library/svelte** für Component-Tests
 - **Playwright** für E2E (Login, CRUD, Filter, Random-Tab)
 
-### 31. Move-Beziehungen
+### 30. Move-Beziehungen
 Variationen und Voraussetzungen zwischen Moves verknüpfen (z.B. „Swingout → Swingout-Variation").
 - **Lösung:** `move_relations`-Tabelle in Supabase mit `parent_id`, `child_id`, `relation_type`.
 
-### 32. Offline-Support für PWA
+### 31. Offline-Support für PWA
 Die App hat `manifest.webmanifest` und Service Worker, aber kein echtes Offline-Caching der Supabase-Daten.
 - **Lösung:** Daten in IndexedDB oder Cache API zwischenspeichern, Sync bei Reconnect.
 
-### 33. Swipe-Gesten im Random-Tab
+### 32. Swipe-Gesten im Random-Tab
 Im "Out of moves!"-Tab per Swipe zum nächsten Random Move wechseln — natürlichere Mobile-UX.
 - **Lösung:** Touch-Event-Handler oder Bibliothek wie `svelte-gestures` für Swipe-Erkennung.
 
@@ -210,9 +206,9 @@ Im "Out of moves!"-Tab per Swipe zum nächsten Random Move wechseln — natürli
 
 | Priorität | Anzahl | Fokus |
 |---|---|---|
-| 🔴 Hoch | 4 | Bugs, toter Code, Service Layer |
+| 🔴 Hoch | 3 | Bugs, toter Code, Service Layer |
 | 🟡 Mittel (UX) | 8 | User Experience, Funktionalität |
 | 🟢 Mittel (a11y) | 6 | Barrierefreiheit |
 | 🔵 Mittel (Perf) | 5 | Performance-Optimierung |
 | ⚪ Niedrig | 10 | Code-Qualität, Nice-to-Have |
-| **Gesamt** | **33** | |
+| **Gesamt** | **32** | |
