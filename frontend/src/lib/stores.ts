@@ -39,7 +39,7 @@ export const showAll = writable<boolean>(true);
 export type SortOrder = 'a-z' | 'z-a' | 'newest' | 'oldest';
 export const sortOrder = writable<SortOrder>('a-z');
 
-// Filter to show only moves with YouTube videos
+// Filter to show only moves with videos
 export const videoOnly = writable<boolean>(false);
 
 // Filtered, searched, and sorted moves (derived)
