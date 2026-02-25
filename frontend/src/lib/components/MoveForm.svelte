@@ -2,7 +2,6 @@
   import { base } from "$app/paths";
   import type { TagGroup, MoveFormData, Video, MoveVideoRef } from "$lib/types";
   import { allVideos } from "$lib/stores";
-  import { onMount } from "svelte";
   import { t } from "$lib/i18n";
 
   interface Props {
