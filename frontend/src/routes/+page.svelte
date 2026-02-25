@@ -15,8 +15,7 @@
     isAdmin,
   } from "$lib/stores";
   import type { SortOrder } from "$lib/stores";
-  import { getAllMoves, getAllTagsGrouped } from "$lib/services/moves";
-  import { getAllVideos } from "$lib/services/videos";
+  import { getAllMoves } from "$lib/services/moves";
   import type { Move } from "$lib/types";
   import FilterChips from "$lib/components/FilterChips.svelte";
   import MoveCard from "$lib/components/MoveCard.svelte";
@@ -26,14 +25,8 @@
   import { t } from "$lib/i18n";
 
   async function handleMoveDeleted() {
-    const [moves, tags, videos] = await Promise.all([
-      getAllMoves(),
-      getAllTagsGrouped(),
-      getAllVideos(),
-    ]);
+    const moves = await getAllMoves();
     allMoves.set(moves);
-    tagGroups.set(tags);
-    allVideos.set(videos);
   }
 
   let showFilters = $state(false);
