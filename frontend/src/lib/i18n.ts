@@ -22,6 +22,7 @@ const translations: Record<string, { de: string; en: string }> = {
   'logout': { de: 'Abmelden', en: 'Logout' },
   'login': { de: 'Anmelden', en: 'Login' },
   'nav_moves': { de: 'Moves', en: 'Moves' },
+  'nav_random': { de: 'Mir fällt nichts ein', en: 'Out of moves!' },
   'nav_videos': { de: 'Videos', en: 'Videos' },
   'nav_tags': { de: 'Tags', en: 'Tags' },
   'nav_settings': { de: 'Einstellungen', en: 'Settings' },
@@ -193,6 +194,14 @@ const translations: Record<string, { de: string; en: string }> = {
   'random_moves_desc': { de: 'Wie viele Moves sollen bei "Zufällige Moves" angezeigt werden?', en: 'How many moves should be shown when using "Random Moves"?' },
   'settings_saved': { de: 'Einstellungen gespeichert', en: 'Settings saved' },
   'settings_save_failed': { de: 'Fehler beim Speichern der Einstellungen', en: 'Failed to save settings' },
+
+  // ── Random Page ──
+  'random_title': { de: 'Mir fällt nichts ein! 🎲', en: 'I\'m out of ideas! 🎲' },
+  'random_subtitle': { de: 'Hier sind zufällige Moves für dich:', en: 'Here are some random moves for you:' },
+  'random_shuffle': { de: 'Neue Moves würfeln', en: 'Shuffle new moves' },
+  'random_empty': { de: 'Keine Moves verfügbar', en: 'No moves available' },
+  'random_empty_desc': { de: 'Erstelle zuerst ein paar Moves, damit wir dir welche vorschlagen können.', en: 'Create some moves first so we can suggest them to you.' },
+  'random_filter_hint': { de: 'Filtere nach Tags, um die Auswahl einzugrenzen.', en: 'Filter by tags to narrow the selection.' },
 
   // ── Color labels ──
   'color_green': { de: 'Grün', en: 'Green' },

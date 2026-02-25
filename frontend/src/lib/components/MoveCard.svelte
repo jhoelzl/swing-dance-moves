@@ -13,10 +13,16 @@
   interface Props {
     move: Move;
     initialOpen?: boolean;
+    showDelete?: boolean;
     ondeleted?: () => void;
   }
 
-  let { move, initialOpen = false, ondeleted }: Props = $props();
+  let {
+    move,
+    initialOpen = false,
+    showDelete = true,
+    ondeleted,
+  }: Props = $props();
 
   let isOpen = $state(initialOpen);
   let videoRefs = $state<MoveToVideo[]>([]);
@@ -217,7 +223,7 @@
           </div>
         {/if}
 
-        {#if $isAdmin}
+        {#if $isAdmin && showDelete}
           <div
             class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50 flex justify-end"
           >

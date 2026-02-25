@@ -9,19 +9,13 @@
     searchQuery,
     isLoading,
     clearFilters,
-    showAll,
     videoOnly,
     activeTab,
     sortOrder,
-    userSettings,
     isAdmin,
   } from "$lib/stores";
   import type { SortOrder } from "$lib/stores";
-  import {
-    getRandomMoves,
-    getAllMoves,
-    getAllTagsGrouped,
-  } from "$lib/services/moves";
+  import { getAllMoves, getAllTagsGrouped } from "$lib/services/moves";
   import { getAllVideos } from "$lib/services/videos";
   import type { Move } from "$lib/types";
   import FilterChips from "$lib/components/FilterChips.svelte";
@@ -42,7 +36,6 @@
     allVideos.set(videos);
   }
 
-  let randomMoves = $state<Move[]>([]);
   let showFilters = $state(false);
   let searchInputValue = $state("");
   let expandMoves = $state(false);
@@ -54,8 +47,6 @@
     { value: "newest", label: "Newest", key: "newest" },
     { value: "oldest", label: "Oldest", key: "oldest" },
   ];
-
-  const displayMoves = $derived($showAll ? $filteredMoves : randomMoves);
 
   // Read filters from URL on mount
   onMount(() => {
@@ -76,7 +67,6 @@
         .filter((n) => !isNaN(n) && n > 0);
       if (tagIds.length > 0) {
         activeFilters.set(tagIds);
-        showAll.set(true);
       }
     }
 
@@ -125,16 +115,6 @@
 
     window.history.replaceState(null, "", newUrl);
   });
-
-  function handleRandomMoves() {
-    const count = $userSettings?.random_moves_count ?? 2;
-    randomMoves = getRandomMoves($filteredMoves, count);
-    showAll.set(false);
-  }
-
-  function handleShowAll() {
-    showAll.set(true);
-  }
 
   function handleSortChange(e: Event) {
     const value = (e.target as HTMLSelectElement).value as SortOrder;
@@ -269,26 +249,6 @@
           {t("new_move")}
         </a>
       {/if}
-      <button
-        onclick={handleRandomMoves}
-        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow cursor-pointer touch-manipulation"
-        title={t("pick_random_moves")}
-      >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
-        </svg>
-        {t("out_of_moves")}
-      </button>
     </div>
   </div>
 
@@ -339,35 +299,10 @@
     </div>
   {/if}
 
-  <!-- Show All banner when in random mode -->
-  {#if !$showAll}
-    <div class="flex justify-center mb-5">
-      <button
-        onclick={handleShowAll}
-        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
-      >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16"
-          />
-        </svg>
-        {t("show_all_moves")}
-      </button>
-    </div>
-  {/if}
-
   <!-- Move List -->
-  {#if displayMoves.length > 0}
+  {#if $filteredMoves.length > 0}
     <div class="space-y-3">
-      {#each displayMoves as move (move.move_id)}
+      {#each $filteredMoves as move (move.move_id)}
         <MoveCard
           {move}
           initialOpen={expandMoves}
