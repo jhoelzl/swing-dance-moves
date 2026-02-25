@@ -8,7 +8,7 @@ A **Progressive Web App (PWA)** for browsing, filtering, and discovering swing d
 
 ## Features
 
-- **64+ swing dance moves** with descriptions, synonyms, and YouTube video embeds
+- **Swing dance moves** with descriptions, synonyms, and YouTube video embeds
 - **Multi-tag filtering** — filter by dance style, level, technical type, rating, and festival/class origin simultaneously
 - **Full-text search** — search across move names, synonyms, and descriptions
 - **"Out of moves!" button** — get 2 random moves matching your current filters
@@ -81,11 +81,11 @@ swing-dance-moves/
 tag_types (1) ←── (N) tags (1) ←── (N) moves_to_tags (N) ──→ (1) moves
 ```
 
-| Table | Columns | Records |
+| Table | Columns |
 |---|---|---|
-| `tag_types` | tag_type_id, tag_type_name, sort_order, tag_type_css | 5 |
-| `tags` | tag_id, tag_type_id (FK), tag_name, tag_label, tag_css, tag_sort | 55 |
-| `moves` | move_id, name, synonyms, description, link | 64 |
+| `tag_types` | tag_type_id, tag_type_name, sort_order, tag_type_css |
+| `tags` | tag_id, tag_type_id (FK), tag_name, tag_label, tag_css, tag_sort |
+| `moves` | move_id, name, synonyms, description, link |
 | `moves_to_tags` | id, move_id (FK), tag_id (FK) | N:M |
 
 ### Tag Types
