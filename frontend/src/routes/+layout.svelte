@@ -53,6 +53,14 @@
     }
   }
 
+  // Reactively update the lang attribute on <html> based on user language setting
+  $effect(() => {
+    const lang = $userSettings?.language;
+    if (lang) {
+      document.documentElement.lang = lang;
+    }
+  });
+
   onMount(async () => {
     initDarkMode();
 
