@@ -161,7 +161,8 @@ const translations: Record<string, { de: string; en: string }> = {
 
   // ── VideoForm ──
   'title': { de: 'Titel', en: 'Title' },
-  'youtube_url': { de: 'YouTube URL', en: 'YouTube URL' },
+  'video_url': { de: 'Video URL', en: 'Video URL' },
+  'video_url_placeholder': { de: 'YouTube oder Dropbox URL einfügen...', en: 'Paste YouTube or Dropbox URL...' },
   'optional_description': { de: 'Optionale Beschreibung...', en: 'Optional description...' },
   'save_video': { de: 'Video speichern', en: 'Save Video' },
 

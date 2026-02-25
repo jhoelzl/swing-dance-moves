@@ -1,6 +1,11 @@
 <script lang="ts">
   import type { Video } from "$lib/types";
-  import { extractYouTubeId, timecodeToSeconds } from "$lib/utils";
+  import {
+    extractYouTubeId,
+    timecodeToSeconds,
+    isDropboxUrl,
+    getDropboxDirectUrl,
+  } from "$lib/utils";
   import { isAdmin, addToast } from "$lib/stores";
   import { base } from "$app/paths";
   import { supabase } from "$lib/supabase";
@@ -40,6 +45,12 @@
   let embedKey = $state(0);
 
   const youtubeId = $derived(extractYouTubeId(video.url));
+  const isDropbox = $derived(isDropboxUrl(video.url));
+  const dropboxDirectUrl = $derived(
+    isDropbox ? getDropboxDirectUrl(video.url) : null,
+  );
+
+  let videoElement: HTMLVideoElement | undefined = $state();
 
   const embedUrl = $derived(() => {
     if (!youtubeId) return "";
@@ -96,6 +107,13 @@
   const descriptionSegments = $derived(parseDescription(video.description));
 
   function seekTo(seconds: number) {
+    // For Dropbox videos, seek directly on the HTML5 video element
+    if (isDropbox && videoElement) {
+      videoElement.currentTime = seconds;
+      videoElement.play();
+      return;
+    }
+    // For YouTube, reload iframe with new start time
     currentStartTime = seconds;
     shouldAutoplay = true;
     embedKey++;
@@ -182,6 +200,17 @@
             </svg>
             YouTube
           </span>
+        {:else if isDropbox}
+          <span
+            class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
+          >
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M6 2l6 3.6L6 9.2 0 5.6zm12 0l6 3.6-6 3.6-6-3.6zM0 12.8l6 3.6 6-3.6-6-3.6zm18-3.6l6 3.6-6 3.6-6-3.6zM6 18l6 3.6L18 18l-6-3.6z"
+              />
+            </svg>
+            Dropbox
+          </span>
         {/if}
       </div>
     </div>
@@ -236,7 +265,7 @@
             class="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-line leading-relaxed mb-4"
           >
             {#each descriptionSegments as seg}
-              {#if seg.type === "timestamp" && youtubeId}
+              {#if seg.type === "timestamp" && (youtubeId || isDropbox)}
                 <button
                   onclick={() => seekTo(seg.seconds!)}
                   class="inline-flex items-center gap-0.5 font-mono text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-1.5 py-0.5 rounded transition-colors cursor-pointer border-none text-sm"
@@ -265,6 +294,18 @@
                 allowfullscreen
               ></iframe>
             {/key}
+          </div>
+        {:else if isDropbox && dropboxDirectUrl}
+          <div class="rounded-xl overflow-hidden shadow-sm">
+            <!-- svelte-ignore a11y_media_has_caption -->
+            <video
+              bind:this={videoElement}
+              src={dropboxDirectUrl}
+              controls
+              preload="metadata"
+              class="w-full rounded-xl"
+              title={video.title}
+            ></video>
           </div>
         {:else if video.url}
           <div>

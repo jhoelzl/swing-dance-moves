@@ -63,6 +63,45 @@ export function extractYouTubeId(url: string): string | null {
 	return null;
 }
 
+/** Check if a URL is a Dropbox shared link */
+export function isDropboxUrl(url: string): boolean {
+	if (!url) return false;
+	return /dropbox\.com\/(s|scl|sh)\//.test(url) || /dropboxusercontent\.com\//.test(url);
+}
+
+/** Convert Dropbox shared link to direct download/streaming URL */
+export function getDropboxDirectUrl(url: string): string | null {
+	if (!url) return null;
+
+	// Already a direct link
+	if (url.includes('dl.dropboxusercontent.com')) {
+		return url;
+	}
+
+	// Shared link: replace domain and force raw=1
+	if (url.includes('dropbox.com/')) {
+		let directUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+		// Remove dl=0 or dl=1 param and add raw=1
+		directUrl = directUrl.replace(/[?&]dl=[01]/, '');
+		if (directUrl.includes('?')) {
+			directUrl += '&raw=1';
+		} else {
+			directUrl += '?raw=1';
+		}
+		return directUrl;
+	}
+
+	return null;
+}
+
+/** Determine the video source type from a URL */
+export type VideoSourceType = 'youtube' | 'dropbox' | null;
+export function getVideoSourceType(url: string): VideoSourceType {
+	if (extractYouTubeId(url)) return 'youtube';
+	if (isDropboxUrl(url)) return 'dropbox';
+	return null;
+}
+
 /** Debounce function for search input */
 export function debounce<T extends (...args: unknown[]) => void>(fn: T, ms: number): T {
 	let timer: ReturnType<typeof setTimeout>;

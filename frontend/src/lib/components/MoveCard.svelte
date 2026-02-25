@@ -1,7 +1,12 @@
 <script lang="ts">
   import type { Move, MoveToVideo } from "$lib/types";
   import TagBadge from "./TagBadge.svelte";
-  import { extractYouTubeId, timecodeToSeconds } from "$lib/utils";
+  import {
+    extractYouTubeId,
+    timecodeToSeconds,
+    isDropboxUrl,
+    getDropboxDirectUrl,
+  } from "$lib/utils";
   import { isAdmin, addToast } from "$lib/stores";
   import { base } from "$app/paths";
   import { supabase } from "$lib/supabase";
@@ -254,15 +259,27 @@
                     class="rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 p-3"
                   >
                     <div class="flex items-center gap-2 mb-2">
-                      <svg
-                        class="w-3.5 h-3.5 text-red-500"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path
-                          d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"
-                        />
-                      </svg>
+                      {#if isDropboxUrl(ref.video?.url ?? "")}
+                        <svg
+                          class="w-3.5 h-3.5 text-blue-500"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M6 2l6 3.6L6 9.2 0 5.6zm12 0l6 3.6-6 3.6-6-3.6zM0 12.8l6 3.6 6-3.6-6-3.6zm18-3.6l6 3.6-6 3.6-6-3.6zM6 18l6 3.6L18 18l-6-3.6z"
+                          />
+                        </svg>
+                      {:else}
+                        <svg
+                          class="w-3.5 h-3.5 text-red-500"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"
+                          />
+                        </svg>
+                      {/if}
                       <span
                         class="text-sm font-medium text-gray-700 dark:text-gray-300"
                         >{ref.video.title}</span
@@ -291,6 +308,17 @@
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowfullscreen
                         ></iframe>
+                      </div>
+                    {:else if isDropboxUrl(ref.video.url)}
+                      <div class="rounded-lg overflow-hidden shadow-sm">
+                        <!-- svelte-ignore a11y_media_has_caption -->
+                        <video
+                          src={getDropboxDirectUrl(ref.video.url)}
+                          controls
+                          preload="metadata"
+                          class="w-full rounded-lg"
+                          title={ref.video.title}
+                        ></video>
                       </div>
                     {/if}
                   </div>
