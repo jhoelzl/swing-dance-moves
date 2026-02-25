@@ -32,9 +32,6 @@ export const isLoading = writable<boolean>(true);
 // User settings (loaded from Supabase)
 export const userSettings = writable<UserSettings | null>(null);
 
-// Show all moves vs random selection
-export const showAll = writable<boolean>(true);
-
 // Sort order for moves
 export type SortOrder = 'a-z' | 'z-a' | 'newest' | 'oldest';
 export const sortOrder = writable<SortOrder>('a-z');
