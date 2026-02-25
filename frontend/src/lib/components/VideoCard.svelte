@@ -8,8 +8,7 @@
   } from "$lib/utils";
   import { isAdmin, addToast } from "$lib/stores";
   import { base } from "$app/paths";
-  import { supabase } from "$lib/supabase";
-  import { deleteVideo } from "$lib/services/videos";
+  import { deleteVideo, getLinkedMovesForVideo } from "$lib/services/videos";
   import ConfirmModal from "./ConfirmModal.svelte";
   import { t } from "$lib/i18n";
 
@@ -125,30 +124,7 @@
     // Lazy-load linked moves when opening
     if (isOpen && !linkedMovesLoaded) {
       try {
-        const { data: mappings } = await supabase
-          .from("moves_to_videos")
-          .select("*")
-          .eq("video_id", video.video_id);
-
-        if (mappings && mappings.length > 0) {
-          const moveIds = mappings.map((m: any) => m.move_id);
-          const { data: moves } = await supabase
-            .from("moves")
-            .select("move_id, name")
-            .in("move_id", moveIds);
-
-          const moveMap = new Map<number, string>();
-          for (const m of moves ?? []) {
-            moveMap.set(m.move_id, m.name);
-          }
-
-          linkedMoves = mappings.map((m: any) => ({
-            move_id: m.move_id,
-            move_name: moveMap.get(m.move_id) ?? "Unknown",
-            start_time: m.start_time ?? "",
-            end_time: m.end_time ?? "",
-          }));
-        }
+        linkedMoves = await getLinkedMovesForVideo(video.video_id);
       } catch (err) {
         console.error("Failed to load linked moves:", err);
       }

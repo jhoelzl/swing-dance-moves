@@ -9,8 +9,8 @@
   } from "$lib/utils";
   import { isAdmin, addToast } from "$lib/stores";
   import { base } from "$app/paths";
-  import { supabase } from "$lib/supabase";
   import { deleteMove } from "$lib/services/moves";
+  import { getVideoRefsForMove } from "$lib/services/videos";
   import DOMPurify from "dompurify";
   import ConfirmModal from "./ConfirmModal.svelte";
   import { t } from "$lib/i18n";
@@ -43,28 +43,7 @@
     // Lazy-load video references when opening
     if (isOpen && !videoRefsLoaded) {
       try {
-        const { data: mappings } = await supabase
-          .from("moves_to_videos")
-          .select("*")
-          .eq("move_id", move.move_id);
-
-        if (mappings && mappings.length > 0) {
-          const videoIds = mappings.map((m: any) => m.video_id);
-          const { data: videos } = await supabase
-            .from("videos")
-            .select("*")
-            .in("video_id", videoIds);
-
-          const videoMap = new Map();
-          for (const v of videos ?? []) {
-            videoMap.set(v.video_id, v);
-          }
-
-          videoRefs = mappings.map((m: any) => ({
-            ...m,
-            video: videoMap.get(m.video_id),
-          }));
-        }
+        videoRefs = await getVideoRefsForMove(move.move_id);
       } catch (err) {
         console.error("Failed to load video refs:", err);
       }
