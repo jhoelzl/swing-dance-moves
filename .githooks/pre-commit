@@ -3,6 +3,15 @@ set -eu
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
+echo "[pre-commit] Running staged secret scan..."
+if command -v gitleaks >/dev/null 2>&1; then
+	cd "$REPO_ROOT"
+	gitleaks protect --staged --redact
+else
+	echo "[pre-commit] gitleaks not found; skipping local secret scan."
+	echo "[pre-commit] Install: https://github.com/gitleaks/gitleaks"
+fi
+
 echo "[pre-commit] Running frontend CI checks..."
 cd "$REPO_ROOT/frontend"
 npm run ci
