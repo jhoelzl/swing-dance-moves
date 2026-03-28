@@ -43,7 +43,7 @@
   let addMoveSessionId = $state<number | null>(null);
   let selectedMoveId = $state<number | null>(null);
   let addingMove = $state(false);
-  let moveSortOrder = $state<'a-z' | 'z-a' | 'newest' | 'oldest'>('a-z');
+  let moveSortOrder = $state<"a-z" | "z-a" | "newest" | "oldest">("a-z");
 
   // ── helpers ──────────────────────────────────────────────────
   function todayIso(): string {
@@ -62,11 +62,16 @@
     const available = $allMoves.filter((m) => !assigned.has(m.move_id));
     return [...available].sort((a, b) => {
       switch (moveSortOrder) {
-        case 'a-z': return a.name.localeCompare(b.name, 'de');
-        case 'z-a': return b.name.localeCompare(a.name, 'de');
-        case 'newest': return b.move_id - a.move_id;
-        case 'oldest': return a.move_id - b.move_id;
-        default: return 0;
+        case "a-z":
+          return a.name.localeCompare(b.name, "de");
+        case "z-a":
+          return b.name.localeCompare(a.name, "de");
+        case "newest":
+          return b.move_id - a.move_id;
+        case "oldest":
+          return a.move_id - b.move_id;
+        default:
+          return 0;
       }
     });
   }
@@ -141,7 +146,7 @@
       sessions = sessions.map((s) =>
         s.session_id === session.session_id
           ? { ...s, name: editName, session_date: editDate, notes: editNotes }
-          : s
+          : s,
       );
       allSessions.set(sessions);
       addToast(t("session_updated"), "success");
@@ -166,7 +171,7 @@
     try {
       await deleteSession(sessionToDelete.session_id);
       sessions = sessions.filter(
-        (s) => s.session_id !== sessionToDelete!.session_id
+        (s) => s.session_id !== sessionToDelete!.session_id,
       );
       allSessions.set(sessions);
       addToast(t("session_deleted"), "success");
@@ -203,10 +208,10 @@
             ? {
                 ...s,
                 moves: [...(s.moves ?? []), move].sort((a, b) =>
-                  a.name.localeCompare(b.name, "de")
+                  a.name.localeCompare(b.name, "de"),
                 ),
               }
-            : s
+            : s,
         );
         allSessions.set(sessions);
       }
@@ -227,7 +232,7 @@
       sessions = sessions.map((s) =>
         s.session_id === session.session_id
           ? { ...s, moves: (s.moves ?? []).filter((m) => m.move_id !== moveId) }
-          : s
+          : s,
       );
       allSessions.set(sessions);
     } catch (err) {
@@ -336,11 +341,7 @@
         class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors cursor-pointer"
       >
         {#if creating}
-          <svg
-            class="w-4 h-4 animate-spin"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
+          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle
               class="opacity-25"
               cx="12"
@@ -383,7 +384,7 @@
     {/each}
   </div>
 
-<!-- Empty state -->
+  <!-- Empty state -->
 {:else if sessions.length === 0}
   <div class="text-center py-20">
     <span class="text-5xl">📅</span>
@@ -395,7 +396,7 @@
     </p>
   </div>
 
-<!-- Session list -->
+  <!-- Session list -->
 {:else}
   <div class="space-y-3">
     {#each sessions as session (session.session_id)}
@@ -575,9 +576,7 @@
 
         <!-- Expanded: move list -->
         {#if expandedSessionId === session.session_id && editingSessionId !== session.session_id}
-          <div
-            class="border-t border-gray-100 dark:border-gray-800 px-5 py-4"
-          >
+          <div class="border-t border-gray-100 dark:border-gray-800 px-5 py-4">
             <div class="flex items-center justify-between mb-3">
               <span
                 class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
@@ -611,19 +610,27 @@
             {#if addMoveSessionId === session.session_id}
               <!-- Sort controls -->
               <div class="flex items-center gap-1.5 mb-2 flex-wrap">
-                <span class="text-xs text-gray-400 dark:text-gray-500 mr-1">{t("session_move_sort")}:</span>
-                {#each [['a-z', t('sort_a_z')], ['z-a', t('sort_z_a')], ['newest', t('sort_newest')], ['oldest', t('sort_oldest')]] as [val, label] (val)}
+                <span class="text-xs text-gray-400 dark:text-gray-500 mr-1"
+                  >{t("session_move_sort")}:</span
+                >
+                {#each [["a-z", t("sort_a_z")], ["z-a", t("sort_z_a")], ["newest", t("sort_newest")], ["oldest", t("sort_oldest")]] as [val, label] (val)}
                   <button
-                    onclick={() => (moveSortOrder = val as 'a-z' | 'z-a' | 'newest' | 'oldest')}
-                    class="px-2 py-0.5 text-xs rounded-full transition-colors cursor-pointer {moveSortOrder === val ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}"
+                    onclick={() =>
+                      (moveSortOrder = val as
+                        | "a-z"
+                        | "z-a"
+                        | "newest"
+                        | "oldest")}
+                    class="px-2 py-0.5 text-xs rounded-full transition-colors cursor-pointer {moveSortOrder ===
+                    val
+                      ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}"
                   >
                     {label}
                   </button>
                 {/each}
               </div>
-              <div
-                class="flex gap-2 mb-3 flex-wrap"
-              >
+              <div class="flex gap-2 mb-3 flex-wrap">
                 <select
                   bind:value={selectedMoveId}
                   class="flex-1 min-w-0 px-3 py-1.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -666,8 +673,7 @@
                       {move.name}
                     </span>
                     <button
-                      onclick={() =>
-                        handleRemoveMove(session, move.move_id)}
+                      onclick={() => handleRemoveMove(session, move.move_id)}
                       title={t("remove")}
                       class="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer shrink-0"
                     >

@@ -20,6 +20,7 @@
 
   // Set of video IDs that have at least one linked move
   let videoIdsWithMoves = $state<Set<number>>(new Set());
+  let videoMoveCountMap = $state<Record<number, number>>({});
 
   const displayVideos = $derived.by(() => {
     let result = searchVideos($allVideos, searchQuery);
@@ -41,7 +42,14 @@
       const { data } = await supabase
         .from("moves_to_videos")
         .select("video_id");
-      videoIdsWithMoves = new Set((data ?? []).map((d: any) => d.video_id));
+      const links = (data ?? []) as Array<{ video_id: number }>;
+      videoIdsWithMoves = new Set(links.map((d) => d.video_id));
+
+      const counts: Record<number, number> = {};
+      for (const link of links) {
+        counts[link.video_id] = (counts[link.video_id] ?? 0) + 1;
+      }
+      videoMoveCountMap = counts;
     } catch (err) {
       console.error("Failed to load video-move links:", err);
     }
@@ -253,7 +261,11 @@
   {#if displayVideos.length > 0}
     <div class="space-y-3">
       {#each displayVideos as video (video.video_id)}
-        <VideoCard {video} ondeleted={handleVideoDeleted} />
+        <VideoCard
+          {video}
+          linkedMoveCount={videoMoveCountMap[video.video_id] ?? 0}
+          ondeleted={handleVideoDeleted}
+        />
       {/each}
     </div>
   {:else}
