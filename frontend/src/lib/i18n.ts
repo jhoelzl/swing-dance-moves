@@ -123,8 +123,10 @@ const translations: Record<string, { de: string; en: string }> = {
   'new_tag_created': { de: 'Neuer Tag erstellt.', en: 'New tag created.' },
   'failed_load_tags': { de: 'Tags konnten nicht geladen werden.', en: 'Failed to load tags.' },
   'confirm_delete_category': { de: 'Kategorie löschen', en: 'Delete category' },
-  'confirm_delete_tag_msg': { de: 'Tag löschen? Move-Verknüpfungen werden ebenfalls entfernt.', en: 'Delete tag? Move associations will also be removed.' },
-  'tags_also_deleted': { de: 'Tag(s) werden ebenfalls gelöscht.', en: 'tag(s) will also be deleted.' },
+  'confirm_delete_tag_msg': { de: 'Tag löschen?', en: 'Delete tag?' },
+  'delete_blocked_tag_group_has_tags': { de: 'Diese Kategorie kann nicht gelöscht werden, solange noch Tags darin enthalten sind.', en: 'This category cannot be deleted while it still contains tags.' },
+  'delete_blocked_tag_in_use': { de: 'Dieses Tag kann nicht gelöscht werden, solange es noch Moves zugeordnet ist.', en: 'This tag cannot be deleted while it is still assigned to moves.' },
+  'delete_blocked_video_in_use': { de: 'Dieses Video kann nicht gelöscht werden, solange es noch mit Moves verknüpft ist.', en: 'This video cannot be deleted while it is still linked to moves.' },
 
   // ── MoveCard ──
   'delete_move': { de: 'Move löschen', en: 'Delete Move' },
@@ -142,7 +144,7 @@ const translations: Record<string, { de: string; en: string }> = {
   'video_delete_failed': { de: 'Video konnte nicht gelöscht werden', en: 'Failed to delete video' },
   'edit_video': { de: 'Video bearbeiten', en: 'Edit Video' },
   'watch_video': { de: 'Video ansehen', en: 'Watch Video' },
-  'confirm_delete_video': { de: 'Bist du sicher, dass du dieses Video löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.', en: 'Are you sure you want to delete this video? This action cannot be undone.' },
+  'confirm_delete_video': { de: 'Bist du sicher, dass du dieses Video löschen möchtest? Falls noch Move-Verknüpfungen bestehen, wird das Löschen blockiert.', en: 'Are you sure you want to delete this video? Deletion will be blocked while move links still exist.' },
 
   // ── MoveForm ──
   'synonyms': { de: 'Synonyme', en: 'Synonyms' },
