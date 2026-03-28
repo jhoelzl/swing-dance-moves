@@ -96,7 +96,74 @@ CREATE TABLE IF NOT EXISTS user_settings (
 
 
 -- ============================================
--- 2. Indexes
+-- 2. Initial seed data
+-- ============================================
+
+-- Seed tag types from README.md
+INSERT INTO tag_types (tag_type_name, sort_order, tag_type_css)
+SELECT v.tag_type_name, v.sort_order, v.tag_type_css
+FROM (
+    VALUES
+        ('Dances', 10, ''),
+        ('Level', 20, ''),
+        ('Rating', 30, ''),
+        ('Technical', 40, ''),
+        ('Festival / Classes', 50, ''),
+        ('Teachers', 60, '')
+) AS v(tag_type_name, sort_order, tag_type_css)
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM tag_types t
+    WHERE t.tag_type_name = v.tag_type_name
+);
+
+-- Seed tags explicitly listed in README.md
+-- Note: "Festival / Classes" and "Teachers" are intentionally left without fixed initial tags,
+-- because README only states that these should be user-defined.
+INSERT INTO tags (tag_type_id, tag_name, tag_label, tag_css, tag_sort)
+SELECT tt.tag_type_id, v.tag_name, 'light', '', v.tag_sort
+FROM (
+    VALUES
+        -- Dances
+        ('Dances', 'Lindy Hop', 10),
+        ('Dances', 'Balboa', 20),
+        ('Dances', 'Collegiate Shag', 30),
+        ('Dances', 'Solo Jazz', 40),
+
+        -- Level
+        ('Level', 'Beg', 10),
+        ('Level', 'Imp', 20),
+        ('Level', 'Int', 30),
+        ('Level', 'Int+', 40),
+        ('Level', 'Int-Adv', 50),
+        ('Level', 'Adv', 60),
+
+        -- Rating
+        ('Rating', 'easy', 10),
+        ('Rating', 'difficult', 20),
+        ('Rating', 'fancy', 30),
+        ('Rating', 'funny', 40),
+        ('Rating', 'to practise', 50),
+
+        -- Technical
+        ('Technical', '6-count', 10),
+        ('Technical', '8-count', 20),
+        ('Technical', '10-count', 30),
+        ('Technical', 'Redirection', 40),
+        ('Technical', 'Footwork-Variation', 50),
+        ('Technical', 'Break', 60)
+) AS v(tag_type_name, tag_name, tag_sort)
+JOIN tag_types tt ON tt.tag_type_name = v.tag_type_name
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM tags t
+    WHERE t.tag_type_id = tt.tag_type_id
+      AND t.tag_name = v.tag_name
+);
+
+
+-- ============================================
+-- 3. Indexes
 -- ============================================
 
 CREATE INDEX IF NOT EXISTS idx_tags_tag_type_id ON tags(tag_type_id);
@@ -111,7 +178,7 @@ CREATE INDEX IF NOT EXISTS idx_session_to_moves_move_id ON session_to_moves(move
 
 
 -- ============================================
--- 3. Triggers
+-- 4. Triggers
 -- ============================================
 
 -- Auto-update updated_at on user_settings
@@ -130,7 +197,7 @@ CREATE TRIGGER update_user_settings_updated_at
 
 
 -- ============================================
--- 4. Row Level Security (RLS)
+-- 5. Row Level Security (RLS)
 -- ============================================
 
 -- Enable RLS on all tables

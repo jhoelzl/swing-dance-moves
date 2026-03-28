@@ -39,38 +39,53 @@ A **Progressive Web App (PWA)** for browsing, filtering, and discovering swing d
 
 ```
 swing-dance-moves/
+├── .githooks/
+│   └── pre-commit             # Local pre-commit hook (runs frontend CI checks)
 ├── .github/workflows/
-│   └── deploy.yml              # GitHub Actions: build & deploy to GitHub Pages
+│   ├── ci.yml                 # PR/main quality checks (audit, spellcheck, lint, test, build)
+│   └── deploy.yml             # GitHub Pages build & deploy workflow
 ├── scripts/
-│   └── migrate.sql             # PostgreSQL migration script for Supabase
-├── frontend/                   # SvelteKit application
+│   └── init.sql               # PostgreSQL schema + seed + RLS setup for Supabase
+├── frontend/                  # SvelteKit application
 │   ├── src/
-│   │   ├── app.css             # Global styles, Tailwind imports, custom variants
-│   │   ├── app.html            # HTML shell with meta tags & PWA links
+│   │   ├── app.css            # Global styles, Tailwind import, custom variants
+│   │   ├── app.html           # HTML shell with meta tags & PWA links
 │   │   ├── lib/
-│   │   │   ├── supabase.ts     # Supabase client singleton
-│   │   │   ├── types.ts        # TypeScript interfaces (Move, Tag, TagType, etc.)
-│   │   │   ├── stores.ts       # Svelte stores (filters, search, darkMode, videoOnly, etc.)
-│   │   │   ├── utils.ts        # Tag colors, YouTube ID extraction, debounce
-│   │   │   ├── services/       # Data access layer (Supabase queries)
+│   │   │   ├── i18n.ts        # DE/EN translations and translation helper
+│   │   │   ├── stores.ts      # Global stores (filters, auth, dark mode, tab state, etc.)
+│   │   │   ├── supabase.ts    # Supabase client singleton
+│   │   │   ├── types.ts       # TypeScript interfaces (moves, tags, videos, sessions, settings)
+│   │   │   ├── utils.ts       # URL helpers, timecode parsing, debounce, tag colors
+│   │   │   ├── services/      # Data access layer (moves, tags, videos, sessions, settings)
 │   │   │   ├── components/
-│   │   │   │   ├── MoveCard.svelte     # Expandable move card with video embed
-│   │   │   │   ├── FilterChips.svelte  # Grouped tag filter chips + video filter
-│   │   │   │   ├── TagBadge.svelte     # Colored tag badge
-│   │   │   │   └── MoveForm.svelte     # Admin create/edit form
-│   │   │   └── assets/         # Favicon, PWA icons
+│   │   │   │   ├── MoveCard.svelte     # Expandable move card
+│   │   │   │   ├── MoveForm.svelte     # Move create/edit form
+│   │   │   │   ├── VideoCard.svelte    # Video list card
+│   │   │   │   ├── VideoForm.svelte    # Video create/edit form
+│   │   │   │   ├── FilterChips.svelte  # Grouped tag filter chips
+│   │   │   │   ├── TagBadge.svelte     # Tag badge UI
+│   │   │   │   ├── Toast.svelte        # Toast notifications
+│   │   │   │   └── ConfirmModal.svelte # Reusable confirmation modal
+│   │   │   └── assets/        # Static assets
 │   │   └── routes/
-│   │       ├── +layout.svelte  # App shell: nav, auth gate, dark mode
-│   │       ├── +layout.ts      # SPA config (ssr=false, prerender=true)
-│   │       ├── +page.svelte    # Main page: search, filters, move list
-│   │       ├── login/          # Login page (Supabase email/password auth)
-│   │       ├── edit/[id]/      # Edit move (admin only)
-│   │       └── new/            # Create move (admin only)
+│   │       ├── +layout.svelte  # App shell (nav, auth gate, dark mode)
+│   │       ├── +layout.ts      # SPA config (`ssr=false`, `prerender=true`)
+│   │       ├── +page.svelte    # Main moves page
+│   │       ├── login/          # Login page
+│   │       ├── new/            # Create move page
+│   │       ├── edit/[id]/      # Edit move page
+│   │       ├── random/         # Random moves view
+│   │       ├── videos/         # Video management pages
+│   │       ├── tags/           # Tag and tag type management pages
+│   │       ├── sessions/       # Training sessions pages
+│   │       └── settings/       # User/app settings page
+│   ├── cspell.json             # Project dictionary for spell checking
 │   ├── svelte.config.js        # SvelteKit config with static adapter
-│   ├── vite.config.ts          # Vite config with Tailwind, PWA plugins
+│   ├── vite.config.ts          # Vite config with Tailwind + PWA + Vitest
 │   ├── package.json
 │   └── tsconfig.json
-└── plan.md                     # Original implementation plan
+├── IMPROVEMENTS.md             # Project improvement notes / backlog
+└── backup/                     # Legacy PHP app snapshot and exports
 ```
 
 ---
@@ -94,7 +109,8 @@ tag_types (1) ←── (N) tags (1) ←── (N) moves_to_tags (N) ──→ (
 - **Level** — Beg, Imp, Int, Int+, Int-Adv, Adv
 - **Rating** — easy, difficult, fancy, funny, to practise
 - **Technical** — 6-count, 8-count, 10-count, Redirection, Footwork-Variation, Break, etc.
-- **Festival / Classes** — Shag Republic, Dragon Swing, LC Shag, etc.
+- **Festival / Classes** — add your own festival and classes
+- **Teachers** — add your own teacher couples
 
 ---
 
