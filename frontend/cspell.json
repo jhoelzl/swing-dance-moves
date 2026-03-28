@@ -1,0 +1,40 @@
+{
+	"version": "0.2",
+	"language": "en,de",
+	"ignorePaths": [
+		"node_modules/**",
+		"build/**",
+		".svelte-kit/**",
+		"package-lock.json",
+		"src/lib/i18n.ts",
+		"../IMPROVEMENTS.md"
+	],
+	"words": [
+		"adminmode",
+		"Balboa",
+		"Bookmarkable",
+		"charleston",
+		"Collegiate",
+		"Deutsch",
+		"dompurify",
+		"dropboxusercontent",
+		"jhoelzl",
+		"Klasse",
+		"lindy",
+		"ondeleted",
+		"PGRST",
+		"practise",
+		"prerender",
+		"prerendered",
+		"Shag",
+		"supabase",
+		"svelte",
+		"sveltekit",
+		"tailwindcss",
+		"timecode",
+		"vite",
+		"vitest",
+		"workbox",
+		"youtu"
+	]
+}

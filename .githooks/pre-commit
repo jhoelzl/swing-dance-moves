@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+set -eu
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+echo "[pre-commit] Running frontend CI checks..."
+cd "$REPO_ROOT/frontend"
+npm run ci
+
+echo "[pre-commit] All checks passed."
