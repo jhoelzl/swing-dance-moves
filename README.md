@@ -94,7 +94,7 @@ tag_types (1) ←── (N) tags (1) ←── (N) moves_to_tags (N) ──→ (
 - **Level** — Beg, Imp, Int, Int+, Int-Adv, Adv
 - **Rating** — easy, difficult, fancy, funny, to practise
 - **Technical** — 6-count, 8-count, 10-count, Redirection, Footwork-Variation, Break, etc.
-- **Festival / Classes** — Celje 2018/2019, Shag Republic, Dragon Swing, LC Shag, etc.
+- **Festival / Classes** — Shag Republic, Dragon Swing, LC Shag, etc.
 
 ---
 
