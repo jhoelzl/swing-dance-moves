@@ -19,6 +19,7 @@
     sessionCount: number;
     learnedCount: number;
     sessions: CalendarEntry[];
+    learnedMoves: CalendarEntry[];
   };
 
   let currentMonth = $state(startOfMonth(new Date()));
@@ -75,8 +76,9 @@
       const iso = toIsoDate(date);
       const entries = entriesByDate.get(iso) ?? [];
       const sessions = entries.filter((e) => e.type === "session");
+      const learnedMoves = entries.filter((e) => e.type === "learned");
       const sessionCount = sessions.length;
-      const learnedCount = entries.filter((e) => e.type === "learned").length;
+      const learnedCount = learnedMoves.length;
 
       cells.push({
         iso,
@@ -86,6 +88,7 @@
         sessionCount,
         learnedCount,
         sessions,
+        learnedMoves,
       });
     }
 
@@ -247,7 +250,7 @@
             {cell.date.getDate()}
           </div>
 
-          {#if cell.sessions.length > 0 || cell.learnedCount > 0}
+          {#if cell.sessions.length > 0 || cell.learnedMoves.length > 0}
             <div class="mt-1.5 space-y-1">
               {#each cell.sessions.slice(0, 2) as session (session.id)}
                 <a
@@ -267,11 +270,21 @@
                 </div>
               {/if}
 
-              {#if cell.learnedCount > 0}
-                <div
-                  class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+              {#each cell.learnedMoves.slice(0, 2) as move (move.id)}
+                <a
+                  href="{base}/edit/{move.id}"
+                  title={move.label}
+                  onclick={(event) => event.stopPropagation()}
+                  class="block max-w-full truncate rounded px-1.5 py-0.5 text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800 hover:bg-amber-200/80 dark:hover:bg-amber-900/60 transition-colors"
                 >
-                  {t("calendar_learned_moves")}: {cell.learnedCount}
+                  {move.label}
+                </a>
+              {/each}
+              {#if cell.learnedCount > 2}
+                <div
+                  class="text-[10px] font-semibold text-amber-700 dark:text-amber-300 px-1.5"
+                >
+                  +{cell.learnedCount - 2}
                 </div>
               {/if}
             </div>
@@ -314,7 +327,12 @@
                 {entry.label}
               </a>
             {:else}
-              <span>{entry.label}</span>
+              <a
+                href="{base}/edit/{entry.id}"
+                class="underline decoration-amber-400/70 hover:decoration-amber-600 dark:hover:decoration-amber-300"
+              >
+                {entry.label}
+              </a>
             {/if}
           </div>
         {/each}
