@@ -108,19 +108,17 @@
       } = await supabase.auth.getSession();
       await syncSessionState(session);
 
-      const { data } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          if (event === "TOKEN_REFRESHED") {
-            isAdmin.set(!!session);
-            return;
-          }
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "TOKEN_REFRESHED") {
+          isAdmin.set(!!session);
+          return;
+        }
 
-          // Supabase recommends avoiding awaited client calls inside this callback.
-          window.setTimeout(() => {
-            void syncSessionState(session);
-          }, 0);
-        },
-      );
+        // Supabase recommends avoiding awaited client calls inside this callback.
+        window.setTimeout(() => {
+          void syncSessionState(session);
+        }, 0);
+      });
 
       subscription = data.subscription;
     }

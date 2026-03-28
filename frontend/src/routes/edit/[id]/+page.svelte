@@ -129,8 +129,13 @@
     error = "";
     try {
       await addMoveToSession(selectedSessionId, moveId);
-      const session = $allSessions.find((s) => s.session_id === selectedSessionId);
-      if (session && !sessionRefs.some((s) => s.session_id === session.session_id)) {
+      const session = $allSessions.find(
+        (s) => s.session_id === selectedSessionId,
+      );
+      if (
+        session &&
+        !sessionRefs.some((s) => s.session_id === session.session_id)
+      ) {
         sessionRefs = [...sessionRefs, session].sort((a, b) =>
           b.session_date.localeCompare(a.session_date),
         );
@@ -238,7 +243,9 @@
                 </svg>
                 {session.name}
                 <span class="opacity-60">·</span>
-                <span class="opacity-75">{formatSessionDate(session.session_date)}</span>
+                <span class="opacity-75"
+                  >{formatSessionDate(session.session_date)}</span
+                >
                 <button
                   onclick={() => handleRemoveSession(session.session_id)}
                   disabled={removingSessionId === session.session_id}

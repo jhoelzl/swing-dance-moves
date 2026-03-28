@@ -72,7 +72,6 @@
     }
   }
 
-
   async function handleDelete() {
     deleting = true;
     showDeleteConfirm = false;
