@@ -14,10 +14,12 @@
     isLoading,
     activeTab,
     userSettings,
+    allSessions,
   } from "$lib/stores";
   import { getAllMoves, getAllTagsGrouped } from "$lib/services/moves";
   import { getAllVideos } from "$lib/services/videos";
   import { getUserSettings } from "$lib/services/settings";
+  import { getAllSessions } from "$lib/services/sessions";
   import { t } from "$lib/i18n";
   import { goto } from "$app/navigation";
   import { base } from "$app/paths";
@@ -34,16 +36,18 @@
 
   async function loadData() {
     try {
-      const [moves, tags, videos, settings] = await Promise.all([
+      const [moves, tags, videos, settings, sessions] = await Promise.all([
         getAllMoves(),
         getAllTagsGrouped(),
         getAllVideos(),
         getUserSettings(),
+        getAllSessions(),
       ]);
       allMoves.set(moves);
       tagGroups.set(tags);
       allVideos.set(videos);
       userSettings.set(settings);
+      allSessions.set(sessions);
     } catch (err) {
       console.error("Failed to load data:", err);
       loadError = true;
@@ -95,6 +99,7 @@
             allMoves.set([]);
             tagGroups.set([]);
             allVideos.set([]);
+            allSessions.set([]);
             userSettings.set(null);
             goto(`${base}/login`);
           }
@@ -125,6 +130,7 @@
     allMoves.set([]);
     tagGroups.set([]);
     allVideos.set([]);
+    allSessions.set([]);
     userSettings.set(null);
     goto(`${base}/login`);
   }
@@ -446,6 +452,33 @@
                 />
               </svg>
               {t("nav_tags")}
+            </a>
+            <a
+              href="{base}/sessions"
+              onclick={(e) => {
+                e.preventDefault();
+                activeTab.set("sessions");
+                goto(`${base}/sessions`);
+              }}
+              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
+            {$activeTab === 'sessions'
+                ? 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              {t("nav_sessions")}
             </a>
           </div>
         </div>
