@@ -28,10 +28,11 @@
 
   interface Props {
     video: Video;
+    linkedMoveCount?: number;
     ondeleted?: () => void;
   }
 
-  let { video, ondeleted }: Props = $props();
+  let { video, linkedMoveCount = 0, ondeleted }: Props = $props();
 
   let isOpen = $state(false);
   let deleting = $state(false);
@@ -188,6 +189,25 @@
             Dropbox
           </span>
         {/if}
+        <span
+          class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800"
+          title={t("linked_moves")}
+        >
+          <svg
+            class="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
+          </svg>
+          {linkedMoveCount}
+        </span>
       </div>
     </div>
 

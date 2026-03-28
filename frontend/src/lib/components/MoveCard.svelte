@@ -89,7 +89,10 @@
       const session = $allSessions.find(
         (s) => s.session_id === selectedSessionId,
       );
-      if (session && !sessionRefs.some((sr) => sr.session_id === session.session_id)) {
+      if (
+        session &&
+        !sessionRefs.some((sr) => sr.session_id === session.session_id)
+      ) {
         sessionRefs = [...sessionRefs, session].sort((a, b) =>
           b.session_date.localeCompare(a.session_date),
         );
