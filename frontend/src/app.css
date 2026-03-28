@@ -1,4 +1,4 @@
-@import url('tailwindcss');
+@import url("tailwindcss");
 
 /* Enable class-based dark mode (Tailwind CSS 4) */
 @custom-variant dark (&:where(.dark, .dark *));
