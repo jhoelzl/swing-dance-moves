@@ -78,6 +78,28 @@
     if (params.length > 0) embedUrl += `?${params.join("&")}`;
     return embedUrl;
   }
+
+  function applyDropboxStartTime(
+    element: HTMLVideoElement,
+    startTime?: string,
+  ) {
+    if (!startTime) return;
+    const startSec = timecodeToSeconds(startTime);
+    if (startSec > 0) {
+      element.currentTime = startSec;
+    }
+  }
+
+  function enforceDropboxEndTime(element: HTMLVideoElement, endTime?: string) {
+    if (!endTime) return;
+    const endSec = timecodeToSeconds(endTime);
+    if (endSec <= 0) return;
+
+    if (element.currentTime >= endSec) {
+      element.currentTime = endSec;
+      element.pause();
+    }
+  }
 </script>
 
 <div
@@ -298,11 +320,12 @@
                           class="w-full rounded-lg"
                           title={ref.video.title}
                           onloadedmetadata={(e) => {
-                            const startSec = timecodeToSeconds(ref.start_time);
-                            if (startSec > 0) {
-                              const vid = e.currentTarget as HTMLVideoElement;
-                              vid.currentTime = startSec;
-                            }
+                            const vid = e.currentTarget as HTMLVideoElement;
+                            applyDropboxStartTime(vid, ref.start_time);
+                          }}
+                          ontimeupdate={(e) => {
+                            const vid = e.currentTarget as HTMLVideoElement;
+                            enforceDropboxEndTime(vid, ref.end_time);
                           }}
                         ></video>
                       </div>
