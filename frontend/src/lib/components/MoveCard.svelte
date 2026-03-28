@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Move, MoveToVideo } from "$lib/types";
+  import type { Move, MoveToVideo, Session } from "$lib/types";
   import TagBadge from "./TagBadge.svelte";
   import {
     extractYouTubeId,
@@ -7,10 +7,15 @@
     isDropboxUrl,
     getDropboxDirectUrl,
   } from "$lib/utils";
-  import { isAdmin, addToast } from "$lib/stores";
+  import { isAdmin, addToast, allSessions } from "$lib/stores";
   import { base } from "$app/paths";
   import { deleteMove } from "$lib/services/moves";
   import { getVideoRefsForMove } from "$lib/services/videos";
+  import {
+    getSessionsForMove,
+    addMoveToSession,
+    removeMoveFromSession,
+  } from "$lib/services/sessions";
   import DOMPurify from "dompurify";
   import ConfirmModal from "./ConfirmModal.svelte";
   import { t } from "$lib/i18n";
@@ -32,15 +37,32 @@
   let isOpen = $state(initialOpen);
   let videoRefs = $state<MoveToVideo[]>([]);
   let videoRefsLoaded = $state(false);
+  let sessionRefs = $state<Session[]>([]);
+  let sessionRefsLoaded = $state(false);
+  let showAddToSession = $state(false);
+  let selectedSessionId = $state<number | null>(null);
+  let addingToSession = $state(false);
   let deleting = $state(false);
   let showDeleteConfirm = $state(false);
 
   const hasVideo = $derived(move.hasVideo ?? false);
 
+  /** Sessions not yet containing this move (for admin picker). */
+  const availableSessionsForMove = $derived(
+    $allSessions.filter(
+      (s) => !sessionRefs.some((sr) => sr.session_id === s.session_id),
+    ),
+  );
+
+  function formatSessionDate(iso: string): string {
+    const [y, m, d] = iso.split("-");
+    return `${d}.${m}.${y}`;
+  }
+
   async function toggle() {
     isOpen = !isOpen;
 
-    // Lazy-load video references when opening
+    // Lazy-load references when opening
     if (isOpen && !videoRefsLoaded) {
       try {
         videoRefs = await getVideoRefsForMove(move.move_id);
@@ -48,6 +70,48 @@
         console.error("Failed to load video refs:", err);
       }
       videoRefsLoaded = true;
+    }
+    if (isOpen && !sessionRefsLoaded) {
+      try {
+        sessionRefs = await getSessionsForMove(move.move_id);
+      } catch (err) {
+        console.error("Failed to load session refs:", err);
+      }
+      sessionRefsLoaded = true;
+    }
+  }
+
+  async function handleAddToSession() {
+    if (!selectedSessionId) return;
+    addingToSession = true;
+    try {
+      await addMoveToSession(selectedSessionId, move.move_id);
+      const session = $allSessions.find(
+        (s) => s.session_id === selectedSessionId,
+      );
+      if (session && !sessionRefs.some((sr) => sr.session_id === session.session_id)) {
+        sessionRefs = [...sessionRefs, session].sort((a, b) =>
+          b.session_date.localeCompare(a.session_date),
+        );
+      }
+      addToast(t("move_added_to_session"), "success");
+      showAddToSession = false;
+      selectedSessionId = null;
+    } catch (err) {
+      console.error(err);
+      addToast(t("move_add_to_session_failed"), "error");
+    } finally {
+      addingToSession = false;
+    }
+  }
+
+  async function handleRemoveFromSession(sessionId: number) {
+    try {
+      await removeMoveFromSession(sessionId, move.move_id);
+      sessionRefs = sessionRefs.filter((s) => s.session_id !== sessionId);
+    } catch (err) {
+      console.error(err);
+      addToast(t("move_remove_from_session_failed"), "error");
     }
   }
 
@@ -244,6 +308,133 @@
         {/if}
 
         <!-- Linked Video References -->
+        <!-- Linked Sessions -->
+        {#if sessionRefs.length > 0 || $isAdmin}
+          <div
+            class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <h4
+                class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500"
+              >
+                {t("linked_sessions")}
+              </h4>
+              {#if $isAdmin && !showAddToSession && availableSessionsForMove.length > 0}
+                <button
+                  onclick={() => {
+                    showAddToSession = true;
+                    selectedSessionId = null;
+                  }}
+                  class="text-[11px] text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <svg
+                    class="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  {t("move_add_to_session")}
+                </button>
+              {/if}
+            </div>
+
+            {#if showAddToSession}
+              <div class="flex gap-2 mb-3 flex-wrap">
+                <select
+                  bind:value={selectedSessionId}
+                  class="flex-1 min-w-0 px-3 py-1.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value={null}>{t("move_select_session")}</option>
+                  {#each availableSessionsForMove as session (session.session_id)}
+                    <option value={session.session_id}>
+                      {session.name} — {formatSessionDate(session.session_date)}
+                    </option>
+                  {/each}
+                </select>
+                <button
+                  onclick={handleAddToSession}
+                  disabled={addingToSession || !selectedSessionId}
+                  class="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors cursor-pointer shrink-0"
+                >
+                  {addingToSession ? t("saving") : t("move_add_to_session")}
+                </button>
+                <button
+                  onclick={() => {
+                    showAddToSession = false;
+                    selectedSessionId = null;
+                  }}
+                  class="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors cursor-pointer shrink-0"
+                >
+                  {t("cancel")}
+                </button>
+              </div>
+            {/if}
+
+            {#if sessionRefs.length === 0}
+              <p class="text-sm text-gray-400 dark:text-gray-500 italic">
+                {t("no_linked_sessions")}
+              </p>
+            {:else}
+              <div class="flex flex-wrap gap-2">
+                {#each sessionRefs as session (session.session_id)}
+                  <div
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300 rounded-full text-xs font-medium border border-green-200 dark:border-green-800"
+                  >
+                    <svg
+                      class="w-3 h-3 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    {session.name}
+                    <span class="opacity-60">·</span>
+                    <span class="opacity-75"
+                      >{formatSessionDate(session.session_date)}</span
+                    >
+                    {#if $isAdmin}
+                      <button
+                        onclick={() =>
+                          handleRemoveFromSession(session.session_id)}
+                        class="ml-0.5 rounded-full hover:bg-green-200 dark:hover:bg-green-800/60 p-0.5 transition-colors cursor-pointer"
+                        title={t("remove")}
+                      >
+                        <svg
+                          class="w-3 h-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    {/if}
+                  </div>
+                {/each}
+              </div>
+            {/if}
+          </div>
+        {/if}
+
+        <!-- Linked Videos -->
         {#if videoRefs.length > 0}
           <div
             class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50"

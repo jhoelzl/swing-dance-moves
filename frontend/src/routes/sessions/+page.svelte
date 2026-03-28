@@ -43,6 +43,7 @@
   let addMoveSessionId = $state<number | null>(null);
   let selectedMoveId = $state<number | null>(null);
   let addingMove = $state(false);
+  let moveSortOrder = $state<'a-z' | 'z-a' | 'newest' | 'oldest'>('a-z');
 
   // ── helpers ──────────────────────────────────────────────────
   function todayIso(): string {
@@ -55,10 +56,19 @@
     return `${d}.${m}.${y}`;
   }
 
-  /** Moves not yet assigned to the given session. */
+  /** Moves not yet assigned to the given session, sorted by moveSortOrder. */
   function availableMoves(session: Session): Move[] {
     const assigned = new Set((session.moves ?? []).map((m) => m.move_id));
-    return $allMoves.filter((m) => !assigned.has(m.move_id));
+    const available = $allMoves.filter((m) => !assigned.has(m.move_id));
+    return [...available].sort((a, b) => {
+      switch (moveSortOrder) {
+        case 'a-z': return a.name.localeCompare(b.name, 'de');
+        case 'z-a': return b.name.localeCompare(a.name, 'de');
+        case 'newest': return b.move_id - a.move_id;
+        case 'oldest': return a.move_id - b.move_id;
+        default: return 0;
+      }
+    });
   }
 
   // ── lifecycle ─────────────────────────────────────────────────
@@ -599,6 +609,18 @@
 
             <!-- Add-move picker -->
             {#if addMoveSessionId === session.session_id}
+              <!-- Sort controls -->
+              <div class="flex items-center gap-1.5 mb-2 flex-wrap">
+                <span class="text-xs text-gray-400 dark:text-gray-500 mr-1">{t("session_move_sort")}:</span>
+                {#each [['a-z', t('sort_a_z')], ['z-a', t('sort_z_a')], ['newest', t('sort_newest')], ['oldest', t('sort_oldest')]] as [val, label] (val)}
+                  <button
+                    onclick={() => (moveSortOrder = val as 'a-z' | 'z-a' | 'newest' | 'oldest')}
+                    class="px-2 py-0.5 text-xs rounded-full transition-colors cursor-pointer {moveSortOrder === val ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}"
+                  >
+                    {label}
+                  </button>
+                {/each}
+              </div>
               <div
                 class="flex gap-2 mb-3 flex-wrap"
               >

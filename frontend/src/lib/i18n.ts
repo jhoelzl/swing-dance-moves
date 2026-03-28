@@ -242,6 +242,22 @@ const translations: Record<string, { de: string; en: string }> = {
   'session_singular': { de: 'Session', en: 'Session' },
   'sessions_plural': { de: 'Sessions', en: 'Sessions' },
   'session_move_count': { de: 'Moves', en: 'Moves' },
+
+  // ── MoveCard Sessions ──
+  'linked_sessions': { de: 'Verknüpfte Sessions', en: 'Linked Sessions' },
+  'move_add_to_session': { de: 'Zur Session hinzufügen', en: 'Add to Session' },
+  'move_select_session': { de: 'Session auswählen...', en: 'Select session...' },
+  'move_added_to_session': { de: 'Move zur Session hinzugefügt', en: 'Move added to session' },
+  'move_add_to_session_failed': { de: 'Konnte nicht zur Session hinzugefügt werden', en: 'Failed to add to session' },
+  'move_remove_from_session_failed': { de: 'Konnte nicht aus Session entfernt werden', en: 'Failed to remove from session' },
+  'no_linked_sessions': { de: 'Noch keiner Session zugewiesen.', en: 'Not assigned to any session yet.' },
+
+  // ── Move sort (sessions picker) ──
+  'session_move_sort': { de: 'Sortierung', en: 'Sort' },
+  'sort_a_z': { de: 'A–Z', en: 'A–Z' },
+  'sort_z_a': { de: 'Z–A', en: 'Z–A' },
+  'sort_newest': { de: 'Neueste', en: 'Newest' },
+  'sort_oldest': { de: 'Älteste', en: 'Oldest' },
 };
 
 /**

@@ -117,3 +117,26 @@ export async function removeMoveFromSession(sessionId: number, moveId: number): 
 		.eq('move_id', moveId);
 	if (error) throw error;
 }
+
+/**
+ * Get all sessions that contain a specific move.
+ */
+export async function getSessionsForMove(moveId: number): Promise<Session[]> {
+	const { data: mappings, error: mapError } = await db
+		.from('session_to_moves')
+		.select('session_id')
+		.eq('move_id', moveId);
+
+	if (mapError) throw mapError;
+	if (!mappings || mappings.length === 0) return [];
+
+	const sessionIds = mappings.map((m: any) => m.session_id);
+	const { data: sessions, error } = await db
+		.from('training_sessions')
+		.select('*')
+		.in('session_id', sessionIds)
+		.order('session_date', { ascending: false });
+
+	if (error) throw error;
+	return (sessions ?? []).map((s: any) => ({ ...s, moves: [] as Move[] }));
+}
