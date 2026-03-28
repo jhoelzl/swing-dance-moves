@@ -1,6 +1,7 @@
 <script lang="ts">
   import "../app.css";
   import { onMount } from "svelte";
+  import type { Session as AuthSession } from "@supabase/supabase-js";
   import { supabase, supabaseConfigError } from "$lib/supabase";
   import Toast from "$lib/components/Toast.svelte";
   import {
@@ -34,7 +35,17 @@
   let loadError = $state(false);
   let loadErrorMessage = $state("");
 
+  function resetAppState() {
+    allMoves.set([]);
+    tagGroups.set([]);
+    allVideos.set([]);
+    allSessions.set([]);
+    userSettings.set(null);
+  }
+
   async function loadData() {
+    loadError = false;
+    loadErrorMessage = "";
     try {
       const [moves, tags, videos, settings, sessions] = await Promise.all([
         getAllMoves(),
@@ -55,6 +66,20 @@
     } finally {
       isLoading.set(false);
     }
+  }
+
+  async function syncSessionState(session: AuthSession | null) {
+    isAdmin.set(!!session);
+
+    if (session) {
+      isLoading.set(true);
+      await loadData();
+      return;
+    }
+
+    resetAppState();
+    isLoading.set(false);
+    goto(`${base}/login`);
   }
 
   // Reactively update the lang attribute on <html> based on user language setting
@@ -81,28 +106,19 @@
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      isAdmin.set(!!session);
-
-      if (session) {
-        await loadData();
-      } else {
-        isLoading.set(false);
-        goto(`${base}/login`);
-      }
+      await syncSessionState(session);
 
       const { data } = supabase.auth.onAuthStateChange(
-        async (_event, session) => {
-          isAdmin.set(!!session);
-          if (session) {
-            await loadData();
-          } else {
-            allMoves.set([]);
-            tagGroups.set([]);
-            allVideos.set([]);
-            allSessions.set([]);
-            userSettings.set(null);
-            goto(`${base}/login`);
+        (event, session) => {
+          if (event === "TOKEN_REFRESHED") {
+            isAdmin.set(!!session);
+            return;
           }
+
+          // Supabase recommends avoiding awaited client calls inside this callback.
+          window.setTimeout(() => {
+            void syncSessionState(session);
+          }, 0);
         },
       );
 
@@ -127,11 +143,7 @@
   async function handleLogout() {
     await supabase.auth.signOut();
     isAdmin.set(false);
-    allMoves.set([]);
-    tagGroups.set([]);
-    allVideos.set([]);
-    allSessions.set([]);
-    userSettings.set(null);
+    resetAppState();
     goto(`${base}/login`);
   }
 </script>
