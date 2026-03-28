@@ -297,6 +297,13 @@
                           preload="metadata"
                           class="w-full rounded-lg"
                           title={ref.video.title}
+                          onloadedmetadata={(e) => {
+                            const startSec = timecodeToSeconds(ref.start_time);
+                            if (startSec > 0) {
+                              const vid = e.currentTarget as HTMLVideoElement;
+                              vid.currentTime = startSec;
+                            }
+                          }}
                         ></video>
                       </div>
                     {/if}
