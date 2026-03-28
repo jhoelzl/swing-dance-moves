@@ -265,6 +265,7 @@ export async function importMoves(file: File, existingMoves: Move[]): Promise<Im
 			name: move.name,
 			synonyms: move.synonyms,
 			description: move.description,
+			learned_on: '',
 			tagIds,
 			videoRefs: []
 		};

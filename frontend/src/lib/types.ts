@@ -23,6 +23,7 @@ export interface Move {
 	name: string;
 	synonyms: string | null;
 	description: string | null;
+	learned_on: string | null; // ISO date string, e.g. '2026-03-28'
 	// Joined fields
 	tags?: Tag[];
 	videoRefs?: MoveToVideo[];
@@ -86,6 +87,7 @@ export interface MoveFormData {
 	name: string;
 	synonyms: string;
 	description: string;
+	learned_on: string;
 	tagIds: number[];
 	videoRefs: MoveVideoRef[];
 }
@@ -148,6 +150,7 @@ interface DbMoveRow {
 	name: string;
 	synonyms: string | null;
 	description: string | null;
+	learned_on: string | null;
 }
 
 interface DbMoveToTagRow {

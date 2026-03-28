@@ -13,6 +13,7 @@ const moves: Move[] = [
 		name: 'Swing Out',
 		synonyms: 'Open Out',
 		description: 'Classic Lindy Hop move',
+		learned_on: null,
 		tags: [
 			{ tag_id: 1, tag_type_id: 1, tag_name: 'Lindy Hop', tag_label: 'primary', tag_css: '', tag_sort: 0 },
 			{ tag_id: 2, tag_type_id: 2, tag_name: 'Beginner', tag_label: 'success', tag_css: '', tag_sort: 0 }
@@ -24,6 +25,7 @@ const moves: Move[] = [
 		name: 'Tuck Turn',
 		synonyms: '',
 		description: 'A turn pattern for partners',
+		learned_on: null,
 		tags: [{ tag_id: 1, tag_type_id: 1, tag_name: 'Lindy Hop', tag_label: 'primary', tag_css: '', tag_sort: 0 }],
 		hasVideo: false
 	},
@@ -32,6 +34,7 @@ const moves: Move[] = [
 		name: 'Basic Charleston',
 		synonyms: 'Charleston Basic',
 		description: 'Solo jazz rhythm',
+		learned_on: null,
 		tags: [{ tag_id: 3, tag_type_id: 1, tag_name: 'Charleston', tag_label: 'warning', tag_css: '', tag_sort: 0 }],
 		hasVideo: false
 	}

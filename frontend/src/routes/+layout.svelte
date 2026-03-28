@@ -492,6 +492,33 @@
               </svg>
               {t("nav_sessions")}
             </a>
+            <a
+              href="{base}/calendar"
+              onclick={(e) => {
+                e.preventDefault();
+                activeTab.set("calendar");
+                goto(`${base}/calendar`);
+              }}
+              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
+            {$activeTab === 'calendar'
+                ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              {t("nav_calendar")}
+            </a>
           </div>
         </div>
       {/if}
