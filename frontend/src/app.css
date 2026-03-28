@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import url('tailwindcss');
 
 /* Enable class-based dark mode (Tailwind CSS 4) */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -34,18 +34,28 @@ html.dark {
 .move-card {
 	transition: box-shadow 0.2s ease, transform 0.15s ease;
 }
+
 .move-card:hover {
-	box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.08);
+	box-shadow: 0 4px 20px -4px rgb(0 0 0 / 8%);
 }
+
 html.dark .move-card:hover {
-	box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 4px 20px -4px rgb(0 0 0 / 30%);
 }
 
 /* Filter panel slide */
 .filter-panel {
-	animation: slideDown 0.2s ease-out;
+	animation: slide-down 0.2s ease-out;
 }
-@keyframes slideDown {
-	from { opacity: 0; transform: translateY(-8px); }
-	to { opacity: 1; transform: translateY(0); }
+
+@keyframes slide-down {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
