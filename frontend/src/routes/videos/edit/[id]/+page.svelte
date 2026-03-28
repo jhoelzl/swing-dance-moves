@@ -80,7 +80,14 @@
       addToast(t("video_deleted"));
       goto(`${base}/videos`);
     } catch (err) {
-      error = err instanceof Error ? err.message : t("failed_delete_video");
+      error =
+        err instanceof Error &&
+        err.message ===
+          "Cannot delete this video while it is still linked to moves."
+          ? t("delete_blocked_video_in_use")
+          : err instanceof Error
+            ? err.message
+            : t("failed_delete_video");
     } finally {
       deleting = false;
     }

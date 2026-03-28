@@ -1,6 +1,12 @@
 import { supabase } from '$lib/supabase';
 import type { Tag, TagType } from '$lib/types';
 
+function createDeleteConstraintError(message: string): Error {
+	const error = new Error(message);
+	error.name = 'DeleteConstraintError';
+	return error;
+}
+
 // ── Tag Types ──
 
 export async function getAllTagTypes(): Promise<TagType[]> {
@@ -42,12 +48,15 @@ export async function updateTagType(
 }
 
 export async function deleteTagType(id: number): Promise<void> {
-	// First delete all tags belonging to this type
-	const { error: tagErr } = await supabase
+	const { count, error: countError } = await supabase
 		.from('tags')
-		.delete()
+		.select('tag_id', { count: 'exact', head: true })
 		.eq('tag_type_id', id);
-	if (tagErr) throw tagErr;
+	if (countError) throw countError;
+
+	if ((count ?? 0) > 0) {
+		throw createDeleteConstraintError('Cannot delete this tag group while it still contains tags.');
+	}
 
 	const { error } = await supabase
 		.from('tag_types')
@@ -107,12 +116,15 @@ export async function updateTag(
 }
 
 export async function deleteTag(id: number): Promise<void> {
-	// First delete all move-to-tag mappings for this tag
-	const { error: mapErr } = await supabase
+	const { count, error: countError } = await supabase
 		.from('moves_to_tags')
-		.delete()
+		.select('id', { count: 'exact', head: true })
 		.eq('tag_id', id);
-	if (mapErr) throw mapErr;
+	if (countError) throw countError;
+
+	if ((count ?? 0) > 0) {
+		throw createDeleteConstraintError('Cannot delete this tag while it is still assigned to moves.');
+	}
 
 	const { error } = await supabase
 		.from('tags')

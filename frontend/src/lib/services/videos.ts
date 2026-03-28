@@ -3,6 +3,12 @@ import type { Video, VideoFormData, MoveToVideo } from '$lib/types';
 
 const db: any = supabase;
 
+function createDeleteConstraintError(message: string): Error {
+	const error = new Error(message);
+	error.name = 'DeleteConstraintError';
+	return error;
+}
+
 /**
  * Fetch all videos ordered by title.
  */
@@ -68,16 +74,19 @@ export async function updateVideo(videoId: number, data: VideoFormData): Promise
 }
 
 /**
- * Delete a video and its move references.
+ * Delete a video when no move references remain.
  */
 export async function deleteVideo(videoId: number): Promise<void> {
-	// Delete move-video references first
-	const { error: refError } = await db
+	const { count, error: countError } = await db
 		.from('moves_to_videos')
-		.delete()
+		.select('id', { count: 'exact', head: true })
 		.eq('video_id', videoId);
 
-	if (refError) throw refError;
+	if (countError) throw countError;
+
+	if ((count ?? 0) > 0) {
+		throw createDeleteConstraintError('Cannot delete this video while it is still linked to moves.');
+	}
 
 	const { error } = await db
 		.from('videos')

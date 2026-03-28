@@ -155,17 +155,22 @@
   }
 
   function confirmDeleteType(tt: TagType) {
-    const tagCount =
-      groups.find((g) => g.tagType.tag_type_id === tt.tag_type_id)?.tags
-        .length ?? 0;
-    confirmMessage = `${t("confirm_delete_category")} "${tt.tag_type_name}"? ${tagCount > 0 ? `${tagCount} ${t("tags_also_deleted")}` : ""}`;
+    confirmMessage = `${t("confirm_delete_category")} "${tt.tag_type_name}"?`;
     confirmAction = async () => {
       try {
         await deleteTagType(tt.tag_type_id);
         await reloadAll();
         showStatus("success", `${t("category_deleted")}`);
       } catch (err) {
-        showStatus("error", `Error: ${(err as Error).message}`);
+        const message =
+          err instanceof Error &&
+          err.message ===
+            "Cannot delete this tag group while it still contains tags."
+            ? t("delete_blocked_tag_group_has_tags")
+            : err instanceof Error
+              ? err.message
+              : t("unexpected_error");
+        showStatus("error", message);
       }
     };
     showConfirm = true;
@@ -229,7 +234,15 @@
         await reloadAll();
         showStatus("success", `${t("tag_deleted")}`);
       } catch (err) {
-        showStatus("error", `Error: ${(err as Error).message}`);
+        const message =
+          err instanceof Error &&
+          err.message ===
+            "Cannot delete this tag while it is still assigned to moves."
+            ? t("delete_blocked_tag_in_use")
+            : err instanceof Error
+              ? err.message
+              : t("unexpected_error");
+        showStatus("error", message);
       }
     };
     showConfirm = true;
