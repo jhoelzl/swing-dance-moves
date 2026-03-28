@@ -34,6 +34,15 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
+            - name: Load secrets from 1Password
+              uses: 1password/load-secrets-action@v2
+              with:
+                  export-env: true
+              env:
+                  OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+                  VITE_SUPABASE_URL: op://swing-dance-moves/Supabase/url
+                  VITE_SUPABASE_ANON_KEY: op://swing-dance-moves/Supabase/anon-key
+
             - name: Security audit (production dependencies)
               run: npm run audit
 
@@ -55,8 +64,6 @@ jobs:
             - name: Build
               run: npm run build
               env:
-                  VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-                  VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
                   BASE_PATH: "/${{ github.event.repository.name }}"
 
             - name: Upload artifact
