@@ -65,7 +65,7 @@
    * Parse description text and identify timestamp patterns like "5:10", "1:30:05"
    * at the beginning of lines. Returns segments for rendering.
    */
-  function parseDescription(text: string): DescSegment[] {
+  function parseDescription(text: string | null): DescSegment[] {
     if (!text) return [];
     const segments: DescSegment[] = [];
     // Match timestamps at start of line: e.g. "5:10", "17:10", "1:30:05"

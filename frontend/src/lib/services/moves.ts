@@ -1,11 +1,13 @@
 import { supabase } from '$lib/supabase';
 import type { Move, Tag, TagGroup, TagType, MoveFormData, MoveToVideo, Video } from '$lib/types';
 
+const db: any = supabase;
+
 /**
  * Fetch all moves with their associated tags.
  */
 export async function getAllMoves(): Promise<Move[]> {
-	const { data: moves, error: movesError } = await supabase
+	const { data: moves, error: movesError } = await db
 		.from('moves')
 		.select('*')
 		.order('name');
@@ -14,14 +16,14 @@ export async function getAllMoves(): Promise<Move[]> {
 	if (!moves) return [];
 
 	// Fetch all move-to-tag mappings
-	const { data: mappings, error: mapError } = await supabase
+	const { data: mappings, error: mapError } = await db
 		.from('moves_to_tags')
 		.select('move_id, tag_id');
 
 	if (mapError) throw mapError;
 
 	// Fetch all tags with their types
-	const { data: tags, error: tagsError } = await supabase
+	const { data: tags, error: tagsError } = await db
 		.from('tags')
 		.select('*, tag_types(*)');
 
@@ -44,13 +46,13 @@ export async function getAllMoves(): Promise<Move[]> {
 	}
 
 	// Fetch all move-to-video mappings to know which moves have videos
-	const { data: videoMappings } = await supabase
+	const { data: videoMappings } = await db
 		.from('moves_to_videos')
 		.select('move_id');
 
 	const moveIdsWithVideo = new Set((videoMappings ?? []).map((m: any) => m.move_id));
 
-	return moves.map((move) => ({
+	return moves.map((move: any) => ({
 		...move,
 		tags: (moveTagMap.get(move.move_id) ?? []).sort((a, b) => {
 			const typeOrder = (a.tag_type?.sort_order ?? 0) - (b.tag_type?.sort_order ?? 0);
@@ -105,14 +107,14 @@ export function getRandomMoves(moves: Move[], count: number): Move[] {
  * Fetch all tags grouped by tag type.
  */
 export async function getAllTagsGrouped(): Promise<TagGroup[]> {
-	const { data: tagTypes, error: typesError } = await supabase
+	const { data: tagTypes, error: typesError } = await db
 		.from('tag_types')
 		.select('*')
 		.order('sort_order');
 
 	if (typesError) throw typesError;
 
-	const { data: tags, error: tagsError } = await supabase
+	const { data: tags, error: tagsError } = await db
 		.from('tags')
 		.select('*')
 		.order('tag_sort')
@@ -120,9 +122,9 @@ export async function getAllTagsGrouped(): Promise<TagGroup[]> {
 
 	if (tagsError) throw tagsError;
 
-	return (tagTypes ?? []).map((type) => ({
+	return (tagTypes ?? []).map((type: any) => ({
 		tagType: type as TagType,
-		tags: (tags ?? []).filter((t) => t.tag_type_id === type.tag_type_id) as Tag[]
+		tags: (tags ?? []).filter((t: any) => t.tag_type_id === type.tag_type_id) as Tag[]
 	}));
 }
 
@@ -130,7 +132,7 @@ export async function getAllTagsGrouped(): Promise<TagGroup[]> {
  * Create a new move with tags.
  */
 export async function createMove(data: MoveFormData): Promise<Move> {
-	const { data: move, error } = await supabase
+	const { data: move, error } = await db
 		.from('moves')
 		.insert({
 			name: data.name,
@@ -144,7 +146,7 @@ export async function createMove(data: MoveFormData): Promise<Move> {
 
 	// Insert tag mappings
 	if (data.tagIds.length > 0) {
-		const { error: tagError } = await supabase.from('moves_to_tags').insert(
+		const { error: tagError } = await db.from('moves_to_tags').insert(
 			data.tagIds.map((tagId) => ({
 				move_id: move.move_id,
 				tag_id: tagId
@@ -155,7 +157,7 @@ export async function createMove(data: MoveFormData): Promise<Move> {
 
 	// Insert video references
 	if (data.videoRefs && data.videoRefs.length > 0) {
-		const { error: vidError } = await supabase.from('moves_to_videos').insert(
+		const { error: vidError } = await db.from('moves_to_videos').insert(
 			data.videoRefs.map((ref) => ({
 				move_id: move.move_id,
 				video_id: ref.video_id,
@@ -173,7 +175,7 @@ export async function createMove(data: MoveFormData): Promise<Move> {
  * Update an existing move and its tags.
  */
 export async function updateMove(moveId: number, data: MoveFormData): Promise<Move> {
-	const { data: move, error } = await supabase
+	const { data: move, error } = await db
 		.from('moves')
 		.update({
 			name: data.name,
@@ -187,7 +189,7 @@ export async function updateMove(moveId: number, data: MoveFormData): Promise<Mo
 	if (error) throw error;
 
 	// Delete old tag mappings
-	const { error: delError } = await supabase
+	const { error: delError } = await db
 		.from('moves_to_tags')
 		.delete()
 		.eq('move_id', moveId);
@@ -196,7 +198,7 @@ export async function updateMove(moveId: number, data: MoveFormData): Promise<Mo
 
 	// Insert new tag mappings
 	if (data.tagIds.length > 0) {
-		const { error: tagError } = await supabase.from('moves_to_tags').insert(
+		const { error: tagError } = await db.from('moves_to_tags').insert(
 			data.tagIds.map((tagId) => ({
 				move_id: moveId,
 				tag_id: tagId
@@ -206,7 +208,7 @@ export async function updateMove(moveId: number, data: MoveFormData): Promise<Mo
 	}
 
 	// Delete old video references
-	const { error: delVidError } = await supabase
+	const { error: delVidError } = await db
 		.from('moves_to_videos')
 		.delete()
 		.eq('move_id', moveId);
@@ -215,7 +217,7 @@ export async function updateMove(moveId: number, data: MoveFormData): Promise<Mo
 
 	// Insert new video references
 	if (data.videoRefs && data.videoRefs.length > 0) {
-		const { error: vidError } = await supabase.from('moves_to_videos').insert(
+		const { error: vidError } = await db.from('moves_to_videos').insert(
 			data.videoRefs.map((ref) => ({
 				move_id: moveId,
 				video_id: ref.video_id,
@@ -233,21 +235,21 @@ export async function updateMove(moveId: number, data: MoveFormData): Promise<Mo
  * Delete a move and its tag mappings.
  */
 export async function deleteMove(moveId: number): Promise<void> {
-	const { error: tagError } = await supabase
+	const { error: tagError } = await db
 		.from('moves_to_tags')
 		.delete()
 		.eq('move_id', moveId);
 
 	if (tagError) throw tagError;
 
-	const { error: videoError } = await supabase
+	const { error: videoError } = await db
 		.from('moves_to_videos')
 		.delete()
 		.eq('move_id', moveId);
 
 	if (videoError) throw videoError;
 
-	const { error } = await supabase.from('moves').delete().eq('move_id', moveId);
+	const { error } = await db.from('moves').delete().eq('move_id', moveId);
 
 	if (error) throw error;
 }
@@ -256,7 +258,7 @@ export async function deleteMove(moveId: number): Promise<void> {
  * Get a single move by ID.
  */
 export async function getMoveById(moveId: number): Promise<Move | null> {
-	const { data: move, error } = await supabase
+	const { data: move, error } = await db
 		.from('moves')
 		.select('*')
 		.eq('move_id', moveId)
@@ -264,12 +266,12 @@ export async function getMoveById(moveId: number): Promise<Move | null> {
 
 	if (error) return null;
 
-	const { data: mappings } = await supabase
+	const { data: mappings } = await db
 		.from('moves_to_tags')
 		.select('tag_id')
 		.eq('move_id', moveId);
 
-	const { data: tags } = await supabase.from('tags').select('*, tag_types(*)');
+	const { data: tags } = await db.from('tags').select('*, tag_types(*)');
 
 	const tagMap = new Map<number, Tag>();
 	for (const tag of tags ?? []) {
@@ -277,18 +279,18 @@ export async function getMoveById(moveId: number): Promise<Move | null> {
 		tagMap.set(t.tag_id, { ...t, tag_type: t.tag_types });
 	}
 
-	const moveTags = (mappings ?? []).map((m) => tagMap.get(m.tag_id)).filter(Boolean) as Tag[];
+	const moveTags = (mappings ?? []).map((m: any) => tagMap.get(m.tag_id)).filter(Boolean) as Tag[];
 
 	// Fetch video references
-	const { data: videoMappings } = await supabase
+	const { data: videoMappings } = await db
 		.from('moves_to_videos')
 		.select('*')
 		.eq('move_id', moveId);
 
 	let videoRefs: MoveToVideo[] = [];
 	if (videoMappings && videoMappings.length > 0) {
-		const videoIds = videoMappings.map((m) => m.video_id);
-		const { data: videos } = await supabase
+		const videoIds = videoMappings.map((m: any) => m.video_id);
+		const { data: videos } = await db
 			.from('videos')
 			.select('*')
 			.in('video_id', videoIds);
@@ -298,7 +300,7 @@ export async function getMoveById(moveId: number): Promise<Move | null> {
 			videoMap.set(v.video_id, v as Video);
 		}
 
-		videoRefs = videoMappings.map((m) => ({
+		videoRefs = videoMappings.map((m: any) => ({
 			...m,
 			video: videoMap.get(m.video_id)
 		})) as MoveToVideo[];

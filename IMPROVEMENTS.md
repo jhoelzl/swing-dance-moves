@@ -1,7 +1,7 @@
 # Improvements – Swing Dance Moves PWA
 
 Empfohlene Verbesserungen, priorisiert nach Wichtigkeit.
-Stand: Juli 2025
+Stand: März 2026
 
 ---
 
@@ -39,6 +39,9 @@ Stand: Juli 2025
 - **Unbenutzter `onMount` Import entfernt** – Ungenutzter `import { onMount }` aus `MoveForm.svelte` entfernt.
 - **`handleMoveDeleted` optimiert** – Nach Move-Löschung wird nur noch `getAllMoves()` aufgerufen statt auch Tags und Videos neu zu laden. Ungenutzte Imports entfernt.
 - **Dynamisches `lang`-Attribut** – `document.documentElement.lang` wird in `+layout.svelte` per `$effect` reaktiv basierend auf `userSettings.language` gesetzt.
+- **Dropbox-Startzeit für Move-Referenzen** – Bei Dropbox-Videos in `MoveCard.svelte` wird `start_time` beim Laden via HTML5-Video-`currentTime` angewendet.
+- **Dropbox-Endzeit für Move-Referenzen** – Bei gesetzter `end_time` pausieren Dropbox-Videos in `MoveCard.svelte` automatisch am Endzeitpunkt.
+- **Type-Check stabilisiert** – `npm run check` läuft wieder ohne Errors (aktuell: **0 Errors**, nur verbleibende A11y-Warnings in `tags/+page.svelte`).
 
 ---
 

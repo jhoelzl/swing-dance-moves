@@ -1,11 +1,13 @@
 import { supabase } from '$lib/supabase';
 import type { Video, VideoFormData, MoveToVideo } from '$lib/types';
 
+const db: any = supabase;
+
 /**
  * Fetch all videos ordered by title.
  */
 export async function getAllVideos(): Promise<Video[]> {
-	const { data, error } = await supabase
+	const { data, error } = await db
 		.from('videos')
 		.select('*')
 		.order('title');
@@ -18,7 +20,7 @@ export async function getAllVideos(): Promise<Video[]> {
  * Get a single video by ID.
  */
 export async function getVideoById(videoId: number): Promise<Video | null> {
-	const { data, error } = await supabase
+	const { data, error } = await db
 		.from('videos')
 		.select('*')
 		.eq('video_id', videoId)
@@ -32,7 +34,7 @@ export async function getVideoById(videoId: number): Promise<Video | null> {
  * Create a new video.
  */
 export async function createVideo(data: VideoFormData): Promise<Video> {
-	const { data: video, error } = await supabase
+	const { data: video, error } = await db
 		.from('videos')
 		.insert({
 			title: data.title,
@@ -50,7 +52,7 @@ export async function createVideo(data: VideoFormData): Promise<Video> {
  * Update an existing video.
  */
 export async function updateVideo(videoId: number, data: VideoFormData): Promise<Video> {
-	const { data: video, error } = await supabase
+	const { data: video, error } = await db
 		.from('videos')
 		.update({
 			title: data.title,
@@ -70,14 +72,14 @@ export async function updateVideo(videoId: number, data: VideoFormData): Promise
  */
 export async function deleteVideo(videoId: number): Promise<void> {
 	// Delete move-video references first
-	const { error: refError } = await supabase
+	const { error: refError } = await db
 		.from('moves_to_videos')
 		.delete()
 		.eq('video_id', videoId);
 
 	if (refError) throw refError;
 
-	const { error } = await supabase
+	const { error } = await db
 		.from('videos')
 		.delete()
 		.eq('video_id', videoId);
@@ -102,7 +104,7 @@ export function searchVideos(videos: Video[], query: string): Video[] {
  * Get video references for a move (with joined video data).
  */
 export async function getVideoRefsForMove(moveId: number): Promise<MoveToVideo[]> {
-	const { data: mappings, error: mapError } = await supabase
+	const { data: mappings, error: mapError } = await db
 		.from('moves_to_videos')
 		.select('*')
 		.eq('move_id', moveId);
@@ -111,7 +113,7 @@ export async function getVideoRefsForMove(moveId: number): Promise<MoveToVideo[]
 	if (!mappings || mappings.length === 0) return [];
 
 	const videoIds = mappings.map((m: any) => m.video_id);
-	const { data: videos, error: vidError } = await supabase
+	const { data: videos, error: vidError } = await db
 		.from('videos')
 		.select('*')
 		.in('video_id', videoIds);
@@ -138,7 +140,7 @@ export async function getLinkedMovesForVideo(videoId: number): Promise<{
 	start_time: string;
 	end_time: string;
 }[]> {
-	const { data: mappings, error: mapError } = await supabase
+	const { data: mappings, error: mapError } = await db
 		.from('moves_to_videos')
 		.select('*')
 		.eq('video_id', videoId);
@@ -147,7 +149,7 @@ export async function getLinkedMovesForVideo(videoId: number): Promise<{
 	if (!mappings || mappings.length === 0) return [];
 
 	const moveIds = mappings.map((m: any) => m.move_id);
-	const { data: moves, error: movError } = await supabase
+	const { data: moves, error: movError } = await db
 		.from('moves')
 		.select('move_id, name')
 		.in('move_id', moveIds);
