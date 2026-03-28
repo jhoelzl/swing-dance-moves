@@ -56,6 +56,23 @@
     return `${d}.${m}.${y}`;
   }
 
+  function getSessionIdFromHash(hash: string): number | null {
+    const match = hash.match(/^#session-(\d+)$/);
+    if (!match) return null;
+    const parsed = Number(match[1]);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function expandSessionFromHash(hash: string) {
+    const sessionId = getSessionIdFromHash(hash);
+    if (!sessionId) return;
+
+    const exists = sessions.some((session) => session.session_id === sessionId);
+    if (!exists) return;
+
+    expandedSessionId = sessionId;
+  }
+
   /** Moves not yet assigned to the given session, sorted by moveSortOrder. */
   function availableMoves(session: Session): Move[] {
     const assigned = new Set((session.moves ?? []).map((m) => m.move_id));
@@ -77,17 +94,29 @@
   }
 
   // ── lifecycle ─────────────────────────────────────────────────
-  onMount(async () => {
-    activeTab.set("sessions");
-    try {
-      sessions = await getAllSessions();
-      allSessions.set(sessions);
-    } catch (err) {
-      console.error("Failed to load sessions:", err);
-      addToast(t("session_create_failed"), "error");
-    } finally {
-      loading = false;
+  onMount(() => {
+    const handleHashChange = () => expandSessionFromHash(window.location.hash);
+    window.addEventListener("hashchange", handleHashChange);
+
+    async function loadSessions() {
+      activeTab.set("sessions");
+      try {
+        sessions = await getAllSessions();
+        allSessions.set(sessions);
+        expandSessionFromHash(window.location.hash);
+      } catch (err) {
+        console.error("Failed to load sessions:", err);
+        addToast(t("session_create_failed"), "error");
+      } finally {
+        loading = false;
+      }
     }
+
+    void loadSessions();
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
   });
 
   // ── create session ────────────────────────────────────────────
