@@ -47,19 +47,30 @@ swing-dance-moves/
 ├── scripts/
 │   └── init.sql               # PostgreSQL schema + seed + RLS setup for Supabase
 ├── frontend/                  # SvelteKit application
+│   ├── .env.example           # Environment variable template
+│   ├── cspell.json            # Project dictionary for spell checking
+│   ├── eslint.config.js       # ESLint flat config
+│   ├── package.json
+│   ├── stylelint.config.js    # Stylelint config
+│   ├── svelte.config.js       # SvelteKit config with static adapter
+│   ├── tsconfig.json
+│   ├── vite.config.ts         # Vite config with Tailwind + PWA + Vitest
 │   ├── src/
 │   │   ├── app.css            # Global styles, Tailwind import, custom variants
 │   │   ├── app.html           # HTML shell with meta tags & PWA links
 │   │   ├── lib/
 │   │   │   ├── i18n.ts        # DE/EN translations and translation helper
+│   │   │   ├── index.ts       # Public lib exports
 │   │   │   ├── stores.ts      # Global stores (filters, auth, dark mode, tab state, etc.)
 │   │   │   ├── supabase.ts    # Supabase client singleton
 │   │   │   ├── types.ts       # TypeScript interfaces (moves, tags, videos, sessions, settings)
+│   │   │   ├── utils.test.ts   # Unit tests for lib helpers
 │   │   │   ├── utils.ts       # URL helpers, timecode parsing, debounce, tag colors
 │   │   │   ├── services/      # Data access layer (moves, tags, videos, sessions, settings)
 │   │   │   ├── components/
 │   │   │   │   ├── MoveCard.svelte     # Expandable move card
 │   │   │   │   ├── MoveForm.svelte     # Move create/edit form
+│   │   │   │   ├── SkeletonCard.svelte # Loading placeholder card
 │   │   │   │   ├── VideoCard.svelte    # Video list card
 │   │   │   │   ├── VideoForm.svelte    # Video create/edit form
 │   │   │   │   ├── FilterChips.svelte  # Grouped tag filter chips
@@ -68,9 +79,11 @@ swing-dance-moves/
 │   │   │   │   └── ConfirmModal.svelte # Reusable confirmation modal
 │   │   │   └── assets/        # Static assets
 │   │   └── routes/
+│   │       ├── +error.svelte   # Error boundary page
 │   │       ├── +layout.svelte  # App shell (nav, auth gate, dark mode)
 │   │       ├── +layout.ts      # SPA config (`ssr=false`, `prerender=true`)
 │   │       ├── +page.svelte    # Main moves page
+│   │       ├── calendar/        # Visual calendar for sessions and learned moves
 │   │       ├── login/          # Login page
 │   │       ├── new/            # Create move page
 │   │       ├── edit/[id]/      # Edit move page
@@ -79,11 +92,8 @@ swing-dance-moves/
 │   │       ├── tags/           # Tag and tag type management pages
 │   │       ├── sessions/       # Training sessions pages
 │   │       └── settings/       # User/app settings page
-│   ├── cspell.json             # Project dictionary for spell checking
-│   ├── svelte.config.js        # SvelteKit config with static adapter
-│   ├── vite.config.ts          # Vite config with Tailwind + PWA + Vitest
-│   ├── package.json
-│   └── tsconfig.json
+│   └── static/
+│       └── robots.txt          # Static public files
 ├── IMPROVEMENTS.md             # Project improvement notes / backlog
 └── backup/                     # Legacy PHP app snapshot and exports
 ```

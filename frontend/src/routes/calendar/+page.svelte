@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { base } from "$app/paths";
   import { onMount } from "svelte";
   import { activeTab, allMoves, allSessions } from "$lib/stores";
   import { getLang, t } from "$lib/i18n";
@@ -17,6 +18,7 @@
     isToday: boolean;
     sessionCount: number;
     learnedCount: number;
+    sessions: CalendarEntry[];
   };
 
   let currentMonth = $state(startOfMonth(new Date()));
@@ -72,7 +74,8 @@
       const date = addDays(start, i);
       const iso = toIsoDate(date);
       const entries = entriesByDate.get(iso) ?? [];
-      const sessionCount = entries.filter((e) => e.type === "session").length;
+      const sessions = entries.filter((e) => e.type === "session");
+      const sessionCount = sessions.length;
       const learnedCount = entries.filter((e) => e.type === "learned").length;
 
       cells.push({
@@ -82,6 +85,7 @@
         isToday: iso === toIsoDate(new Date()),
         sessionCount,
         learnedCount,
+        sessions,
       });
     }
 
@@ -219,12 +223,16 @@
 
     <div class="grid grid-cols-7">
       {#each dayCells as cell}
-        <button
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div
           onclick={() => (selectedDate = cell.iso)}
           class="min-h-[88px] px-2 py-1.5 text-left border-r border-b border-gray-100 dark:border-gray-800 transition-colors cursor-pointer
-          {cell.inMonth
-            ? 'bg-white dark:bg-gray-900'
-            : 'bg-gray-50 dark:bg-gray-950 text-gray-400 dark:text-gray-600'}
+          {cell.sessionCount > 0
+            ? 'bg-green-50/90 dark:bg-green-950/25'
+            : cell.inMonth
+              ? 'bg-white dark:bg-gray-900'
+              : 'bg-gray-50 dark:bg-gray-950 text-gray-400 dark:text-gray-600'}
           {selectedDate === cell.iso
             ? 'ring-2 ring-blue-500/40 ring-inset'
             : 'hover:bg-blue-50/50 dark:hover:bg-blue-950/20'}"
@@ -239,15 +247,26 @@
             {cell.date.getDate()}
           </div>
 
-          {#if cell.sessionCount > 0 || cell.learnedCount > 0}
+          {#if cell.sessions.length > 0 || cell.learnedCount > 0}
             <div class="mt-1.5 space-y-1">
-              {#if cell.sessionCount > 0}
-                <div
-                  class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800"
+              {#each cell.sessions.slice(0, 2) as session (session.id)}
+                <a
+                  href="{base}/sessions#session-{session.id}"
+                  title={session.label}
+                  onclick={(event) => event.stopPropagation()}
+                  class="block max-w-full truncate rounded px-1.5 py-0.5 text-[10px] font-semibold bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800 hover:bg-green-200/80 dark:hover:bg-green-900/60 transition-colors"
                 >
-                  {t("calendar_sessions")}: {cell.sessionCount}
+                  {session.label}
+                </a>
+              {/each}
+              {#if cell.sessionCount > 2}
+                <div
+                  class="text-[10px] font-semibold text-green-700 dark:text-green-300 px-1.5"
+                >
+                  +{cell.sessionCount - 2}
                 </div>
               {/if}
+
               {#if cell.learnedCount > 0}
                 <div
                   class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
@@ -257,7 +276,7 @@
               {/if}
             </div>
           {/if}
-        </button>
+        </div>
       {/each}
     </div>
   </div>
@@ -287,7 +306,16 @@
                 ? t("calendar_sessions")
                 : t("calendar_learned_moves")}:
             </span>
-            <span>{entry.label}</span>
+            {#if entry.type === "session"}
+              <a
+                href="{base}/sessions#session-{entry.id}"
+                class="underline decoration-green-400/70 hover:decoration-green-600 dark:hover:decoration-green-300"
+              >
+                {entry.label}
+              </a>
+            {:else}
+              <span>{entry.label}</span>
+            {/if}
           </div>
         {/each}
       </div>
