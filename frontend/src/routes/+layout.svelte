@@ -231,7 +231,7 @@
           >
             <span
               class="text-2xl group-hover:scale-110 transition-transform duration-200"
-              >💃</span
+              >🕺</span
             >
             <h1 class="text-lg font-bold tracking-tight">Swing Moves</h1>
           </a>

@@ -401,6 +401,7 @@
   <div class="space-y-3">
     {#each sessions as session (session.session_id)}
       <div
+        id="session-{session.session_id}"
         class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden"
       >
         <!-- Session header -->
