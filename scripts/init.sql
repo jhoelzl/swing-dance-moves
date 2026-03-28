@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS moves (
     move_id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name varchar(200) NOT NULL,
     synonyms varchar(400) NOT NULL DEFAULT '',
-    description text NOT NULL DEFAULT ''
+    description text NOT NULL DEFAULT '',
+    learned_on date
 );
 
 -- N:M junction table: moves <-> tags

@@ -160,6 +160,8 @@ const translations: Record<string, { de: string; en: string }> = {
   'no_videos_linked': { de: 'Keine Videos verknüpft. Klicke auf "Video hinzufügen", um eine Verknüpfung zu erstellen.', en: 'No videos linked. Click "Add Video" to create a reference.' },
   'saving': { de: 'Wird gespeichert...', en: 'Saving...' },
   'save_move': { de: 'Move speichern', en: 'Save Move' },
+  'learned_on': { de: 'Gelernt am', en: 'Learned on' },
+  'learned_on_optional': { de: 'Optional: Wann hast du diesen Move gelernt?', en: 'Optional: When did you learn this move?' },
 
   // ── VideoForm ──
   'title': { de: 'Titel', en: 'Title' },
@@ -244,6 +246,17 @@ const translations: Record<string, { de: string; en: string }> = {
   'session_singular': { de: 'Session', en: 'Session' },
   'sessions_plural': { de: 'Sessions', en: 'Sessions' },
   'session_move_count': { de: 'Moves', en: 'Moves' },
+
+  // ── Calendar Page ──
+  'nav_calendar': { de: 'Kalender', en: 'Calendar' },
+  'calendar_title': { de: 'Trainingskalender', en: 'Training Calendar' },
+  'calendar_subtitle': { de: 'Sessions und gelernte Moves im Monatsüberblick', en: 'Sessions and learned moves in a monthly overview' },
+  'calendar_prev_month': { de: 'Vorheriger Monat', en: 'Previous month' },
+  'calendar_next_month': { de: 'Nächster Monat', en: 'Next month' },
+  'calendar_today': { de: 'Heute', en: 'Today' },
+  'calendar_sessions': { de: 'Sessions', en: 'Sessions' },
+  'calendar_learned_moves': { de: 'Gelernte Moves', en: 'Learned moves' },
+  'calendar_no_events': { de: 'Keine Einträge in diesem Monat.', en: 'No entries in this month.' },
 
   // ── MoveCard Sessions ──
   'linked_sessions': { de: 'Verknüpfte Sessions', en: 'Linked Sessions' },

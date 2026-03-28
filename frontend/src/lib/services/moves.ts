@@ -137,7 +137,8 @@ export async function createMove(data: MoveFormData): Promise<Move> {
 		.insert({
 			name: data.name,
 			synonyms: data.synonyms,
-			description: data.description
+			description: data.description,
+			learned_on: data.learned_on || null
 		})
 		.select()
 		.single();
@@ -180,7 +181,8 @@ export async function updateMove(moveId: number, data: MoveFormData): Promise<Mo
 		.update({
 			name: data.name,
 			synonyms: data.synonyms,
-			description: data.description
+			description: data.description,
+			learned_on: data.learned_on || null
 		})
 		.eq('move_id', moveId)
 		.select()
@@ -232,22 +234,37 @@ export async function updateMove(moveId: number, data: MoveFormData): Promise<Mo
 }
 
 /**
- * Delete a move and its tag mappings.
+ * Delete a move only when it is not linked from videos or sessions.
  */
 export async function deleteMove(moveId: number): Promise<void> {
+	const { count: videoLinkCount, error: videoLinkError } = await db
+		.from('moves_to_videos')
+		.select('id', { count: 'exact', head: true })
+		.eq('move_id', moveId);
+
+	if (videoLinkError) throw videoLinkError;
+
+	if ((videoLinkCount ?? 0) > 0) {
+		throw new Error('Cannot delete move: linked video references exist.');
+	}
+
+	const { count: sessionLinkCount, error: sessionLinkError } = await db
+		.from('session_to_moves')
+		.select('id', { count: 'exact', head: true })
+		.eq('move_id', moveId);
+
+	if (sessionLinkError) throw sessionLinkError;
+
+	if ((sessionLinkCount ?? 0) > 0) {
+		throw new Error('Cannot delete move: linked training sessions exist.');
+	}
+
 	const { error: tagError } = await db
 		.from('moves_to_tags')
 		.delete()
 		.eq('move_id', moveId);
 
 	if (tagError) throw tagError;
-
-	const { error: videoError } = await db
-		.from('moves_to_videos')
-		.delete()
-		.eq('move_id', moveId);
-
-	if (videoError) throw videoError;
 
 	const { error } = await db.from('moves').delete().eq('move_id', moveId);
 

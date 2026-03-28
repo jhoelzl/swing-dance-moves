@@ -20,6 +20,7 @@
   // Keep in sync when formData changes (avoid reading localData to prevent re-trigger loop)
   $effect(() => {
     const newData = { ...derivedFormData };
+    if (newData.learned_on === undefined) newData.learned_on = "";
     if (!newData.videoRefs) newData.videoRefs = [];
     localData = newData;
   });
@@ -100,6 +101,23 @@
       class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-y"
       placeholder={t("description_placeholder")}
     ></textarea>
+  </div>
+
+  <div>
+    <label
+      for="learned-on"
+      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >{t("learned_on")}</label
+    >
+    <input
+      id="learned-on"
+      type="date"
+      bind:value={localData.learned_on}
+      class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+    />
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+      {t("learned_on_optional")}
+    </p>
   </div>
 
   <!-- Tags grouped by type -->

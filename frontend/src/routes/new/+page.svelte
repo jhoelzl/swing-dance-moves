@@ -15,6 +15,7 @@
     name: "",
     synonyms: "",
     description: "",
+    learned_on: "",
     tagIds: [],
     videoRefs: [],
   });
