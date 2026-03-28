@@ -12,7 +12,7 @@ A **Progressive Web App (PWA)** for browsing, filtering, and discovering swing d
 - **Multi-tag filtering** — filter by dance style, level, technical type, rating, and festival/class origin simultaneously
 - **Full-text search** — search across move names, synonyms, and descriptions
 - **"Out of moves!" button** — get 2 random moves matching your current filters
-- **YouTube video filter** — filter for moves that have a linked video
+- **Video (Youtube/Dropbox) filter** — filter for moves that have a linked video
 - **Bookmarkable filters** — filter state is synced to the URL (`?tags=1,2&q=search&video=1`)
 - **Dark mode** — toggle or auto-detect from system preference, persisted in localStorage
 - **PWA / installable** — works offline, installable on iOS and Android home screens

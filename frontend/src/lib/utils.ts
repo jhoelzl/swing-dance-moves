@@ -103,12 +103,12 @@ export function getVideoSourceType(url: string): VideoSourceType {
 }
 
 /** Debounce function for search input */
-export function debounce<T extends (...args: unknown[]) => void>(fn: T, ms: number): T {
+export function debounce<T extends (...args: any[]) => void>(fn: T, ms: number): (...args: Parameters<T>) => void {
 	let timer: ReturnType<typeof setTimeout>;
-	return ((...args: unknown[]) => {
+	return (...args: Parameters<T>) => {
 		clearTimeout(timer);
 		timer = setTimeout(() => fn(...args), ms);
-	}) as T;
+	};
 }
 
 /** Convert timecode string (e.g. "10:01" or "1:30:05") to seconds */

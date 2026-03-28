@@ -90,46 +90,107 @@ export interface MoveFormData {
 	videoRefs: MoveVideoRef[];
 }
 
+interface DbTagTypeRow {
+	tag_type_id: number;
+	tag_type_name: string;
+	sort_order: number;
+	tag_type_css: string;
+}
+
+interface DbTagRow {
+	tag_id: number;
+	tag_type_id: number;
+	tag_name: string;
+	tag_label: string;
+	tag_css: string;
+	tag_sort: number;
+}
+
+interface DbMoveRow {
+	move_id: number;
+	name: string;
+	synonyms: string | null;
+	description: string | null;
+}
+
+interface DbMoveToTagRow {
+	id: number;
+	move_id: number;
+	tag_id: number;
+}
+
+interface DbVideoRow {
+	video_id: number;
+	title: string;
+	url: string;
+	description: string | null;
+	created_at: string;
+}
+
+interface DbMoveToVideoRow {
+	id: number;
+	move_id: number;
+	video_id: number;
+	start_time: string | null;
+	end_time: string | null;
+}
+
+interface DbUserSettingsRow {
+	id: number;
+	user_id: string;
+	language: 'de' | 'en';
+	random_moves_count: number;
+	created_at: string;
+	updated_at: string;
+}
+
 // Database schema type for Supabase client
 export interface Database {
 	public: {
 		Tables: {
 			tag_types: {
-				Row: TagType;
-				Insert: Omit<TagType, 'tag_type_id'> & { tag_type_id?: number };
-				Update: Partial<TagType>;
+				Row: DbTagTypeRow;
+				Insert: Omit<DbTagTypeRow, 'tag_type_id'> & { tag_type_id?: number };
+				Update: Partial<Omit<DbTagTypeRow, 'tag_type_id'>>;
+				Relationships: [];
 			};
 			tags: {
-				Row: Tag;
-				Insert: Omit<Tag, 'tag_id'> & { tag_id?: number };
-				Update: Partial<Tag>;
+				Row: DbTagRow;
+				Insert: Omit<DbTagRow, 'tag_id'> & { tag_id?: number };
+				Update: Partial<Omit<DbTagRow, 'tag_id'>>;
+				Relationships: [];
 			};
 			moves: {
-				Row: Move;
-				Insert: Omit<Move, 'move_id'> & { move_id?: number };
-				Update: Partial<Move>;
+				Row: DbMoveRow;
+				Insert: Omit<DbMoveRow, 'move_id'> & { move_id?: number };
+				Update: Partial<Omit<DbMoveRow, 'move_id'>>;
+				Relationships: [];
 			};
 			moves_to_tags: {
-				Row: MoveToTag;
-				Insert: Omit<MoveToTag, 'id'> & { id?: number };
-				Update: Partial<MoveToTag>;
+				Row: DbMoveToTagRow;
+				Insert: Omit<DbMoveToTagRow, 'id'> & { id?: number };
+				Update: Partial<Omit<DbMoveToTagRow, 'id'>>;
+				Relationships: [];
 			};
 			videos: {
-				Row: Video;
-				Insert: Omit<Video, 'video_id' | 'created_at'> & { video_id?: number; created_at?: string };
-				Update: Partial<Video>;
+				Row: DbVideoRow;
+				Insert: Omit<DbVideoRow, 'video_id' | 'created_at'> & { video_id?: number; created_at?: string };
+				Update: Partial<Omit<DbVideoRow, 'video_id' | 'created_at'>>;
+				Relationships: [];
 			};
 			moves_to_videos: {
-				Row: MoveToVideo;
-				Insert: Omit<MoveToVideo, 'id'> & { id?: number };
-				Update: Partial<MoveToVideo>;
+				Row: DbMoveToVideoRow;
+				Insert: Omit<DbMoveToVideoRow, 'id'> & { id?: number };
+				Update: Partial<Omit<DbMoveToVideoRow, 'id'>>;
+				Relationships: [];
+			};
+			user_settings: {
+				Row: DbUserSettingsRow;
+				Insert: Omit<DbUserSettingsRow, 'id' | 'created_at' | 'updated_at'> & { id?: number; created_at?: string; updated_at?: string };
+				Update: Partial<Omit<DbUserSettingsRow, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
+				Relationships: [];
 			};
 		};
-			user_settings: {
-				Row: UserSettings;
-				Insert: Omit<UserSettings, 'id' | 'created_at' | 'updated_at'> & { id?: number; created_at?: string; updated_at?: string };
-				Update: Partial<Omit<UserSettings, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
-			};
 		Views: Record<string, never>;
 		Functions: Record<string, never>;
 		Enums: Record<string, never>;

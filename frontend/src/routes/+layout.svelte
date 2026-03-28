@@ -61,46 +61,54 @@
     }
   });
 
-  onMount(async () => {
-    initDarkMode();
+  onMount(() => {
+    let subscription: { unsubscribe: () => void } | undefined;
 
-    // Abort initialization if Supabase credentials are missing
-    if (supabaseConfigError) {
-      isLoading.set(false);
-      return;
-    }
+    async function init() {
+      initDarkMode();
 
-    // Check auth state
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    isAdmin.set(!!session);
+      // Abort initialization if Supabase credentials are missing
+      if (supabaseConfigError) {
+        isLoading.set(false);
+        return;
+      }
 
-    if (session) {
-      await loadData();
-    } else {
-      isLoading.set(false);
-      goto(`${base}/login`);
-    }
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      // Check auth state
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       isAdmin.set(!!session);
+
       if (session) {
         await loadData();
       } else {
-        allMoves.set([]);
-        tagGroups.set([]);
-        allVideos.set([]);
-        userSettings.set(null);
+        isLoading.set(false);
         goto(`${base}/login`);
       }
-    });
+
+      const { data } = supabase.auth.onAuthStateChange(
+        async (_event, session) => {
+          isAdmin.set(!!session);
+          if (session) {
+            await loadData();
+          } else {
+            allMoves.set([]);
+            tagGroups.set([]);
+            allVideos.set([]);
+            userSettings.set(null);
+            goto(`${base}/login`);
+          }
+        },
+      );
+
+      subscription = data.subscription;
+    }
+
+    void init();
 
     // Cleanup subscription on component destroy to prevent memory leak
     return () => {
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   });
 
