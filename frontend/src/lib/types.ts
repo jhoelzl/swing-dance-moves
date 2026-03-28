@@ -90,6 +90,43 @@ export interface MoveFormData {
 	videoRefs: MoveVideoRef[];
 }
 
+// Training session (practice session with a set of moves to learn)
+export interface Session {
+	session_id: number;
+	name: string;
+	session_date: string; // ISO date string, e.g. '2026-03-28'
+	notes: string;
+	created_at: string;
+	// Joined fields
+	moves?: Move[];
+}
+
+export interface SessionToMove {
+	id: number;
+	session_id: number;
+	move_id: number;
+}
+
+export interface SessionFormData {
+	name: string;
+	session_date: string;
+	notes: string;
+}
+
+interface DbSessionRow {
+	session_id: number;
+	name: string;
+	session_date: string;
+	notes: string;
+	created_at: string;
+}
+
+interface DbSessionToMoveRow {
+	id: number;
+	session_id: number;
+	move_id: number;
+}
+
 interface DbTagTypeRow {
 	tag_type_id: number;
 	tag_type_name: string;
@@ -188,6 +225,18 @@ export interface Database {
 				Row: DbUserSettingsRow;
 				Insert: Omit<DbUserSettingsRow, 'id' | 'created_at' | 'updated_at'> & { id?: number; created_at?: string; updated_at?: string };
 				Update: Partial<Omit<DbUserSettingsRow, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
+				Relationships: [];
+			};
+			training_sessions: {
+				Row: DbSessionRow;
+				Insert: Omit<DbSessionRow, 'session_id' | 'created_at'> & { session_id?: number; created_at?: string };
+				Update: Partial<Omit<DbSessionRow, 'session_id' | 'created_at'>>;
+				Relationships: [];
+			};
+			session_to_moves: {
+				Row: DbSessionToMoveRow;
+				Insert: Omit<DbSessionToMoveRow, 'id'> & { id?: number };
+				Update: Partial<Omit<DbSessionToMoveRow, 'id'>>;
 				Relationships: [];
 			};
 		};

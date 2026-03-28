@@ -1,15 +1,18 @@
 import { writable, derived } from 'svelte/store';
-import type { Move, TagGroup, Video, UserSettings } from '$lib/types';
+import type { Move, TagGroup, Video, UserSettings, Session } from '$lib/types';
 import { filterMovesByTags, searchMoves } from '$lib/services/moves';
 
-// Active tab: 'moves' | 'random' | 'videos' | 'tags' | 'settings'
-export const activeTab = writable<'moves' | 'random' | 'videos' | 'tags' | 'settings'>('moves');
+// Active tab: 'moves' | 'random' | 'videos' | 'tags' | 'sessions' | 'settings'
+export const activeTab = writable<'moves' | 'random' | 'videos' | 'tags' | 'sessions' | 'settings'>('moves');
 
 // All moves loaded from Supabase
 export const allMoves = writable<Move[]>([]);
 
 // All videos loaded from Supabase
 export const allVideos = writable<Video[]>([]);
+
+// All training sessions loaded from Supabase
+export const allSessions = writable<Session[]>([]);
 
 // All tag groups loaded from Supabase
 export const tagGroups = writable<TagGroup[]>([]);

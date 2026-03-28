@@ -64,6 +64,23 @@ CREATE TABLE IF NOT EXISTS moves_to_videos (
     UNIQUE(move_id, video_id)
 );
 
+-- Training sessions (practice sessions with assigned moves)
+CREATE TABLE IF NOT EXISTS training_sessions (
+    session_id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name varchar(200) NOT NULL,
+    session_date date NOT NULL,
+    notes text NOT NULL DEFAULT '',
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- N:M junction table: training_sessions <-> moves
+CREATE TABLE IF NOT EXISTS session_to_moves (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    session_id integer NOT NULL REFERENCES training_sessions(session_id) ON DELETE CASCADE,
+    move_id integer NOT NULL REFERENCES moves(move_id) ON DELETE CASCADE,
+    UNIQUE(session_id, move_id)
+);
+
 -- User settings (per-user preferences, linked to Supabase Auth)
 CREATE TABLE IF NOT EXISTS user_settings (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -88,6 +105,9 @@ CREATE INDEX IF NOT EXISTS idx_moves_to_tags_tag_id ON moves_to_tags(tag_id);
 CREATE INDEX IF NOT EXISTS idx_moves_to_videos_move_id ON moves_to_videos(move_id);
 CREATE INDEX IF NOT EXISTS idx_moves_to_videos_video_id ON moves_to_videos(video_id);
 CREATE INDEX IF NOT EXISTS idx_user_settings_user_id ON user_settings(user_id);
+CREATE INDEX IF NOT EXISTS idx_training_sessions_date ON training_sessions(session_date);
+CREATE INDEX IF NOT EXISTS idx_session_to_moves_session_id ON session_to_moves(session_id);
+CREATE INDEX IF NOT EXISTS idx_session_to_moves_move_id ON session_to_moves(move_id);
 
 
 -- ============================================
@@ -162,3 +182,17 @@ CREATE POLICY "Allow authenticated delete moves_to_videos" ON moves_to_videos FO
 CREATE POLICY "Users can read own settings" ON user_settings FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own settings" ON user_settings FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own settings" ON user_settings FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- training_sessions: authenticated read/write
+ALTER TABLE training_sessions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read training_sessions" ON training_sessions FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Allow authenticated insert training_sessions" ON training_sessions FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Allow authenticated update training_sessions" ON training_sessions FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated delete training_sessions" ON training_sessions FOR DELETE TO authenticated USING (true);
+
+-- session_to_moves: authenticated read/write
+ALTER TABLE session_to_moves ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read session_to_moves" ON session_to_moves FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Allow authenticated insert session_to_moves" ON session_to_moves FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Allow authenticated update session_to_moves" ON session_to_moves FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated delete session_to_moves" ON session_to_moves FOR DELETE TO authenticated USING (true);
