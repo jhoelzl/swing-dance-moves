@@ -1,5 +1,7 @@
 name: Frontend CI
 
+# cspell:ignore shellcheck sbom
+
 on:
   pull_request:
   push:
@@ -15,6 +17,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  dependency_review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check dependency graph availability
+        id: dep_graph
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          STATUS_CODE="$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/dependency-graph/sbom")"
+
+          echo "Dependency graph API status: ${STATUS_CODE}"
+          if [ "${STATUS_CODE}" = "200" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dependency review
+        if: steps.dep_graph.outputs.enabled == 'true'
+        uses: actions/dependency-review-action@v4
+
+      - name: Dependency review skipped
+        if: steps.dep_graph.outputs.enabled != 'true'
+        run: |
+          echo "Dependency review skipped because dependency graph is not enabled for this repository."
+          echo "Enable it at: https://github.com/${{ github.repository }}/settings/security_analysis"
+
   secret_scan:
     runs-on: ubuntu-latest
     steps:
@@ -40,9 +78,23 @@ jobs:
       - name: Run actionlint
         run: ./actionlint -color
 
+  shell_lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck
+        run: shellcheck .githooks/pre-commit
+
   quality:
     runs-on: ubuntu-latest
-    needs: [secret_scan, lint_workflows]
+    needs: [secret_scan, lint_workflows, shell_lint]
     defaults:
       run:
         working-directory: frontend
