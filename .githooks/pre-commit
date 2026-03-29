@@ -30,6 +30,24 @@ else
 	echo "[pre-commit] Install: https://www.shellcheck.net/"
 fi
 
+echo "[pre-commit] Running YAML lint..."
+if command -v yamllint >/dev/null 2>&1; then
+	cd "$REPO_ROOT"
+	yamllint .github/workflows
+else
+	echo "[pre-commit] yamllint not found; skipping YAML lint."
+	echo "[pre-commit] Install: https://yamllint.readthedocs.io/"
+fi
+
+echo "[pre-commit] Running Markdown lint..."
+if command -v markdownlint >/dev/null 2>&1; then
+	cd "$REPO_ROOT"
+	markdownlint README.md IMPROVEMENTS.md frontend/README.md
+else
+	echo "[pre-commit] markdownlint not found; skipping Markdown lint."
+	echo "[pre-commit] Install: https://github.com/igorshubovych/markdownlint-cli"
+fi
+
 echo "[pre-commit] Running frontend CI checks..."
 cd "$REPO_ROOT/frontend"
 npm run ci

@@ -1,6 +1,6 @@
 name: Frontend CI
 
-# cspell:ignore shellcheck sbom
+# cspell:ignore shellcheck sbom yamllint markdownlint
 
 on:
   pull_request:
@@ -78,6 +78,37 @@ jobs:
       - name: Run actionlint
         run: ./actionlint -color
 
+  lint_yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yamllint
+
+      - name: Run yamllint
+        run: yamllint .github/workflows
+
+  lint_markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        run: markdownlint README.md IMPROVEMENTS.md frontend/README.md
+
   shell_lint:
     runs-on: ubuntu-latest
     steps:
@@ -94,7 +125,7 @@ jobs:
 
   quality:
     runs-on: ubuntu-latest
-    needs: [secret_scan, lint_workflows, shell_lint]
+    needs: [secret_scan, lint_workflows, lint_yaml, lint_markdown, shell_lint]
     defaults:
       run:
         working-directory: frontend
