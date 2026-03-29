@@ -21,6 +21,15 @@ else
 	echo "[pre-commit] Install: https://github.com/rhysd/actionlint#installation"
 fi
 
+echo "[pre-commit] Running shell script lint..."
+if command -v shellcheck >/dev/null 2>&1; then
+	cd "$REPO_ROOT"
+	shellcheck .githooks/pre-commit
+else
+	echo "[pre-commit] shellcheck not found; skipping shell lint."
+	echo "[pre-commit] Install: https://www.shellcheck.net/"
+fi
+
 echo "[pre-commit] Running frontend CI checks..."
 cd "$REPO_ROOT/frontend"
 npm run ci
