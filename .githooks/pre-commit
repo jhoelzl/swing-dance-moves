@@ -12,6 +12,15 @@ else
 	echo "[pre-commit] Install: https://github.com/gitleaks/gitleaks"
 fi
 
+echo "[pre-commit] Running workflow lint..."
+if command -v actionlint >/dev/null 2>&1; then
+	cd "$REPO_ROOT"
+	actionlint
+else
+	echo "[pre-commit] actionlint not found; skipping workflow lint."
+	echo "[pre-commit] Install: https://github.com/rhysd/actionlint#installation"
+fi
+
 echo "[pre-commit] Running frontend CI checks..."
 cd "$REPO_ROOT/frontend"
 npm run ci
