@@ -129,7 +129,7 @@ export function exportMovesAsCsv(moves: Move[]) {
 // ── Full Database Export ──
 
 export interface FullExportPayload {
-	version: 2;
+	version: 3;
 	exported_at: string;
 	tag_types: any[];
 	tags: any[];
@@ -137,30 +137,52 @@ export interface FullExportPayload {
 	moves_to_tags: any[];
 	videos: any[];
 	moves_to_videos: any[];
+	training_sessions: any[];
+	session_to_moves: any[];
 }
 
 /**
  * Export ALL database tables as a single JSON file.
- * Includes: tag_types, tags, moves, moves_to_tags, videos, moves_to_videos
+ * Includes: tag_types, tags, moves, moves_to_tags, videos, moves_to_videos,
+ *           training_sessions, session_to_moves
  */
 export async function exportAllData() {
-	const [tagTypesRes, tagsRes, movesRes, movesToTagsRes, videosRes, movesToVideosRes] =
-		await Promise.all([
-			supabase.from('tag_types').select('*').order('sort_order'),
-			supabase.from('tags').select('*').order('tag_sort'),
-			supabase.from('moves').select('*').order('name'),
-			supabase.from('moves_to_tags').select('*'),
-			supabase.from('videos').select('*').order('created_at'),
-			supabase.from('moves_to_videos').select('*'),
-		]);
+	const [
+		tagTypesRes,
+		tagsRes,
+		movesRes,
+		movesToTagsRes,
+		videosRes,
+		movesToVideosRes,
+		trainingSessionsRes,
+		sessionToMovesRes
+	] = await Promise.all([
+		supabase.from('tag_types').select('*').order('sort_order'),
+		supabase.from('tags').select('*').order('tag_sort'),
+		supabase.from('moves').select('*').order('name'),
+		supabase.from('moves_to_tags').select('*'),
+		supabase.from('videos').select('*').order('created_at'),
+		supabase.from('moves_to_videos').select('*'),
+		supabase.from('training_sessions').select('*').order('session_date'),
+		supabase.from('session_to_moves').select('*')
+	]);
 
 	// Check for errors
-	for (const res of [tagTypesRes, tagsRes, movesRes, movesToTagsRes, videosRes, movesToVideosRes]) {
+	for (const res of [
+		tagTypesRes,
+		tagsRes,
+		movesRes,
+		movesToTagsRes,
+		videosRes,
+		movesToVideosRes,
+		trainingSessionsRes,
+		sessionToMovesRes
+	]) {
 		if (res.error) throw res.error;
 	}
 
 	const payload: FullExportPayload = {
-		version: 2,
+		version: 3,
 		exported_at: new Date().toISOString(),
 		tag_types: tagTypesRes.data ?? [],
 		tags: tagsRes.data ?? [],
@@ -168,6 +190,8 @@ export async function exportAllData() {
 		moves_to_tags: movesToTagsRes.data ?? [],
 		videos: videosRes.data ?? [],
 		moves_to_videos: movesToVideosRes.data ?? [],
+		training_sessions: trainingSessionsRes.data ?? [],
+		session_to_moves: sessionToMovesRes.data ?? []
 	};
 
 	const json = JSON.stringify(payload, null, 2);
