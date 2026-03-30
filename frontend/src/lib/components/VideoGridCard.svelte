@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Video } from '$lib/types';
-  import { extractYouTubeId, getVideoSourceType } from '$lib/utils';
+  import { extractYouTubeId, getVideoSourceType, getDropboxDirectUrl } from '$lib/utils';
   import { isAdmin } from '$lib/stores';
   import { base } from '$app/paths';
   import { t } from '$lib/i18n';
@@ -12,9 +12,19 @@
 
   let { video, linkedMoveCount = 0 }: Props = $props();
 
+  let dropboxPreviewError = $state(false);
+  let previewVideoEl: HTMLVideoElement | undefined = $state();
+
   const youtubeId = $derived(extractYouTubeId(video.url));
   const sourceType = $derived(getVideoSourceType(video.url));
   const thumbnailUrl = $derived(youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg` : null);
+  const dropboxPreviewUrl = $derived(sourceType === 'dropbox' ? getDropboxDirectUrl(video.url) : null);
+
+  function handleDropboxMetadataLoaded() {
+    if (!previewVideoEl) return;
+    // Seek a bit forward so browsers can render a representative frame.
+    previewVideoEl.currentTime = 0.1;
+  }
 </script>
 
 <div class="relative rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800/80 shadow-sm">
@@ -34,6 +44,18 @@
           loading="lazy"
           class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
+      {:else if sourceType === 'dropbox' && dropboxPreviewUrl && !dropboxPreviewError}
+        <video
+          bind:this={previewVideoEl}
+          src={dropboxPreviewUrl}
+          preload="metadata"
+          muted
+          playsinline
+          onloadedmetadata={handleDropboxMetadataLoaded}
+          onerror={() => (dropboxPreviewError = true)}
+          class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          aria-hidden="true"
+        ></video>
       {:else}
         <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-400 dark:text-gray-500">
           <svg class="w-9 h-9" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
