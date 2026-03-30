@@ -87,6 +87,10 @@ const translations: Record<string, { de: string; en: string }> = {
   'no_videos_found': { de: 'Keine Videos gefunden', en: 'No videos found' },
   'video_singular': { de: 'Video', en: 'Video' },
   'video_plural': { de: 'Videos', en: 'Videos' },
+  'list': { de: 'Liste', en: 'List' },
+  'grid': { de: 'Raster', en: 'Grid' },
+  'list_view': { de: 'Listenansicht', en: 'List view' },
+  'grid_view': { de: 'Rasteransicht', en: 'Grid view' },
 
   // ── Tags Page ──
   'manage_tags': { de: 'Tags verwalten', en: 'Manage Tags' },

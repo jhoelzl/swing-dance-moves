@@ -5,6 +5,7 @@
   import { searchVideos } from "$lib/services/videos";
   import type { Video } from "$lib/types";
   import VideoCard from "$lib/components/VideoCard.svelte";
+  import VideoGridCard from "$lib/components/VideoGridCard.svelte";
   import { getAllVideos } from "$lib/services/videos";
   import { debounce } from "$lib/utils";
   import { base } from "$app/paths";
@@ -14,6 +15,7 @@
   let searchQuery = $state("");
   let searchInputValue = $state("");
   let showFilters = $state(false);
+  let viewMode = $state<"list" | "grid">("list");
 
   // Filter: 'all' | 'with-moves' | 'without-moves'
   let moveFilter = $state<"all" | "with-moves" | "without-moves">("all");
@@ -155,6 +157,39 @@
     </div>
 
     <div class="flex items-center gap-3">
+      <div
+        class="inline-flex items-center rounded-xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 p-0.5"
+      >
+        <button
+          onclick={() => (viewMode = "list")}
+          class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer {viewMode ===
+          'list'
+            ? 'bg-blue-500 text-white'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}"
+          title={t("list_view")}
+          aria-label={t("list_view")}
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          {t("list")}
+        </button>
+        <button
+          onclick={() => (viewMode = "grid")}
+          class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer {viewMode ===
+          'grid'
+            ? 'bg-blue-500 text-white'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}"
+          title={t("grid_view")}
+          aria-label={t("grid_view")}
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z" />
+          </svg>
+          {t("grid")}
+        </button>
+      </div>
+
       <span
         class="text-xs font-medium text-gray-400 dark:text-gray-500 tabular-nums"
       >
@@ -257,17 +292,28 @@
     </div>
   {/if}
 
-  <!-- Video List -->
+  <!-- Video Collection -->
   {#if displayVideos.length > 0}
-    <div class="space-y-3">
-      {#each displayVideos as video (video.video_id)}
-        <VideoCard
-          {video}
-          linkedMoveCount={videoMoveCountMap[video.video_id] ?? 0}
-          ondeleted={handleVideoDeleted}
-        />
-      {/each}
-    </div>
+    {#if viewMode === "list"}
+      <div class="space-y-3">
+        {#each displayVideos as video (video.video_id)}
+          <VideoCard
+            {video}
+            linkedMoveCount={videoMoveCountMap[video.video_id] ?? 0}
+            ondeleted={handleVideoDeleted}
+          />
+        {/each}
+      </div>
+    {:else}
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {#each displayVideos as video (video.video_id)}
+          <VideoGridCard
+            {video}
+            linkedMoveCount={videoMoveCountMap[video.video_id] ?? 0}
+          />
+        {/each}
+      </div>
+    {/if}
   {:else}
     <div class="text-center py-16">
       <div class="text-4xl mb-3">🎬</div>
