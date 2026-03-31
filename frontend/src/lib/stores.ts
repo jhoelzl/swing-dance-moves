@@ -116,9 +116,9 @@ export function toggleDarkMode() {
 }
 
 // Toast notification system
-export type ToastType = 'success' | 'error' | 'info';
+type ToastType = 'success' | 'error' | 'info';
 
-export interface ToastMessage {
+interface ToastMessage {
 	id: number;
 	text: string;
 	type: ToastType;

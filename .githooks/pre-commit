@@ -48,6 +48,28 @@ else
 	echo "[pre-commit] Install: https://github.com/igorshubovych/markdownlint-cli"
 fi
 
+echo "[pre-commit] Running GitHub Actions security scan..."
+if command -v zizmor >/dev/null 2>&1; then
+	cd "$REPO_ROOT"
+	zizmor .github/workflows
+else
+	echo "[pre-commit] zizmor not found; skipping GitHub Actions security scan."
+	echo "[pre-commit] Install: https://docs.zizmor.sh/installation/"
+fi
+
+echo "[pre-commit] Running link check..."
+if command -v lychee >/dev/null 2>&1; then
+	cd "$REPO_ROOT"
+	lychee --no-progress README.md IMPROVEMENTS.md frontend/README.md
+else
+	echo "[pre-commit] lychee not found; skipping link check."
+	echo "[pre-commit] Install: https://github.com/lycheeverse/lychee"
+fi
+
+echo "[pre-commit] Running dependency and dead-code check..."
+cd "$REPO_ROOT/frontend"
+npm run knip
+
 echo "[pre-commit] Running frontend CI checks..."
 cd "$REPO_ROOT/frontend"
 npm run ci

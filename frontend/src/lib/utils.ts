@@ -95,7 +95,7 @@ export function getDropboxDirectUrl(url: string): string | null {
 }
 
 /** Determine the video source type from a URL */
-export type VideoSourceType = 'youtube' | 'dropbox' | null;
+type VideoSourceType = 'youtube' | 'dropbox' | null;
 export function getVideoSourceType(url: string): VideoSourceType {
 	if (extractYouTubeId(url)) return 'youtube';
 	if (isDropboxUrl(url)) return 'dropbox';

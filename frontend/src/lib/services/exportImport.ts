@@ -4,14 +4,14 @@ import { createMove } from './moves';
 
 // ── Export types ──
 
-export interface ExportMove {
+interface ExportMove {
 	name: string;
 	synonyms: string;
 	description: string;
 	tags: string[]; // tag names
 }
 
-export interface ExportPayload {
+interface ExportPayload {
 	version: 1;
 	exported_at: string;
 	moves: ExportMove[];
@@ -128,7 +128,7 @@ export function exportMovesAsCsv(moves: Move[]) {
 
 // ── Full Database Export ──
 
-export interface FullExportPayload {
+interface FullExportPayload {
 	version: 3;
 	exported_at: string;
 	tag_types: any[];
@@ -229,7 +229,7 @@ async function getTagNameMap(): Promise<Map<string, number>> {
 	return map;
 }
 
-export interface ImportResult {
+interface ImportResult {
 	imported: number;
 	skipped: number;
 	errors: string[];
