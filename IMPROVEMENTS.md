@@ -1,199 +1,208 @@
 # Improvements – Swing Dance Moves PWA
 
 Empfohlene Verbesserungen, priorisiert nach Wichtigkeit.
-Stand: März 2026
+Stand: März 2026 (aktualisiert)
 
 ---
 
-## ✅ Bereits implementiert
+## ✅ Bereits implementiert (Auszug)
 
-- **Sortierung der Moves** – Sortier-Dropdown (a-z, z-a, newest, oldest) in der Toolbar mit `localStorage`-Persistierung.
-- **Fisher-Yates Shuffle** – Korrekte gleichmäßige Verteilung in `getRandomMoves()`.
-- **User Settings** – Settings-Seite mit konfigurierbarer Sprache (de/en) und Anzahl Random Moves (1–5), gespeichert in `user_settings`-Tabelle in Supabase.
-- **Login-Seite** – `autocomplete`-Attribute, Passwort-Sichtbarkeit-Toggle, Passwort-Vergessen-Link.
-- **Export/Import** – Moves als JSON/CSV exportieren und importieren mit Deduplizierung.
-- **Cancel-Links mit base path** – MoveForm und VideoForm nutzen `{base}/` für GitHub Pages.
-- **Tags-Verwaltung** – Eigene Seite (Tab) mit CRUD für Tag-Typen und Tags inkl. Farbauswahl.
-- **HTML-Sanitization** – DOMPurify in `MoveCard.svelte` mit expliziter Allow-List.
-- **Null-Safety** – Optional Chaining in `searchMoves()` und `searchVideos()`.
-- **Typen korrigiert** – `Move.synonyms`, `Move.description`, `Video.description` auf `string | null` geändert.
-- **Auth State Cleanup** – `onAuthStateChange`-Subscription wird in `onMount`-Cleanup aufgeräumt.
-- **deleteMove Video-Referenzen** – `moves_to_videos`-Einträge werden vor Move-Löschung entfernt.
-- **Supabase-Client Fehler-UI** – Bei fehlenden Credentials wird eine Error-Seite mit Konfigurationsanleitung angezeigt.
-- **Toast-Benachrichtigungen** – Globale Toast-Komponente für alle CRUD-Operationen.
-- **Skeleton Loading** – Animierte Platzhalter-Karten statt Spinner beim Laden.
-- **Error-UI mit Retry** – Bei `loadData()`-Fehlern wird eine Error-Seite mit Retry-Button angezeigt.
-- **Move löschen in MoveCard** – Direkter Lösch-Button mit Bestätigungsdialog in der aufgeklappten Karte.
-- **Null-Werte in Edit-Formularen** – `synonyms ?? ''` und `description ?? ''` in Edit-Seiten für Moves und Videos.
-- **Svelte-5-Syntax in ConfirmModal** – `onkeydown` statt veralteter `on:keydown`-Syntax, `$props()` statt `createEventDispatcher`.
-- **Fehler beim Video-Löschen wird angezeigt** – Toast-Benachrichtigung im catch-Block von `VideoCard.handleDelete`.
-- **Route-Parameter Validierung** – `isNaN()`-Prüfung mit Toast-Fehlermeldung und Redirect bei ungültigen IDs.
-- **Konfigurierbarer Random-Count** – Anzahl Random Moves wird aus `userSettings.random_moves_count` gelesen (Fallback: 2).
-- **SvelteKit Error Page** – `+error.svelte` mit Status-Anzeige, Fehlermeldung, Reload-Button und Home-Link.
-- **"Out of moves!" Tab** – Eigener Tab mit zufälligen Moves, kompakter mobiler Toolbar (Filter + Shuffle), Tag-Filter, Video-Only-Filter.
-- **i18n-System** – Vollständiges Übersetzungssystem mit de/en Dictionary und `t()`-Funktion, gesteuert über User Settings.
-- **VideoCard Löschung über Service Layer** – `handleDelete` in VideoCard nutzt `deleteVideo()` aus dem Service.
-- **`$derived.by` in Videos-Seite** – `displayVideos` korrigiert von `$derived(() => ...)` zu `$derived.by(() => ...)`, Template-Zugriffe ohne `()`.
-- **Service Layer für toggle()** – `toggle()` in VideoCard und MoveCard nutzt nun `getLinkedMovesForVideo()` und `getVideoRefsForMove()` aus dem Service Layer statt direkter Supabase-Queries.
-- **Unbenutzter `showAll` Store entfernt** – Toter Code `showAll` aus `stores.ts` entfernt.
-- **Unbenutzter `onMount` Import entfernt** – Ungenutzter `import { onMount }` aus `MoveForm.svelte` entfernt.
-- **`handleMoveDeleted` optimiert** – Nach Move-Löschung wird nur noch `getAllMoves()` aufgerufen statt auch Tags und Videos neu zu laden. Ungenutzte Imports entfernt.
-- **Dynamisches `lang`-Attribut** – `document.documentElement.lang` wird in `+layout.svelte` per `$effect` reaktiv basierend auf `userSettings.language` gesetzt.
-- **Dropbox-Startzeit für Move-Referenzen** – Bei Dropbox-Videos in `MoveCard.svelte` wird `start_time` beim Laden via HTML5-Video-`currentTime` angewendet.
-- **Dropbox-Endzeit für Move-Referenzen** – Bei gesetzter `end_time` pausieren Dropbox-Videos in `MoveCard.svelte` automatisch am Endzeitpunkt.
-- **Type-Check stabilisiert** – `npm run check` läuft wieder ohne Errors (aktuell: **0 Errors**, nur verbleibende A11y-Warnings in `tags/+page.svelte`).
+- Sortierung der Moves (a-z, z-a, newest, oldest) mit Persistierung.
+- Fisher-Yates Shuffle in `getRandomMoves()`.
+- User-Settings (Sprache de/en, Random Count 1-5) in Supabase.
+- Login-UX (Autocomplete, Passwort-Toggle, Forgot-Password-Link).
+- Export/Import (JSON/CSV) mit Deduplizierung.
+- Tags-Verwaltung mit CRUD und Farbauswahl.
+- DOMPurify-Sanitization in MoveCard.
+- Error-UI + Retry, globale Toasts, Skeleton Loading.
+- Route-Parameter-Validierung bei Edit-Seiten.
+- i18n-System mit de/en Dictionary.
+- Videos-Seite mit List/Grid-View Toggle.
+- Dropbox-Preview in Video-Grid-Karten inkl. Fix gegen wiederholte Requests.
+- Basis-Testsetup mit Vitest (Unit-Tests vorhanden).
+- CI-Grundschutz: gitleaks, actionlint, yamllint, markdownlint, shellcheck, dependency review.
+- Security/Checks: Dependabot, CodeQL, zizmor, lychee, knip.
 
 ---
 
-## 🔴 Hoch – Bugs & Code-Qualität
+## 🔎 Review der bisherigen offenen Punkte (1-27)
 
-(Keine offenen Items)
+### Erledigt / nicht mehr aktuell
+
+- **23. CI/CD verbessern**: größtenteils erledigt (`check`/`test` sind im CI, zusätzliche Security-Checks vorhanden).
+- **24. Tests einführen**: nicht mehr aktuell, da bereits Vitest-Tests existieren.
+
+### Weiterhin relevant (bleibt im Backlog)
+
+- **1, 2, 3, 4, 6**: UX/Produktivität (Favoriten, Sharing, Shortcuts, Form-Validierung, Praxis-Timer).
+- **5**: Escape für Export-Dropdown weiterhin sinnvoll (kleine UX-Lücke).
+- **7 bis 12**: A11y-Themen bleiben wichtig; mehrere Svelte-A11y-Warnings sind weiterhin sichtbar.
+- **13, 14, 16, 17**: Performance-Themen bleiben relevant.
+- **15**: Doppelter API-Call in Tags-Seite prüfen; wenn weiterhin vorhanden, beheben.
+- **18 bis 22**: Refactoring-/Code-Qualitätsthemen bleiben relevant.
+- **25, 26, 27**: sinnvolle Produkt-Erweiterungen (Relations, Offline-Daten, Swipe).
 
 ---
 
-## 🟡 Mittel – UX & Funktionalität
+## 🔴 Hoch – Jetzt priorisieren
 
-### 1. Favoriten / Persönliche Lesezeichen
-Moves als Favorit markieren, damit man seine meistgenutzten Moves schnell findet.
-- **Lösung:** Favoriten in `localStorage` speichern, Stern-Icon auf MoveCard, Filter für Favoriten.
+### A. A11y-Warnings auf 0 bringen
 
-### 2. Share-Button für einzelne Moves
-Einen Move direkt teilen (URL, WhatsApp, Copy-to-Clipboard).
-- **Lösung:** Web Share API oder Copy-to-Clipboard-Link auf MoveCard.
+Ziel: `npm run check` ohne A11y-Warnings.
+
+- Labels korrekt mit Controls verknüpfen (`for`/`id` oder Wrapper-Label).
+- Icon-Buttons mit `aria-label` versehen.
+- ConfirmModal mit `role="dialog"`, `aria-modal`, `aria-labelledby`, initialem Fokus und Focus-Trap.
+
+### B. Knip-Ergebnisse dauerhaft sauber halten
+
+- `knip` als Gate behalten und nur bewusst dokumentierte Ausnahmen zulassen.
+- Bei neuen Exports immer prüfen, ob wirklich public API oder intern.
+
+### C. CI-Signalqualität verbessern
+
+- Branch Protection: obligatorische Required Checks festlegen.
+- Optional: „warnungsfrei“-Regel für `svelte-check` (nach A11y-Fixes).
+
+---
+
+## 🟡 Mittel – UX & Features
+
+### 1. Favoriten / Lesezeichen
+
+- Stern auf MoveCard, Favoriten-Filter, optional Sortierung „Favorites first".
+
+### 2. Share für Moves
+
+- Web Share API + Clipboard-Fallback.
+- Deep-Link auf konkreten Move (inkl. optionalem Tag-Filter-Context).
 
 ### 3. Keyboard Shortcuts
-Keine Tastaturkürzel vorhanden.
-- `/` → Suche fokussieren
-- `r` → Random Moves shufflen
-- `Esc` → Filter/Dropdown schließen
 
-### 4. Input-Validierung in MoveForm/VideoForm
-Name-Feld hat nur `required`, aber keine Mindestlängen-Validierung. YouTube-URL wird nicht validiert.
-- Name: mindestens 2 Zeichen (`minlength`)
-- YouTube-URL: Validierung via `extractYouTubeId()` mit Fehlermeldung
-- YouTube-Vorschau beim Erstellen/Bearbeiten anzeigen
+- `/` Suche fokusieren, `r` random shufflen, `g` Grid/List togglen, `Esc` Panels schließen.
 
-### 5. Export-Dropdown: Escape zum Schließen
-Das Export/Import-Menü nutzt einen unsichtbaren Backdrop-Button zum Schließen, reagiert aber nicht auf Escape-Taste.
-- **Datei:** `routes/+page.svelte`
-- **Lösung:** Keydown-Listener für Escape hinzufügen.
+### 4. Formularvalidierung ausbauen
 
-### 6. Praxis-Modus mit Timer
-Timer-basierter Modus im "Out of moves!"-Tab: alle X Sekunden einen neuen zufälligen Move anzeigen — ideal zum Üben.
-- **Lösung:** Timer-Button in der Random-Toolbar mit einstellbarer Sekunden-Zahl. Könnte `userSettings` für Interval nutzen.
+- Name: `minlength` + klare Fehlermeldung.
+- YouTube-URL: harte Validierung via `extractYouTubeId()`.
+- Sofort-Vorschau im VideoForm.
+
+### 5. Praxis-Modus mit Timer
+
+- Intervall-Modus im Random-Tab, Intervall in Settings speicherbar.
+
+### 6. Move-Beziehungen
+
+- `move_relations` (Prerequisite, Variation, Follow-up).
+- UI: „Das könntest du als Nächstes üben".
+
+### 7. Trainingshistorie erweitern
+
+- Session-Statistiken (Anzahl geübt, häufigste Tags, letzte Wiederholung).
 
 ---
 
-## 🟢 Mittel – Accessibility (a11y)
+## 🟢 Mittel – Accessibility
 
-### 7. ARIA-Attribute ergänzen
-- `aria-expanded` auf MoveCard/VideoCard Toggle-Buttons
-- `aria-pressed` auf FilterChips-Buttons
-- `aria-label` auf Icon-only-Buttons (Dark Mode, Logout, Export, Shuffle)
-- `aria-hidden="true"` auf dekorativen SVG-Icons
-- `aria-live="polite"` Region für Move-Count, Suchergebnisse und Random-Moves-Bereich
+### 8. ARIA-Set vervollständigen
 
-### 8. Skip-to-Content Link
-Fehlender „Skip to main content"-Link in `+layout.svelte` für Keyboard-Navigation.
+- `aria-expanded`, `aria-pressed`, `aria-hidden`, `aria-live` konsistent einführen.
 
-### 9. Focus-Visible Styling
-Inputs haben `focus:ring-2`, aber Buttons und Links haben keine expliziten Focus-Styles.
-- **Lösung:** `focus-visible:ring-2 focus-visible:ring-blue-500` global auf interaktive Elemente in `app.css`.
+### 9. Skip-Link + Fokusführung
 
-### 10. Prefers-Reduced-Motion
-Animationen (Card-Hover-Transition, Filter-Panel-Slide, Toast-Slide) werden nicht deaktiviert für User mit Motion-Sensitivity.
-- **Lösung:** `@media (prefers-reduced-motion: reduce)` in `app.css` mit `transition: none` und `animation: none`.
+- Skip-to-content in Layout.
+- Sichtbare Focus-Styles für Buttons/Links global in `app.css`.
 
-### 11. Interaktive Elemente verschachtelt
-In `MoveCard.svelte` und `VideoCard.svelte` befindet sich der Edit-Link `<a>` innerhalb des Toggle-`<button>`. Interaktive Elemente in interaktiven Elementen sind ein A11y-Antipattern.
-- **Lösung:** Edit-Link außerhalb des Buttons platzieren, z.B. in einer separaten Action-Bar.
+### 10. Reduced Motion
 
-### 12. ConfirmModal: role, aria-modal, Focus-Trap
-Das Modal hat weder `role="dialog"`, `aria-modal="true"` noch `aria-labelledby`. Kein Focus-Trapping — Tab navigiert hinter das Modal. Focus wird nicht automatisch ins Modal gesetzt.
-- **Datei:** `lib/components/ConfirmModal.svelte`
-- **Lösung:** ARIA-Attribute ergänzen, Focus-Trap implementieren, Focus beim Öffnen auf Cancel-Button setzen.
+- `prefers-reduced-motion` für Übergänge/Animationen respektieren.
+
+### 11. Interaktive Elemente entkoppeln
+
+- Keine `<a>`-Elemente innerhalb klickbarer `<button>`-Container.
 
 ---
 
 ## 🔵 Mittel – Performance
 
-### 13. Supabase-Queries optimieren
-`getAllMoves()` macht **4 separate Queries** (moves, moves_to_tags, tags mit tag_types, moves_to_videos). Ein einziger Join-Query wäre effizienter:
-```ts
-supabase.from('moves').select('*, moves_to_tags(*, tags(*, tag_types(*))), moves_to_videos(*)')
-```
+### 12. Datenzugriff effizienter machen
 
-### 14. YouTube Lazy Loading
-YouTube iFrames in `MoveCard.svelte` und `VideoCard.svelte` haben kein `loading="lazy"` Attribut.
-- **Lösung:** `loading="lazy"` auf iFrames setzen oder [lite-youtube-embed](https://github.com/paulirish/lite-youtube-embed) verwenden.
+- `getAllMoves()` optimieren (Join-Strategie oder smartere Batch-Strategie).
+- Nach Mutationen selektiv invalidieren statt kompletter Re-Loads.
 
-### 15. Doppelter API-Call in Tags-Seite
-`reloadAll()` in `tags/+page.svelte` ruft `loadGroups()` → `getAllTagsGrouped()` auf und danach **nochmal** `getAllTagsGrouped()` für den Store-Update.
-- **Lösung:** Ergebnis aus `loadGroups()` direkt für den Store-Update verwenden.
+### 13. Rendering skalieren
 
-### 16. Kein Caching / Invalidation-Strategie
-Nach jeder Mutation (Create/Update/Delete) werden **alle Moves komplett neu geladen** (`getAllMoves()`).
-- **Lösung:** Optimistische Updates oder selektives Invalidieren statt komplettes Neuladen.
+- Pagination oder Virtual Scrolling für große Move-Listen.
 
-### 17. Pagination / Virtual Scrolling
-Bei vielen Moves werden alle gleichzeitig gerendert. Bei 100+ Moves leidet die Performance.
-- **Lösung:** Virtual Scrolling (z.B. `svelte-virtual-list`) oder einfache Pagination.
+### 14. Medien-Ladeverhalten verbessern
+
+- YouTube `loading="lazy"` oder Lite-Embed.
+- Einheitliche Thumbnail-Strategie (YouTube/Dropbox/Fallback).
+
+### 15. Bundle-/Runtime-Monitoring
+
+- CI-Budget (z.B. `size-limit`) für JS/CSS-Artefakte.
+- Optional Lighthouse CI im PR oder nightly.
 
 ---
 
-## ⚪ Niedrig – Nice-to-Have & Code-Qualität
+## ⚪ Niedrig – Refactoring & Wartbarkeit
 
-### 18. Doppelter Video-Badge-Code in MoveCard
-Der Video-Badge HTML-Code in `MoveCard.svelte` ist zweimal nahezu identisch (einmal mit Tags, einmal ohne Tags).
-- **Lösung:** In ein Svelte-Snippet `{#snippet videoBadge()}` oder eine separate Komponente auslagern.
+### 16. Delete-/Confirm-Patterns zentralisieren
 
-### 19. Duplizierte Delete-Patterns
-Delete-Logik (State, Handler, ConfirmModal) ist in 4 Dateien nahezu identisch: MoveCard, VideoCard, edit/[id], videos/edit/[id].
-- **Lösung:** In einen wiederverwendbaren Composable oder eine Wrapper-Komponente auslagern.
+- Wiederverwendbares Confirm/Delete-Pattern statt Duplikation in mehreren Komponenten.
 
-### 20. System-Dark-Mode Listener
-`initDarkMode()` liest die System-Präferenz nur einmal. Wenn der User sein System auf Dark/Light umstellt, reagiert die App nicht.
-- **Lösung:** `matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ...)`.
+### 17. Error-Handling vereinheitlichen
 
-### 21. Supabase-Typen bereinigen
-Mehrfach `as any`-Casts und `@ts-expect-error` in `tags.ts` und `moves.ts` deuten auf fehlerhafte `Database`-Typdefinitionen hin.
-- **Lösung:** Typen in `types.ts` mit `supabase gen types` neu generieren oder manuell korrigieren.
+- Konvention: Service layer wirft typed Errors, UI layer mapped auf Toast/UI-States.
 
-### 22. Inkonsistente Fehlerbehandlung
-Manche Stellen werfen Fehler weiter (`throw error`), manche loggen nur (`console.error`), manche zeigen eine Fehlermeldung. Kein einheitliches Pattern.
-- **Lösung:** Konsistentes Error-Handling einführen: Service-Layer wirft, UI-Layer zeigt Toast.
+### 18. Supabase-Typen härten
 
-### 23. CI/CD verbessern
-- `npm run check` (Svelte-Check + TypeScript) in den Build-Workflow einbauen
-- Lighthouse CI für Performance-Monitoring
+- `as any`/`@ts-expect-error` schrittweise abbauen.
+- DB-Typen regelmäßig regenerieren und diffen.
 
-### 24. Tests einführen
-Aktuell gibt es keine Tests.
-- **Vitest** für Unit-Tests (`searchMoves`, `extractYouTubeId`, `debounce`, `getRandomMoves`)
-- **@testing-library/svelte** für Component-Tests
-- **Playwright** für E2E (Login, CRUD, Filter, Random-Tab)
+### 19. Dark-Mode Listener
 
-### 25. Move-Beziehungen
-Variationen und Voraussetzungen zwischen Moves verknüpfen (z.B. „Swingout → Swingout-Variation").
-- **Lösung:** `move_relations`-Tabelle in Supabase mit `parent_id`, `child_id`, `relation_type`.
+- Reaktiv auf System-Theme-Wechsel reagieren.
 
-### 26. Offline-Support für PWA
-Die App hat `manifest.webmanifest` und Service Worker, aber kein echtes Offline-Caching der Supabase-Daten.
-- **Lösung:** Daten in IndexedDB oder Cache API zwischenspeichern, Sync bei Reconnect.
+### 20. Komponenten-Duplikate reduzieren
 
-### 27. Swipe-Gesten im Random-Tab
-Im "Out of moves!"-Tab per Swipe zum nächsten Random Move wechseln — natürlichere Mobile-UX.
-- **Lösung:** Touch-Event-Handler oder Bibliothek wie `svelte-gestures` für Swipe-Erkennung.
+- Wiederkehrende Badges/Action-Bars in Snippets oder kleine Shared Components auslagern.
 
 ---
 
-## Zusammenfassung
+## 🧪 Neue Ideen für CI & Checks
 
-| Priorität | Anzahl | Fokus |
-|---|---|---|
-| 🔴 Hoch | 0 | — |
-| 🟡 Mittel (UX) | 6 | User Experience, Funktionalität |
-| 🟢 Mittel (a11y) | 6 | Barrierefreiheit |
-| 🔵 Mittel (Perf) | 5 | Performance-Optimierung |
-| ⚪ Niedrig | 10 | Code-Qualität, Nice-to-Have |
-| **Gesamt** | **27** | |
+### 21. Action-Pinning auf SHA
+
+- GitHub Actions auf Commit-SHA pinnen (Supply-Chain-Härtung).
+
+### 22. Nightly-Workflow ergänzen
+
+- Geplanter Lauf für externe Link-Checks, Audit, ggf. Performance-Checks.
+
+### 23. Playwright-Smoke in CI
+
+- Schneller E2E-Sanity-Test (Login, Liste laden, CRUD-Grundpfad).
+
+### 24. Testabdeckung messbar machen
+
+- Coverage-Report + Mindestschwelle (z.B. 70-80%).
+
+### 25. PR-Templates/Checklisten
+
+- PR-Template mit Pflichtpunkten: Tests, A11y, i18n, mobile Check.
+
+---
+
+## Zusammenfassung (aktualisiert)
+
+| Priorität | Fokus |
+|---|---|
+| 🔴 Hoch | A11y-Warnings abbauen, CI-Signalqualität, Knip-Disziplin |
+| 🟡 Mittel | UX-/Feature-Ausbau (Favoriten, Share, Shortcuts, Timer, Relations) |
+| 🟢 Mittel | Barrierefreiheit konsistent fertigstellen |
+| 🔵 Mittel | Datenzugriff, Rendering, Medien-Lazyload, Budgets |
+| ⚪ Niedrig | Refactoring, Typ-Härtung, Wartbarkeit |
+
+Nächster sinnvoller Schritt: A11y-Block (Punkte 8 bis 11) in einem dedizierten Branch umsetzen und danach `svelte-check` auf „no warnings" scharf schalten.
