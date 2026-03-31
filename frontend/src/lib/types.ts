@@ -30,7 +30,7 @@ export interface Move {
 	hasVideo?: boolean;
 }
 
-export interface MoveToTag {
+interface MoveToTag {
 	id: number;
 	move_id: number;
 	tag_id: number;
@@ -103,7 +103,7 @@ export interface Session {
 	moves?: Move[];
 }
 
-export interface SessionToMove {
+interface SessionToMove {
 	id: number;
 	session_id: number;
 	move_id: number;
