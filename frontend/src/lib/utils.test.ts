@@ -46,6 +46,16 @@ describe('video URL helpers', () => {
 		expect(getVideoSourceType('https://www.dropbox.com/s/example123/video.mp4?dl=0')).toBe('dropbox');
 		expect(getVideoSourceType('https://example.com/video.mp4')).toBeNull();
 	});
+
+	it('rejects URLs that only mention Dropbox in the path, query, or hostname substring', () => {
+		expect(isDropboxUrl('https://evil-example.net/dropbox.com/s/example123/video.mp4')).toBe(false);
+		expect(isDropboxUrl('https://evil-example.net/?next=https://www.dropbox.com/s/example123/video.mp4')).toBe(false);
+		expect(isDropboxUrl('https://evil-dropbox.com/s/example123/video.mp4')).toBe(false);
+
+		expect(getDropboxDirectUrl('https://evil-example.net/dropbox.com/s/example123/video.mp4')).toBeNull();
+		expect(getDropboxDirectUrl('https://evil-example.net/?next=https://www.dropbox.com/s/example123/video.mp4')).toBeNull();
+		expect(getDropboxDirectUrl('https://evil-dropbox.com/s/example123/video.mp4')).toBeNull();
+	});
 });
 
 describe('timecodeToSeconds', () => {

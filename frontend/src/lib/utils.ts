@@ -63,32 +63,50 @@ export function extractYouTubeId(url: string): string | null {
 	return null;
 }
 
+function parseUrl(url: string): URL | null {
+	try {
+		return new URL(url);
+	} catch {
+		return null;
+	}
+}
+
+function isDropboxSharedPath(pathname: string): boolean {
+	return /^\/(s|scl|sh)\//.test(pathname);
+}
+
 /** Check if a URL is a Dropbox shared link */
 export function isDropboxUrl(url: string): boolean {
 	if (!url) return false;
-	return /dropbox\.com\/(s|scl|sh)\//.test(url) || /dropboxusercontent\.com\//.test(url);
+
+	const parsedUrl = parseUrl(url);
+	if (!parsedUrl) return false;
+
+	const hostname = parsedUrl.hostname.toLowerCase();
+	if (hostname === 'dl.dropboxusercontent.com') return true;
+
+	return (hostname === 'dropbox.com' || hostname === 'www.dropbox.com') && isDropboxSharedPath(parsedUrl.pathname);
 }
 
 /** Convert Dropbox shared link to direct download/streaming URL */
 export function getDropboxDirectUrl(url: string): string | null {
 	if (!url) return null;
+	const parsedUrl = parseUrl(url);
+	if (!parsedUrl) return null;
+
+	const hostname = parsedUrl.hostname.toLowerCase();
 
 	// Already a direct link
-	if (url.includes('dl.dropboxusercontent.com')) {
-		return url;
+	if (hostname === 'dl.dropboxusercontent.com') {
+		return parsedUrl.toString();
 	}
 
 	// Shared link: replace domain and force raw=1
-	if (url.includes('dropbox.com/')) {
-		let directUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
-		// Remove dl=0 or dl=1 param and add raw=1
-		directUrl = directUrl.replace(/[?&]dl=[01]/, '');
-		if (directUrl.includes('?')) {
-			directUrl += '&raw=1';
-		} else {
-			directUrl += '?raw=1';
-		}
-		return directUrl;
+	if ((hostname === 'dropbox.com' || hostname === 'www.dropbox.com') && isDropboxSharedPath(parsedUrl.pathname)) {
+		parsedUrl.hostname = 'dl.dropboxusercontent.com';
+		parsedUrl.searchParams.delete('dl');
+		parsedUrl.searchParams.set('raw', '1');
+		return parsedUrl.toString();
 	}
 
 	return null;
