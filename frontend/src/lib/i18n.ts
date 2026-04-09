@@ -250,6 +250,9 @@ const translations: Record<string, { de: string; en: string }> = {
   'session_singular': { de: 'Session', en: 'Session' },
   'sessions_plural': { de: 'Sessions', en: 'Sessions' },
   'session_move_count': { de: 'Moves', en: 'Moves' },
+  'sessions_archive': { de: 'Archiv', en: 'Archive' },
+  'sessions_archive_hint': { de: 'Vergangene Training-Sessions', en: 'Past training sessions' },
+  'session_badge_tomorrow': { de: 'Morgen', en: 'Tomorrow' },
 
   // ── Calendar Page ──
   'nav_calendar': { de: 'Kalender', en: 'Calendar' },
