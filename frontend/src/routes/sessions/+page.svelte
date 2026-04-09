@@ -44,16 +44,42 @@
   let selectedMoveId = $state<number | null>(null);
   let addingMove = $state(false);
   let moveSortOrder = $state<"a-z" | "z-a" | "newest" | "oldest">("a-z");
+  let today = $derived(todayIso());
+  let tomorrow = $derived(addDays(today, 1));
+  let upcomingSessions = $derived(
+    sessions.filter((session) => session.session_date >= today),
+  );
+  let archivedSessions = $derived(
+    sessions.filter((session) => session.session_date < today),
+  );
 
   // ── helpers ──────────────────────────────────────────────────
+  function pad(value: number): string {
+    return String(value).padStart(2, "0");
+  }
+
   function todayIso(): string {
-    return new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  }
+
+  function addDays(iso: string, days: number): string {
+    const [year, month, day] = iso.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() + days);
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
   function formatDate(iso: string): string {
     // e.g. '2026-03-28' → '28.03.2026'
     const [y, m, d] = iso.split("-");
     return `${d}.${m}.${y}`;
+  }
+
+  function getSessionBadge(sessionDate: string): string | null {
+    if (sessionDate === today) return t("calendar_today");
+    if (sessionDate === tomorrow) return t("session_badge_tomorrow");
+    return null;
   }
 
   function getSessionIdFromHash(hash: string): number | null {
@@ -427,168 +453,130 @@
 
   <!-- Session list -->
 {:else}
-  <div class="space-y-3">
-    {#each sessions as session (session.session_id)}
-      <div
-        id="session-{session.session_id}"
-        class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden"
-      >
-        <!-- Session header -->
-        {#if editingSessionId === session.session_id}
-          <!-- Inline edit form -->
-          <div class="p-5">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-              <div>
-                <label
-                  for="edit-name-{session.session_id}"
-                  class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                >
-                  {t("session_name")} *
-                </label>
-                <input
-                  id="edit-name-{session.session_id}"
-                  type="text"
-                  bind:value={editName}
-                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label
-                  for="edit-date-{session.session_id}"
-                  class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                >
-                  {t("session_date")} *
-                </label>
-                <input
-                  id="edit-date-{session.session_id}"
-                  type="date"
-                  bind:value={editDate}
-                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            <div class="mb-3">
+  {#snippet sessionCard(session: Session)}
+    <div
+      id="session-{session.session_id}"
+      class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden"
+    >
+      {#if editingSessionId === session.session_id}
+        <div class="p-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <div>
               <label
-                for="edit-notes-{session.session_id}"
+                for="edit-name-{session.session_id}"
                 class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
               >
-                {t("session_notes")}
+                {t("session_name")} *
               </label>
-              <textarea
-                id="edit-notes-{session.session_id}"
-                bind:value={editNotes}
-                rows="2"
-                placeholder={t("session_notes_placeholder")}
-                class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              ></textarea>
+              <input
+                id="edit-name-{session.session_id}"
+                type="text"
+                bind:value={editName}
+                class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
-            <div class="flex gap-2">
-              <button
-                onclick={() => handleSaveEdit(session)}
-                disabled={saving || !editName.trim() || !editDate}
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
+            <div>
+              <label
+                for="edit-date-{session.session_id}"
+                class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
               >
-                {saving ? t("saving") : t("save")}
-              </button>
-              <button
-                onclick={cancelEdit}
-                class="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
-              >
-                {t("cancel")}
-              </button>
+                {t("session_date")} *
+              </label>
+              <input
+                id="edit-date-{session.session_id}"
+                type="date"
+                bind:value={editDate}
+                class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
           </div>
-        {:else}
-          <!-- Normal view -->
-          <!-- svelte-ignore a11y_click_events_have_key_events -->
-          <!-- svelte-ignore a11y_no_static_element_interactions -->
-          <div
-            class="w-full text-left px-5 py-4 flex items-center justify-between gap-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-            onclick={() =>
-              (expandedSessionId =
-                expandedSessionId === session.session_id
-                  ? null
-                  : session.session_id)}
-          >
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-3 flex-wrap">
-                <span
-                  class="font-semibold text-gray-900 dark:text-white truncate"
-                >
-                  {session.name}
-                </span>
-                <span
-                  class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full shrink-0"
-                >
-                  📅 {formatDate(session.session_date)}
-                </span>
-                <span
-                  class="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-full shrink-0"
-                >
-                  {session.moves?.length ?? 0}
-                  {t("session_move_count")}
-                </span>
-              </div>
-              {#if session.notes}
-                <p
-                  class="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate"
-                >
-                  {session.notes}
-                </p>
-              {/if}
-            </div>
-
-            <!-- Action buttons -->
-            <div
-              class="flex items-center gap-1 shrink-0"
-              onclick={(e) => e.stopPropagation()}
-              role="presentation"
+          <div class="mb-3">
+            <label
+              for="edit-notes-{session.session_id}"
+              class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
             >
-              <button
-                onclick={() => startEdit(session)}
-                title={t("edit_session")}
-                class="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors cursor-pointer"
+              {t("session_notes")}
+            </label>
+            <textarea
+              id="edit-notes-{session.session_id}"
+              bind:value={editNotes}
+              rows="2"
+              placeholder={t("session_notes_placeholder")}
+              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            ></textarea>
+          </div>
+          <div class="flex gap-2">
+            <button
+              onclick={() => handleSaveEdit(session)}
+              disabled={saving || !editName.trim() || !editDate}
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
+            >
+              {saving ? t("saving") : t("save")}
+            </button>
+            <button
+              onclick={cancelEdit}
+              class="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+            >
+              {t("cancel")}
+            </button>
+          </div>
+        </div>
+      {:else}
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div
+          class="w-full text-left px-5 py-4 flex items-center justify-between gap-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+          onclick={() =>
+            (expandedSessionId =
+              expandedSessionId === session.session_id
+                ? null
+                : session.session_id)}
+        >
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-3 flex-wrap">
+              <span
+                class="font-semibold text-gray-900 dark:text-white truncate"
               >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-              </button>
-              <button
-                onclick={() => openDeleteConfirm(session)}
-                title={t("delete_session")}
-                class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                {session.name}
+              </span>
+              <span
+                class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full shrink-0"
               >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                📅 {formatDate(session.session_date)}
+              </span>
+              {#if getSessionBadge(session.session_date)}
+                <span
+                  class="text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full shrink-0"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
+                  {getSessionBadge(session.session_date)}
+                </span>
+              {/if}
+              <span
+                class="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-full shrink-0"
+              >
+                {session.moves?.length ?? 0}
+                {t("session_move_count")}
+              </span>
+            </div>
+            {#if session.notes}
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
+                {session.notes}
+              </p>
+            {/if}
+          </div>
 
-              <!-- Expand/collapse chevron -->
+          <div
+            class="flex items-center gap-1 shrink-0"
+            onclick={(e) => e.stopPropagation()}
+            role="presentation"
+          >
+            <button
+              onclick={() => startEdit(session)}
+              title={t("edit_session")}
+              class="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors cursor-pointer"
+            >
               <svg
-                class="w-4 h-4 text-gray-400 transition-transform duration-200 {expandedSessionId ===
-                session.session_id
-                  ? 'rotate-180'
-                  : ''}"
+                class="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -597,138 +585,209 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M19 9l-7 7-7-7"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                 />
               </svg>
-            </div>
-          </div>
-        {/if}
-
-        <!-- Expanded: move list -->
-        {#if expandedSessionId === session.session_id && editingSessionId !== session.session_id}
-          <div class="border-t border-gray-100 dark:border-gray-800 px-5 py-4">
-            <div class="flex items-center justify-between mb-3">
-              <span
-                class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+            </button>
+            <button
+              onclick={() => openDeleteConfirm(session)}
+              title={t("delete_session")}
+              class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                {t("session_moves")}
-              </span>
-              {#if addMoveSessionId !== session.session_id}
-                <button
-                  onclick={() => openAddMovePicker(session.session_id)}
-                  class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer"
-                >
-                  <svg
-                    class="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  {t("session_add_move")}
-                </button>
-              {/if}
-            </div>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
 
-            <!-- Add-move picker -->
-            {#if addMoveSessionId === session.session_id}
-              <!-- Sort controls -->
-              <div class="flex items-center gap-1.5 mb-2 flex-wrap">
-                <span class="text-xs text-gray-400 dark:text-gray-500 mr-1"
-                  >{t("session_move_sort")}:</span
-                >
-                {#each [["a-z", t("sort_a_z")], ["z-a", t("sort_z_a")], ["newest", t("sort_newest")], ["oldest", t("sort_oldest")]] as [val, label] (val)}
-                  <button
-                    onclick={() =>
-                      (moveSortOrder = val as
-                        | "a-z"
-                        | "z-a"
-                        | "newest"
-                        | "oldest")}
-                    class="px-2 py-0.5 text-xs rounded-full transition-colors cursor-pointer {moveSortOrder ===
-                    val
-                      ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold'
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                  >
-                    {label}
-                  </button>
-                {/each}
-              </div>
-              <div class="flex gap-2 mb-3 flex-wrap">
-                <select
-                  bind:value={selectedMoveId}
-                  class="flex-1 min-w-0 px-3 py-1.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value={null}>{t("session_select_move")}</option>
-                  {#each availableMoves(session) as move (move.move_id)}
-                    <option value={move.move_id}>{move.name}</option>
-                  {/each}
-                </select>
-                <button
-                  onclick={() => handleAddMove(session)}
-                  disabled={addingMove || !selectedMoveId}
-                  class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors cursor-pointer shrink-0"
-                >
-                  {addingMove ? t("saving") : t("session_add_move")}
-                </button>
-                <button
-                  onclick={cancelAddMove}
-                  class="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors cursor-pointer shrink-0"
-                >
-                  {t("cancel")}
-                </button>
-              </div>
-            {/if}
+            <svg
+              class="w-4 h-4 text-gray-400 transition-transform duration-200 {expandedSessionId ===
+              session.session_id
+                ? 'rotate-180'
+                : ''}"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+        </div>
+      {/if}
 
-            <!-- Assigned moves list -->
-            {#if !session.moves || session.moves.length === 0}
-              <p class="text-sm text-gray-400 dark:text-gray-500 italic py-2">
-                {t("session_no_moves")}
-              </p>
-            {:else}
-              <ul class="space-y-1.5">
-                {#each session.moves as move (move.move_id)}
-                  <li
-                    class="flex items-center justify-between gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl"
-                  >
-                    <span
-                      class="text-sm font-medium text-gray-800 dark:text-gray-200"
-                    >
-                      {move.name}
-                    </span>
-                    <button
-                      onclick={() => handleRemoveMove(session, move.move_id)}
-                      title={t("remove")}
-                      class="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer shrink-0"
-                    >
-                      <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </li>
-                {/each}
-              </ul>
+      {#if expandedSessionId === session.session_id && editingSessionId !== session.session_id}
+        <div class="border-t border-gray-100 dark:border-gray-800 px-5 py-4">
+          <div class="flex items-center justify-between mb-3">
+            <span
+              class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+            >
+              {t("session_moves")}
+            </span>
+            {#if addMoveSessionId !== session.session_id}
+              <button
+                onclick={() => openAddMovePicker(session.session_id)}
+                class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer"
+              >
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                {t("session_add_move")}
+              </button>
             {/if}
           </div>
-        {/if}
+
+          {#if addMoveSessionId === session.session_id}
+            <div class="flex items-center gap-1.5 mb-2 flex-wrap">
+              <span class="text-xs text-gray-400 dark:text-gray-500 mr-1"
+                >{t("session_move_sort")}:</span
+              >
+              {#each [["a-z", t("sort_a_z")], ["z-a", t("sort_z_a")], ["newest", t("sort_newest")], ["oldest", t("sort_oldest")]] as [val, label] (val)}
+                <button
+                  onclick={() =>
+                    (moveSortOrder = val as
+                      | "a-z"
+                      | "z-a"
+                      | "newest"
+                      | "oldest")}
+                  class="px-2 py-0.5 text-xs rounded-full transition-colors cursor-pointer {moveSortOrder ===
+                  val
+                    ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}"
+                >
+                  {label}
+                </button>
+              {/each}
+            </div>
+            <div class="flex gap-2 mb-3 flex-wrap">
+              <select
+                bind:value={selectedMoveId}
+                class="flex-1 min-w-0 px-3 py-1.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value={null}>{t("session_select_move")}</option>
+                {#each availableMoves(session) as move (move.move_id)}
+                  <option value={move.move_id}>{move.name}</option>
+                {/each}
+              </select>
+              <button
+                onclick={() => handleAddMove(session)}
+                disabled={addingMove || !selectedMoveId}
+                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors cursor-pointer shrink-0"
+              >
+                {addingMove ? t("saving") : t("session_add_move")}
+              </button>
+              <button
+                onclick={cancelAddMove}
+                class="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors cursor-pointer shrink-0"
+              >
+                {t("cancel")}
+              </button>
+            </div>
+          {/if}
+
+          {#if !session.moves || session.moves.length === 0}
+            <p class="text-sm text-gray-400 dark:text-gray-500 italic py-2">
+              {t("session_no_moves")}
+            </p>
+          {:else}
+            <ul class="space-y-1.5">
+              {#each session.moves as move (move.move_id)}
+                <li
+                  class="flex items-center justify-between gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl"
+                >
+                  <span
+                    class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                  >
+                    {move.name}
+                  </span>
+                  <button
+                    onclick={() => handleRemoveMove(session, move.move_id)}
+                    title={t("remove")}
+                    class="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer shrink-0"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        </div>
+      {/if}
+    </div>
+  {/snippet}
+
+  <div class="space-y-8">
+    {#if upcomingSessions.length > 0}
+      <div class="space-y-3">
+        {#each upcomingSessions as session (session.session_id)}
+          {@render sessionCard(session)}
+        {/each}
       </div>
-    {/each}
+    {/if}
+
+    {#if archivedSessions.length > 0}
+      <section class="space-y-3">
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              {t("sessions_archive")}
+            </h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              {t("sessions_archive_hint")}
+            </p>
+          </div>
+          <span
+            class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full shrink-0"
+          >
+            {archivedSessions.length}
+            {archivedSessions.length === 1
+              ? t("session_singular")
+              : t("sessions_plural")}
+          </span>
+        </div>
+
+        <div class="space-y-3">
+          {#each archivedSessions as session (session.session_id)}
+            {@render sessionCard(session)}
+          {/each}
+        </div>
+      </section>
+    {/if}
   </div>
 {/if}
 
