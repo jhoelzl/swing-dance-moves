@@ -48,6 +48,6 @@
 	},
 	"overrides": {
 		"cookie": "0.7.0",
-		"serialize-javascript": "7.0.3"
+		"serialize-javascript": "7.0.5"
 	}
 }
