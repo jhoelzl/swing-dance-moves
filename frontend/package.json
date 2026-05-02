@@ -47,6 +47,7 @@
 		"dompurify": "^3.4.1"
 	},
 	"overrides": {
-		"cookie": "0.7.0"
+		"cookie": "0.7.0",
+		"serialize-javascript": "7.0.5"
 	}
 }
