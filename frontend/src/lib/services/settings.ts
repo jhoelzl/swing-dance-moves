@@ -36,12 +36,11 @@ export async function getUserSettings(): Promise<UserSettings> {
 async function createDefaultSettings(userId: string): Promise<UserSettings> {
 	const { data, error } = await supabase
 		.from('user_settings')
-		// @ts-expect-error – Supabase generics resolve Insert type to never for user_settings
 		.insert({
 			user_id: userId,
 			language: DEFAULT_SETTINGS.language,
 			random_moves_count: DEFAULT_SETTINGS.random_moves_count
-		})
+		} as never)
 		.select()
 		.single();
 
@@ -60,8 +59,7 @@ export async function updateUserSettings(
 
 	const { data, error } = await supabase
 		.from('user_settings')
-		// @ts-expect-error – Supabase generics resolve Update type to never for user_settings
-		.update(updates)
+		.update(updates as never)
 		.eq('user_id', user.id)
 		.select()
 		.single();
