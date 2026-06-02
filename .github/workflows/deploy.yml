@@ -42,6 +42,7 @@ jobs:
         uses: 1password/load-secrets-action@92467eb28f72e8255933372f1e0707c567ce2259
         with:
           export-env: true
+          version: 2.30.0
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           VITE_SUPABASE_URL: op://swing-dance-moves/Supabase/url
