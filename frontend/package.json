@@ -49,6 +49,7 @@
 	"overrides": {
 		"cookie": "0.7.0",
 		"serialize-javascript": "7.0.5",
+		"@babel/core": "^7.29.6",
 		"@vite-pwa/sveltekit": {
 			"vite": ">=7.3.2"
 		}
