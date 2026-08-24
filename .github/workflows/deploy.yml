@@ -39,7 +39,7 @@ jobs:
         run: npm ci
 
       - name: Load secrets from 1Password
-        uses: 1password/load-secrets-action@e544b780808654ba8ceba5fb2fe2897103d92ff4
+        uses: 1password/load-secrets-action@70062d7a876d3eb6334754fa26efd2fbd90c32f2
         with:
           export-env: true
           version: 2.30.0
