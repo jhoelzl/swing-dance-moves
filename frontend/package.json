@@ -24,7 +24,7 @@
 		"@eslint/js": "^10.0.1",
 		"@supabase/supabase-js": "^2.112.3",
 		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.70.2",
+		"@sveltejs/kit": "^2.70.3",
 		"@sveltejs/vite-plugin-svelte": "^7.3.0",
 		"@tailwindcss/vite": "^4.3.3",
 		"@vite-pwa/sveltekit": "^1.1.0",
@@ -35,13 +35,13 @@
 		"knip": "^6.32.2",
 		"stylelint": "^17.14.1",
 		"stylelint-config-standard": "^40.0.0",
-		"svelte": "^5.56.9",
+		"svelte": "^5.56.10",
 		"svelte-check": "^4.7.6",
 		"tailwindcss": "^4.2.0",
-		"typescript": "^5.8.3",
+		"typescript": "^7.0.2",
 		"typescript-eslint": "^8.67.0",
-		"vite": "^8.2.1",
-		"vitest": "^4.1.10"
+		"vite": "^8.2.2",
+		"vitest": "^4.1.11"
 	},
 	"dependencies": {
 		"dompurify": "^3.4.13"
