@@ -44,7 +44,7 @@
 		"vitest": "^5.0.0"
 	},
 	"dependencies": {
-		"dompurify": "^3.4.14"
+		"dompurify": "^3.4.15"
 	},
 	"overrides": {
 		"cookie": "0.7.0",
