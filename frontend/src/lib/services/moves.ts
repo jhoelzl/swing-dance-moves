@@ -66,13 +66,24 @@ export async function getAllMoves(): Promise<Move[]> {
 }
 
 /**
- * Filter moves by multiple tag IDs (AND logic: move must have ALL selected tags).
+ * Filter moves by tag IDs. Tags of the same tag type are combined with OR,
+ * different tag types are combined with AND.
  */
 export function filterMovesByTags(moves: Move[], tagIds: number[]): Move[] {
 	if (tagIds.length === 0) return moves;
+	const typeOf = new Map<number, number>();
+	for (const move of moves) {
+		for (const t of move.tags ?? []) typeOf.set(t.tag_id, t.tag_type_id);
+	}
+	const groups = new Map<number, Set<number>>();
+	for (const id of tagIds) {
+		const key = typeOf.get(id) ?? -id - 1;
+		if (!groups.has(key)) groups.set(key, new Set());
+		groups.get(key)!.add(id);
+	}
 	return moves.filter((move) => {
 		const moveTagIds = new Set(move.tags?.map((t) => t.tag_id) ?? []);
-		return tagIds.every((id) => moveTagIds.has(id));
+		return [...groups.values()].every((ids) => [...ids].some((id) => moveTagIds.has(id)));
 	});
 }
 
