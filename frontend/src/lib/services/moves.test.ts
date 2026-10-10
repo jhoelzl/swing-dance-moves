@@ -45,7 +45,11 @@ describe('filterMovesByTags', () => {
 		expect(filterMovesByTags(moves, [])).toEqual(moves);
 	});
 
-	it('applies AND logic across selected tags', () => {
+	it('applies OR logic within the same tag type', () => {
+		expect(filterMovesByTags(moves, [1, 3])).toHaveLength(3);
+	});
+
+	it('applies AND logic across different tag types', () => {
 		const filtered = filterMovesByTags(moves, [1, 2]);
 
 		expect(filtered).toHaveLength(1);
