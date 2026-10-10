@@ -11,10 +11,23 @@ updates:
     labels:
       - dependencies
     groups:
-      dev-dependencies:
-        dependency-type: development
-      production-dependencies:
-        dependency-type: production
+      # One PR per week with all minor/patch updates (dev + prod together),
+      # so the lockfile is resolved once and peer conflicts show up in one place.
+      npm-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+      # Security fixes (incl. transitive deps like brace-expansion, devalue)
+      # are batched into one PR instead of one PR per package.
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    # Major bumps stay as separate PRs (not grouped) so breaking changes are
+    # reviewed on their own and cannot block the weekly minor/patch PR.
 
   - package-ecosystem: github-actions
     directory: /
@@ -27,3 +40,7 @@ updates:
     labels:
       - dependencies
       - github-actions
+    groups:
+      github-actions:
+        patterns:
+          - "*"
