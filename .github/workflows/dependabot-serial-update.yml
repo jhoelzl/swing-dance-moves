@@ -10,6 +10,7 @@ on:
       - main
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
@@ -40,7 +41,15 @@ jobs:
             exit 0
           fi
 
+          NEXT_BRANCH=$(gh pr view "$NEXT_PR" \
+            --repo "$GITHUB_REPOSITORY" \
+            --json headRefName \
+            --jq '.headRefName')
+
           echo "Updating PR #$NEXT_PR with latest main"
           gh api --method PUT \
             "repos/$GITHUB_REPOSITORY/pulls/$NEXT_PR/update-branch" \
             --silent
+          gh workflow run ci.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$NEXT_BRANCH"
