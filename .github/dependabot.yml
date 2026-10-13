@@ -8,6 +8,7 @@ updates:
       time: "08:00"
       timezone: Europe/Berlin
     open-pull-requests-limit: 5
+    rebase-strategy: disabled
     labels:
       - dependencies
     groups:
@@ -41,6 +42,7 @@ updates:
       time: "08:00"
       timezone: Europe/Berlin
     open-pull-requests-limit: 5
+    rebase-strategy: disabled
     labels:
       - dependencies
       - github-actions

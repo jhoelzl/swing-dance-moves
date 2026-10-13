@@ -1,0 +1,55 @@
+# cspell:ignore zizmor
+
+name: Dependabot serial branch update
+
+on:
+  pull_request_target:  # zizmor: ignore[dangerous-triggers]
+    types:
+      - closed
+    branches:
+      - main
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: dependabot-serial-update
+  cancel-in-progress: false
+
+jobs:
+  update-next:
+    if: github.event.pull_request.merged == true && github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update oldest open Dependabot PR branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          NEXT_PR=$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --author "app/dependabot" \
+            --state open \
+            --json number,createdAt \
+            --jq 'sort_by(.createdAt) | .[0].number')
+
+          if [ -z "$NEXT_PR" ] || [ "$NEXT_PR" = "null" ]; then
+            echo "No open Dependabot PRs left."
+            exit 0
+          fi
+
+          NEXT_BRANCH=$(gh pr view "$NEXT_PR" \
+            --repo "$GITHUB_REPOSITORY" \
+            --json headRefName \
+            --jq '.headRefName')
+
+          echo "Updating PR #$NEXT_PR with latest main"
+          gh api --method PUT \
+            "repos/$GITHUB_REPOSITORY/pulls/$NEXT_PR/update-branch" \
+            --silent
+          gh workflow run ci.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$NEXT_BRANCH"
