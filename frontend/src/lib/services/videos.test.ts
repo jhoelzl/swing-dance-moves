@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('$lib/supabase', () => ({
+vi.mock('#lib/supabase.js', () => ({
 	supabase: {}
 }));
 
-import type { Video } from '$lib/types';
-import { searchVideos } from '$lib/services/videos';
+import type { Video } from '#lib/types.js';
+import { searchVideos } from '#lib/services/videos.js';
 
 const videos: Video[] = [
 	{

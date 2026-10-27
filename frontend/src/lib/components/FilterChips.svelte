@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { TagGroup } from "$lib/types";
-  import { activeFilters, toggleFilter } from "$lib/stores";
-  import { getTagColors } from "$lib/utils";
+  import type { TagGroup } from "#lib/types.js";
+  import { activeFilters, toggleFilter } from "#lib/stores.js";
+  import { getTagColors } from "#lib/utils.js";
 
   interface Props {
     tagGroups: TagGroup[];

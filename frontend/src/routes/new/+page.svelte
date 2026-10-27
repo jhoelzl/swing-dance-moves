@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { base } from "$app/paths";
-  import { isAdmin, tagGroups, allMoves, addToast } from "$lib/stores";
-  import { createMove, getAllMoves } from "$lib/services/moves";
-  import type { MoveFormData } from "$lib/types";
-  import MoveForm from "$lib/components/MoveForm.svelte";
-  import { t } from "$lib/i18n";
+  import { resolve } from "$app/paths";
+  import { isAdmin, tagGroups, allMoves, addToast } from "#lib/stores.js";
+  import { createMove, getAllMoves } from "#lib/services/moves.js";
+  import type { MoveFormData } from "#lib/types.js";
+  import MoveForm from "#lib/components/MoveForm.svelte";
+  import { t } from "#lib/i18n.js";
 
   let loading = $state(false);
   let error = $state("");
@@ -21,7 +21,7 @@
   });
 
   onMount(() => {
-    if (!$isAdmin) goto(`${base}/login`);
+    if (!$isAdmin) goto(resolve("/login"));
   });
 
   async function handleSubmit(data: MoveFormData) {
@@ -33,7 +33,7 @@
       const moves = await getAllMoves();
       allMoves.set(moves);
       addToast(t("move_created"));
-      goto(`${base}/`);
+      goto(resolve("/"));
     } catch (err) {
       error = err instanceof Error ? err.message : t("failed_create_move");
     } finally {

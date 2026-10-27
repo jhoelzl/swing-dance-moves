@@ -1,7 +1,13 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import adapter from '@sveltejs/adapter-static';
 import tailwindcss from '@tailwindcss/vite';
-import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+import { SvelteKitPWA } from '@katama-labs/vite-pwa-sveltekit';
 import { defineConfig } from 'vitest/config';
+import process from 'node:process';
+
+const basePath = process.argv.includes('dev')
+	? ''
+	: (process.env.BASE_PATH as '' | `/${string}` | undefined) ?? '';
 
 export default defineConfig({
 	test: {
@@ -11,7 +17,18 @@ export default defineConfig({
 	},
 	plugins: [
 		tailwindcss(),
-		sveltekit(),
+		sveltekit({
+			adapter: adapter({
+				pages: 'build',
+				assets: 'build',
+				fallback: '404.html',
+				precompress: false,
+				strict: true
+			}),
+			paths: {
+				base: basePath
+			}
+		}),
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
 			manifest: {
@@ -21,8 +38,8 @@ export default defineConfig({
 				theme_color: '#1e293b',
 				background_color: '#0f172a',
 				display: 'standalone',
-				scope: '/',
-				start_url: '/',
+				scope: `${basePath}/`,
+				start_url: `${basePath}/`,
 				icons: [
 					{
 						src: 'pwa-192x192.svg',

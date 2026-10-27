@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { activeTab, isLoading, tagGroups } from "$lib/stores";
-  import { getAllTagsGrouped } from "$lib/services/moves";
+  import { activeTab, isLoading, tagGroups } from "#lib/stores.js";
+  import { getAllTagsGrouped } from "#lib/services/moves.js";
   import {
     getAllTagTypes,
     createTagType,
@@ -11,11 +11,11 @@
     createTag,
     updateTag,
     deleteTag,
-  } from "$lib/services/tags";
-  import { getTagColors } from "$lib/utils";
-  import type { Tag, TagType, TagGroup } from "$lib/types";
-  import ConfirmModal from "$lib/components/ConfirmModal.svelte";
-  import { t } from "$lib/i18n";
+  } from "#lib/services/tags.js";
+  import { getTagColors } from "#lib/utils.js";
+  import type { Tag, TagType, TagGroup } from "#lib/types.js";
+  import ConfirmModal from "#lib/components/ConfirmModal.svelte";
+  import { t } from "#lib/i18n.js";
 
   // Available label colors for the color picker
   const labelOptions = [

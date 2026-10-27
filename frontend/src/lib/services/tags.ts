@@ -1,5 +1,5 @@
-import { supabase } from '$lib/supabase';
-import type { Tag, TagType } from '$lib/types';
+import { supabase } from '#lib/supabase.js';
+import type { Tag, TagType } from '#lib/types.js';
 
 function createDeleteConstraintError(message: string): Error {
 	const error = new Error(message);

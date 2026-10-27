@@ -1,5 +1,5 @@
-import { supabase } from '$lib/supabase';
-import type { UserSettings } from '$lib/types';
+import { supabase } from '#lib/supabase.js';
+import type { UserSettings } from '#lib/types.js';
 
 /** Default settings for new users */
 const DEFAULT_SETTINGS: Pick<UserSettings, 'language' | 'random_moves_count'> = {

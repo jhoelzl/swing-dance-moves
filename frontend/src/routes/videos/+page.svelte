@@ -1,16 +1,16 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { allVideos, isLoading, isAdmin, activeTab } from "$lib/stores";
-  import SkeletonCard from "$lib/components/SkeletonCard.svelte";
-  import { searchVideos } from "$lib/services/videos";
-  import type { Video } from "$lib/types";
-  import VideoCard from "$lib/components/VideoCard.svelte";
-  import VideoGridCard from "$lib/components/VideoGridCard.svelte";
-  import { getAllVideos } from "$lib/services/videos";
-  import { debounce } from "$lib/utils";
-  import { base } from "$app/paths";
-  import { supabase } from "$lib/supabase";
-  import { t } from "$lib/i18n";
+  import { allVideos, isLoading, isAdmin, activeTab } from "#lib/stores.js";
+  import SkeletonCard from "#lib/components/SkeletonCard.svelte";
+  import { searchVideos } from "#lib/services/videos.js";
+  import type { Video } from "#lib/types.js";
+  import VideoCard from "#lib/components/VideoCard.svelte";
+  import VideoGridCard from "#lib/components/VideoGridCard.svelte";
+  import { getAllVideos } from "#lib/services/videos.js";
+  import { debounce } from "#lib/utils.js";
+  import { resolve } from "$app/paths";
+  import { supabase } from "#lib/supabase.js";
+  import { t } from "#lib/i18n.js";
 
   let searchQuery = $state("");
   let searchInputValue = $state("");
@@ -199,7 +199,7 @@
 
       {#if $isAdmin}
         <a
-          href="{base}/videos/new"
+          href={resolve("/videos/new")}
           class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow cursor-pointer no-underline"
         >
           <svg

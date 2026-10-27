@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { userSettings, activeTab, addToast } from "$lib/stores";
-  import { getUserSettings, updateUserSettings } from "$lib/services/settings";
-  import { exportAllData } from "$lib/services/exportImport";
-  import type { UserSettings } from "$lib/types";
-  import { t } from "$lib/i18n";
+  import { userSettings, activeTab, addToast } from "#lib/stores.js";
+  import { getUserSettings, updateUserSettings } from "#lib/services/settings.js";
+  import { exportAllData } from "#lib/services/exportImport.js";
+  import type { UserSettings } from "#lib/types.js";
+  import { t } from "#lib/i18n.js";
 
   let language = $state<"de" | "en">("de");
   let randomMovesCount = $state(2);

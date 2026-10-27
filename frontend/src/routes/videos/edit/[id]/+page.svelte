@@ -1,19 +1,19 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { base } from "$app/paths";
-  import { page } from "$app/stores";
-  import { isAdmin, allVideos, activeTab, addToast } from "$lib/stores";
+  import { resolve } from "$app/paths";
+  import { page } from "$app/state";
+  import { isAdmin, allVideos, activeTab, addToast } from "#lib/stores.js";
   import {
     getVideoById,
     updateVideo,
     deleteVideo,
     getAllVideos,
-  } from "$lib/services/videos";
-  import type { VideoFormData } from "$lib/types";
-  import VideoForm from "$lib/components/VideoForm.svelte";
-  import ConfirmModal from "$lib/components/ConfirmModal.svelte";
-  import { t } from "$lib/i18n";
+  } from "#lib/services/videos.js";
+  import type { VideoFormData } from "#lib/types.js";
+  import VideoForm from "#lib/components/VideoForm.svelte";
+  import ConfirmModal from "#lib/components/ConfirmModal.svelte";
+  import { t } from "#lib/i18n.js";
 
   let loading = $state(false);
   let deleting = $state(false);
@@ -24,25 +24,25 @@
     url: "",
     description: "",
   });
-  let videoId = $derived(Number($page.params.id));
+  let videoId = $derived(Number(page.params.id));
   let loaded = $state(false);
 
   onMount(async () => {
     activeTab.set("videos");
     if (!$isAdmin) {
-      goto(`${base}/login`);
+      goto(resolve("/login"));
       return;
     }
 
     if (isNaN(videoId)) {
       addToast(t("invalid_video_id"), "error");
-      goto(`${base}/videos`);
+      goto(resolve("/videos"));
       return;
     }
 
     const video = await getVideoById(videoId);
     if (!video) {
-      goto(`${base}/videos`);
+      goto(resolve("/videos"));
       return;
     }
 
@@ -62,7 +62,7 @@
       const videos = await getAllVideos();
       allVideos.set(videos);
       addToast(t("video_updated"));
-      goto(`${base}/videos`);
+      goto(resolve("/videos"));
     } catch (err) {
       error = err instanceof Error ? err.message : t("failed_update_video");
     } finally {
@@ -78,7 +78,7 @@
       const videos = await getAllVideos();
       allVideos.set(videos);
       addToast(t("video_deleted"));
-      goto(`${base}/videos`);
+      goto(resolve("/videos"));
     } catch (err) {
       error =
         err instanceof Error &&

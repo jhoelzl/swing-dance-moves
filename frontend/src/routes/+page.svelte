@@ -13,16 +13,16 @@
     activeTab,
     sortOrder,
     isAdmin,
-  } from "$lib/stores";
-  import type { SortOrder } from "$lib/stores";
-  import { getAllMoves } from "$lib/services/moves";
-  import type { Move } from "$lib/types";
-  import FilterChips from "$lib/components/FilterChips.svelte";
-  import MoveCard from "$lib/components/MoveCard.svelte";
-  import SkeletonCard from "$lib/components/SkeletonCard.svelte";
-  import { debounce } from "$lib/utils";
-  import { base } from "$app/paths";
-  import { t } from "$lib/i18n";
+  } from "#lib/stores.js";
+  import type { SortOrder } from "#lib/stores.js";
+  import { getAllMoves } from "#lib/services/moves.js";
+  import type { Move } from "#lib/types.js";
+  import FilterChips from "#lib/components/FilterChips.svelte";
+  import MoveCard from "#lib/components/MoveCard.svelte";
+  import SkeletonCard from "#lib/components/SkeletonCard.svelte";
+  import { debounce } from "#lib/utils.js";
+  import { resolve } from "$app/paths";
+  import { t } from "#lib/i18n.js";
 
   async function handleMoveDeleted() {
     const moves = await getAllMoves();
@@ -103,7 +103,7 @@
     }
 
     const search = params.toString();
-    const basePath = `${base}/` || "/";
+    const basePath = resolve("/");
     const newUrl = search ? `${basePath}?${search}` : basePath;
 
     window.history.replaceState(null, "", newUrl);
@@ -223,7 +223,7 @@
       </span>
       {#if $isAdmin}
         <a
-          href="{base}/new"
+          href={resolve("/new")}
           class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow cursor-pointer no-underline"
         >
           <svg

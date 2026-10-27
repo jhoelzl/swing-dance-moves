@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { base } from "$app/paths";
-  import { isAdmin, allVideos, activeTab, addToast } from "$lib/stores";
-  import { createVideo, getAllVideos } from "$lib/services/videos";
-  import type { VideoFormData } from "$lib/types";
-  import VideoForm from "$lib/components/VideoForm.svelte";
-  import { t } from "$lib/i18n";
+  import { resolve } from "$app/paths";
+  import { isAdmin, allVideos, activeTab, addToast } from "#lib/stores.js";
+  import { createVideo, getAllVideos } from "#lib/services/videos.js";
+  import type { VideoFormData } from "#lib/types.js";
+  import VideoForm from "#lib/components/VideoForm.svelte";
+  import { t } from "#lib/i18n.js";
 
   let loading = $state(false);
   let error = $state("");
@@ -19,7 +19,7 @@
 
   onMount(() => {
     activeTab.set("videos");
-    if (!$isAdmin) goto(`${base}/login`);
+    if (!$isAdmin) goto(resolve("/login"));
   });
 
   async function handleSubmit(data: VideoFormData) {
@@ -31,7 +31,7 @@
       const videos = await getAllVideos();
       allVideos.set(videos);
       addToast(t("video_created"));
-      goto(`${base}/videos`);
+      goto(resolve("/videos"));
     } catch (err) {
       error = err instanceof Error ? err.message : t("failed_create_video");
     } finally {

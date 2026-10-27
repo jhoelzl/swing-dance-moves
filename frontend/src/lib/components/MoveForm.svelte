@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { base } from "$app/paths";
-  import type { TagGroup, MoveFormData, Video, MoveVideoRef } from "$lib/types";
-  import { allVideos } from "$lib/stores";
-  import { t } from "$lib/i18n";
+  import { resolve } from "$app/paths";
+  import type { TagGroup, MoveFormData, Video, MoveVideoRef } from "#lib/types.js";
+  import { allVideos } from "#lib/stores.js";
+  import { t } from "#lib/i18n.js";
 
   interface Props {
     formData: MoveFormData;
@@ -263,7 +263,7 @@
       {loading ? t("saving") : t("save_move")}
     </button>
     <a
-      href="{base}/"
+      href={resolve("/")}
       class="px-5 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium text-sm transition-colors no-underline"
     >
       {t("cancel")}

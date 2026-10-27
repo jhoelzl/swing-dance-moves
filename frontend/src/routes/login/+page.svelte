@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { supabase } from "$lib/supabase";
-  import { isAdmin } from "$lib/stores";
+  import { supabase } from "#lib/supabase.js";
+  import { isAdmin } from "#lib/stores.js";
   import { goto } from "$app/navigation";
-  import { base } from "$app/paths";
-  import { t } from "$lib/i18n";
+  import { resolve } from "$app/paths";
+  import { t } from "#lib/i18n.js";
 
   let email = $state("");
   let password = $state("");
@@ -28,7 +28,7 @@
         error = authError.message;
       } else {
         isAdmin.set(true);
-        goto(`${base}/`);
+        goto(resolve("/"));
       }
     } catch (err) {
       error = t("unexpected_error");
@@ -47,7 +47,7 @@
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
         email,
-        { redirectTo: `${window.location.origin}${base}/login` },
+        { redirectTo: `${window.location.origin}${resolve("/login")}` },
       );
       if (resetError) {
         error = resetError.message;

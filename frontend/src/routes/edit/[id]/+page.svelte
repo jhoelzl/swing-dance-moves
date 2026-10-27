@@ -1,30 +1,30 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { base } from "$app/paths";
-  import { page } from "$app/stores";
+  import { resolve } from "$app/paths";
+  import { page } from "$app/state";
   import {
     isAdmin,
     tagGroups,
     allMoves,
     allSessions,
     addToast,
-  } from "$lib/stores";
+  } from "#lib/stores.js";
   import {
     getMoveById,
     updateMove,
     deleteMove,
     getAllMoves,
-  } from "$lib/services/moves";
+  } from "#lib/services/moves.js";
   import {
     getSessionsForMove,
     addMoveToSession,
     removeMoveFromSession,
-  } from "$lib/services/sessions";
-  import type { MoveFormData, Session } from "$lib/types";
-  import MoveForm from "$lib/components/MoveForm.svelte";
-  import ConfirmModal from "$lib/components/ConfirmModal.svelte";
-  import { t } from "$lib/i18n";
+  } from "#lib/services/sessions.js";
+  import type { MoveFormData, Session } from "#lib/types.js";
+  import MoveForm from "#lib/components/MoveForm.svelte";
+  import ConfirmModal from "#lib/components/ConfirmModal.svelte";
+  import { t } from "#lib/i18n.js";
 
   let loading = $state(false);
   let deleting = $state(false);
@@ -42,7 +42,7 @@
     tagIds: [],
     videoRefs: [],
   });
-  let moveId = $derived(Number($page.params.id));
+  let moveId = $derived(Number(page.params.id));
   let loaded = $state(false);
 
   const availableSessionsForMove = $derived(
@@ -58,19 +58,19 @@
 
   onMount(async () => {
     if (!$isAdmin) {
-      goto(`${base}/login`);
+      goto(resolve("/login"));
       return;
     }
 
     if (isNaN(moveId)) {
       addToast(t("invalid_move_id"), "error");
-      goto(`${base}/`);
+      goto(resolve("/"));
       return;
     }
 
     const move = await getMoveById(moveId);
     if (!move) {
-      goto(`${base}/`);
+      goto(resolve("/"));
       return;
     }
 
@@ -99,7 +99,7 @@
       const moves = await getAllMoves();
       allMoves.set(moves);
       addToast(t("move_updated"));
-      goto(`${base}/`);
+      goto(resolve("/"));
     } catch (err) {
       error = err instanceof Error ? err.message : t("failed_update_move");
     } finally {
@@ -115,7 +115,7 @@
       const moves = await getAllMoves();
       allMoves.set(moves);
       addToast(t("move_deleted"));
-      goto(`${base}/`);
+      goto(resolve("/"));
     } catch (err) {
       error = err instanceof Error ? err.message : t("failed_delete_move");
     } finally {

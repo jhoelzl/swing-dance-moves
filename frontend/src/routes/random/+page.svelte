@@ -10,16 +10,15 @@
     videoOnly,
     clearFilters,
     userSettings,
-  } from "$lib/stores";
-  import { getRandomMoves } from "$lib/services/moves";
-  import type { Move } from "$lib/types";
-  import MoveCard from "$lib/components/MoveCard.svelte";
-  import FilterChips from "$lib/components/FilterChips.svelte";
-  import SkeletonCard from "$lib/components/SkeletonCard.svelte";
-  import { getAllMoves, getAllTagsGrouped } from "$lib/services/moves";
-  import { getAllVideos } from "$lib/services/videos";
-  import { t } from "$lib/i18n";
-  import { base } from "$app/paths";
+  } from "#lib/stores.js";
+  import { getRandomMoves } from "#lib/services/moves.js";
+  import type { Move } from "#lib/types.js";
+  import MoveCard from "#lib/components/MoveCard.svelte";
+  import FilterChips from "#lib/components/FilterChips.svelte";
+  import SkeletonCard from "#lib/components/SkeletonCard.svelte";
+  import { getAllMoves, getAllTagsGrouped } from "#lib/services/moves.js";
+  import { getAllVideos } from "#lib/services/videos.js";
+  import { t } from "#lib/i18n.js";
 
   let randomMoves = $state<Move[]>([]);
   let showFilters = $state(false);

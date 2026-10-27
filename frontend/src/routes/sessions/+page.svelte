@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { allMoves, allSessions, activeTab, addToast } from "$lib/stores";
-  import ConfirmModal from "$lib/components/ConfirmModal.svelte";
-  import { t } from "$lib/i18n";
-  import type { Session, Move } from "$lib/types";
+  import { allMoves, allSessions, activeTab, addToast } from "#lib/stores.js";
+  import ConfirmModal from "#lib/components/ConfirmModal.svelte";
+  import { t } from "#lib/i18n.js";
+  import type { Session, Move } from "#lib/types.js";
   import {
     getAllSessions,
     createSession,
@@ -11,7 +11,7 @@
     deleteSession,
     addMoveToSession,
     removeMoveFromSession,
-  } from "$lib/services/sessions";
+  } from "#lib/services/sessions.js";
 
   // ── local state ──────────────────────────────────────────────
   let sessions = $state<Session[]>([]);

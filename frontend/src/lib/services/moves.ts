@@ -1,5 +1,5 @@
-import { supabase } from '$lib/supabase';
-import type { Move, Tag, TagGroup, TagType, MoveFormData, MoveToVideo, Video } from '$lib/types';
+import { supabase } from '#lib/supabase.js';
+import type { Move, Tag, TagGroup, TagType, MoveFormData, MoveToVideo, Video } from '#lib/types.js';
 
 const db: any = supabase;
 

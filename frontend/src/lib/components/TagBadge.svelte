@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Tag } from "$lib/types";
-  import { getTagColors } from "$lib/utils";
+  import type { Tag } from "#lib/types.js";
+  import { getTagColors } from "#lib/utils.js";
 
   interface Props {
     tag: Tag;

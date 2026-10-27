@@ -1,5 +1,5 @@
-import { supabase } from '$lib/supabase';
-import type { Session, SessionFormData, Move } from '$lib/types';
+import { supabase } from '#lib/supabase.js';
+import type { Session, SessionFormData, Move } from '#lib/types.js';
 
 const db: any = supabase;
 
