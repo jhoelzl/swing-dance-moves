@@ -1,13 +1,13 @@
 <script lang="ts">
-  import type { Video } from "$lib/types";
+  import type { Video } from "#lib/types.js";
   import {
     extractYouTubeId,
     getVideoSourceType,
     getDropboxDirectUrl,
-  } from "$lib/utils";
-  import { isAdmin } from "$lib/stores";
-  import { base } from "$app/paths";
-  import { t } from "$lib/i18n";
+  } from "#lib/utils.js";
+  import { isAdmin } from "#lib/stores.js";
+  import { resolve } from "$app/paths";
+  import { t } from "#lib/i18n.js";
 
   interface Props {
     video: Video;
@@ -157,7 +157,9 @@
 
   {#if $isAdmin}
     <a
-      href="{base}/videos/edit/{video.video_id}"
+      href={resolve("/videos/edit/[id]", {
+        id: String(video.video_id),
+      })}
       class="absolute bottom-2 right-2 p-1.5 rounded-md text-white/90 bg-black/45 hover:bg-black/60 transition-colors"
       title={t("edit_video")}
       aria-label="{t('edit_video')}: {video.title}"

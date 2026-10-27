@@ -1,5 +1,5 @@
 import { get } from 'svelte/store';
-import { userSettings } from '$lib/stores';
+import { userSettings } from '#lib/stores.js';
 
 /**
  * Translation dictionary for all UI strings.

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { VideoFormData } from "$lib/types";
-  import { base } from "$app/paths";
-  import { t } from "$lib/i18n";
+  import type { VideoFormData } from "#lib/types.js";
+  import { resolve } from "$app/paths";
+  import { t } from "#lib/i18n.js";
 
   interface Props {
     formData: VideoFormData;
@@ -88,7 +88,7 @@
       {loading ? t("saving") : t("save_video")}
     </button>
     <a
-      href="{base}/videos"
+      href={resolve("/videos")}
       class="px-5 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium text-sm transition-colors no-underline"
     >
       {t("cancel")}

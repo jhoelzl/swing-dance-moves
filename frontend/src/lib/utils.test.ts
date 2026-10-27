@@ -8,7 +8,7 @@ import {
 	getVideoSourceType,
 	isDropboxUrl,
 	timecodeToSeconds
-} from '$lib/utils';
+} from '#lib/utils.js';
 
 describe('getTagColors', () => {
 	it('returns mapped colors for known labels', () => {

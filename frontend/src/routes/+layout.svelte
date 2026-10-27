@@ -2,8 +2,8 @@
   import "../app.css";
   import { onMount } from "svelte";
   import type { Session as AuthSession } from "@supabase/supabase-js";
-  import { supabase, supabaseConfigError } from "$lib/supabase";
-  import Toast from "$lib/components/Toast.svelte";
+  import { supabase, supabaseConfigError } from "#lib/supabase.js";
+  import Toast from "#lib/components/Toast.svelte";
   import {
     darkMode,
     toggleDarkMode,
@@ -16,20 +16,22 @@
     activeTab,
     userSettings,
     allSessions,
-  } from "$lib/stores";
-  import { getAllMoves, getAllTagsGrouped } from "$lib/services/moves";
-  import { getAllVideos } from "$lib/services/videos";
-  import { getUserSettings } from "$lib/services/settings";
-  import { getAllSessions } from "$lib/services/sessions";
-  import { t } from "$lib/i18n";
+  } from "#lib/stores.js";
+  import { getAllMoves, getAllTagsGrouped } from "#lib/services/moves.js";
+  import { getAllVideos } from "#lib/services/videos.js";
+  import { getUserSettings } from "#lib/services/settings.js";
+  import { getAllSessions } from "#lib/services/sessions.js";
+  import { t } from "#lib/i18n.js";
   import { goto } from "$app/navigation";
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
+  import { useRegisterSW } from "virtual:pwa-register/svelte";
 
   let { children } = $props();
+  useRegisterSW();
 
   // Check if current page is the login page
-  import { page } from "$app/stores";
-  let isLoginPage = $derived($page.url.pathname.endsWith("/login"));
+  import { page } from "$app/state";
+  let isLoginPage = $derived(page.url.pathname.endsWith("/login"));
 
   // Error state for failed data loading
   let loadError = $state(false);
@@ -79,7 +81,7 @@
 
     resetAppState();
     isLoading.set(false);
-    goto(`${base}/login`);
+    goto(resolve("/login"));
   }
 
   // Reactively update the lang attribute on <html> based on user language setting
@@ -142,7 +144,7 @@
     await supabase.auth.signOut();
     isAdmin.set(false);
     resetAppState();
-    goto(`${base}/login`);
+    goto(resolve("/login"));
   }
 </script>
 
@@ -226,7 +228,7 @@
       <div class="max-w-3xl mx-auto px-5 py-3.5">
         <div class="flex items-center justify-between">
           <a
-            href="{base}/"
+            href={resolve("/")}
             class="flex items-center gap-2.5 text-gray-900 dark:text-white no-underline group"
           >
             <span
@@ -277,7 +279,7 @@
             <!-- Settings -->
             {#if $isAdmin}
               <a
-                href="{base}/settings"
+                href={resolve("/settings")}
                 class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                 title={t("nav_settings")}
               >
@@ -326,7 +328,7 @@
               </button>
             {:else}
               <a
-                href="{base}/login"
+                href={resolve("/login")}
                 class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                 title={t("login")}
               >
@@ -356,11 +358,11 @@
             class="flex gap-1 border-t border-gray-100 dark:border-gray-800 pt-2"
           >
             <a
-              href="{base}/"
+              href={resolve("/")}
               onclick={(e) => {
                 e.preventDefault();
                 activeTab.set("moves");
-                goto(`${base}/`);
+                goto(resolve("/"));
               }}
               class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
             {$activeTab === 'moves'
@@ -383,11 +385,11 @@
               {t("nav_moves")}
             </a>
             <a
-              href="{base}/random"
+              href={resolve("/random")}
               onclick={(e) => {
                 e.preventDefault();
                 activeTab.set("random");
-                goto(`${base}/random`);
+                goto(resolve("/random"));
               }}
               class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
             {$activeTab === 'random'
@@ -410,11 +412,11 @@
               {t("nav_random")}
             </a>
             <a
-              href="{base}/videos"
+              href={resolve("/videos")}
               onclick={(e) => {
                 e.preventDefault();
                 activeTab.set("videos");
-                goto(`${base}/videos`);
+                goto(resolve("/videos"));
               }}
               class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
             {$activeTab === 'videos'
@@ -437,11 +439,11 @@
               {t("nav_videos")}
             </a>
             <a
-              href="{base}/tags"
+              href={resolve("/tags")}
               onclick={(e) => {
                 e.preventDefault();
                 activeTab.set("tags");
-                goto(`${base}/tags`);
+                goto(resolve("/tags"));
               }}
               class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
             {$activeTab === 'tags'
@@ -464,11 +466,11 @@
               {t("nav_tags")}
             </a>
             <a
-              href="{base}/sessions"
+              href={resolve("/sessions")}
               onclick={(e) => {
                 e.preventDefault();
                 activeTab.set("sessions");
-                goto(`${base}/sessions`);
+                goto(resolve("/sessions"));
               }}
               class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
             {$activeTab === 'sessions'
@@ -491,11 +493,11 @@
               {t("nav_sessions")}
             </a>
             <a
-              href="{base}/calendar"
+              href={resolve("/calendar")}
               onclick={(e) => {
                 e.preventDefault();
                 activeTab.set("calendar");
-                goto(`${base}/calendar`);
+                goto(resolve("/calendar"));
               }}
               class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
             {$activeTab === 'calendar'
@@ -533,7 +535,7 @@
             {t("sign_in_prompt")}
           </p>
           <a
-            href="{base}/login"
+            href={resolve("/login")}
             class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all shadow-sm hover:shadow font-medium text-sm"
             >{t("sign_in")}</a
           >

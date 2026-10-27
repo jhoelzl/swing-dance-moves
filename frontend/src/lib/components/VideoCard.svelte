@@ -1,16 +1,16 @@
 <script lang="ts">
-  import type { Video } from "$lib/types";
+  import type { Video } from "#lib/types.js";
   import {
     extractYouTubeId,
     timecodeToSeconds,
     isDropboxUrl,
     getDropboxDirectUrl,
-  } from "$lib/utils";
-  import { isAdmin, addToast } from "$lib/stores";
-  import { base } from "$app/paths";
-  import { deleteVideo, getLinkedMovesForVideo } from "$lib/services/videos";
+  } from "#lib/utils.js";
+  import { isAdmin, addToast } from "#lib/stores.js";
+  import { resolve } from "$app/paths";
+  import { deleteVideo, getLinkedMovesForVideo } from "#lib/services/videos.js";
   import ConfirmModal from "./ConfirmModal.svelte";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n.js";
 
   interface LinkedMove {
     move_id: number;
@@ -214,7 +214,9 @@
     <div class="flex items-center gap-2 mt-0.5 shrink-0">
       {#if $isAdmin}
         <a
-          href="{base}/videos/edit/{video.video_id}"
+          href={resolve("/videos/edit/[id]", {
+            id: String(video.video_id),
+          })}
           onclick={(e) => e.stopPropagation()}
           class="p-1.5 rounded-md text-gray-300 hover:text-blue-500 hover:bg-blue-50 dark:text-gray-600 dark:hover:text-blue-400 dark:hover:bg-blue-950/30 transition-all"
           title={t("edit_video")}
@@ -342,9 +344,9 @@
             <div class="space-y-1.5">
               {#each linkedMoves as lm}
                 <a
-                  href="{base}/?q={encodeURIComponent(
+                  href={`${resolve("/")}?q=${encodeURIComponent(
                     lm.move_name.trim(),
-                  )}&expand=1"
+                  )}&expand=1`}
                   class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:border-blue-200 dark:hover:border-blue-800 transition-all no-underline group/move"
                 >
                   <svg

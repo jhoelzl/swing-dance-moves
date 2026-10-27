@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { page } from "$app/stores";
-  import { base } from "$app/paths";
+  import { page } from "$app/state";
+  import { resolve } from "$app/paths";
 </script>
 
 <div class="min-h-[60vh] flex items-center justify-center p-6">
@@ -9,22 +9,22 @@
   >
     <div class="text-5xl mb-4">😵</div>
     <h1 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">
-      {$page.status} – {$page.status === 404
+      {page.status} – {page.status === 404
         ? "Page not found"
         : "Something went wrong"}
     </h1>
     <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-2">
-      {#if $page.status === 404}
+      {#if page.status === 404}
         The requested page does not exist or has been moved.
       {:else}
         An unexpected error occurred. Please try again.
       {/if}
     </p>
-    {#if $page.error?.message}
+    {#if page.error?.message}
       <p
         class="text-xs text-gray-400 dark:text-gray-500 font-mono bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 mb-5"
       >
-        {$page.error.message}
+        {page.error.message}
       </p>
     {/if}
     <div class="flex items-center justify-center gap-3">
@@ -48,7 +48,7 @@
         Try Again
       </button>
       <a
-        href="{base}/"
+        href={resolve("/")}
         class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors"
       >
         <svg

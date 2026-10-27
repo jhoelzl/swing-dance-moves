@@ -1,5 +1,5 @@
-import { supabase } from '$lib/supabase';
-import type { Move, MoveFormData } from '$lib/types';
+import { supabase } from '#lib/supabase.js';
+import type { Move, MoveFormData } from '#lib/types.js';
 import { createMove } from './moves';
 
 // ── Export types ──

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
   import { onMount } from "svelte";
-  import { activeTab, allMoves, allSessions } from "$lib/stores";
-  import { getLang, t } from "$lib/i18n";
-  import type { Move, Session } from "$lib/types";
+  import { activeTab, allMoves, allSessions } from "#lib/stores.js";
+  import { getLang, t } from "#lib/i18n.js";
+  import type { Move, Session } from "#lib/types.js";
 
   type CalendarEntry = {
     type: "session" | "learned";
@@ -254,7 +254,7 @@
             <div class="mt-1.5 space-y-1">
               {#each cell.sessions.slice(0, 2) as session (session.id)}
                 <a
-                  href="{base}/sessions#session-{session.id}"
+                  href="{resolve('/sessions')}#session-{session.id}"
                   title={session.label}
                   onclick={(event) => event.stopPropagation()}
                   class="block max-w-full truncate rounded px-1.5 py-0.5 text-[10px] font-semibold bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800 hover:bg-green-200/80 dark:hover:bg-green-900/60 transition-colors"
@@ -272,7 +272,7 @@
 
               {#each cell.learnedMoves.slice(0, 2) as move (move.id)}
                 <a
-                  href="{base}/edit/{move.id}"
+                  href={resolve("/edit/[id]", { id: String(move.id) })}
                   title={move.label}
                   onclick={(event) => event.stopPropagation()}
                   class="block max-w-full truncate rounded px-1.5 py-0.5 text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800 hover:bg-amber-200/80 dark:hover:bg-amber-900/60 transition-colors"
@@ -321,14 +321,14 @@
             </span>
             {#if entry.type === "session"}
               <a
-                href="{base}/sessions#session-{entry.id}"
+                href="{resolve('/sessions')}#session-{entry.id}"
                 class="underline decoration-green-400/70 hover:decoration-green-600 dark:hover:decoration-green-300"
               >
                 {entry.label}
               </a>
             {:else}
               <a
-                href="{base}/edit/{entry.id}"
+                href={resolve("/edit/[id]", { id: String(entry.id) })}
                 class="underline decoration-amber-400/70 hover:decoration-amber-600 dark:hover:decoration-amber-300"
               >
                 {entry.label}

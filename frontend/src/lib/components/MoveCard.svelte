@@ -1,20 +1,20 @@
 <script lang="ts">
-  import type { Move, MoveToVideo, Session } from "$lib/types";
+  import type { Move, MoveToVideo, Session } from "#lib/types.js";
   import TagBadge from "./TagBadge.svelte";
   import {
     extractYouTubeId,
     timecodeToSeconds,
     isDropboxUrl,
     getDropboxDirectUrl,
-  } from "$lib/utils";
-  import { isAdmin, addToast } from "$lib/stores";
-  import { base } from "$app/paths";
-  import { deleteMove } from "$lib/services/moves";
-  import { getVideoRefsForMove } from "$lib/services/videos";
-  import { getSessionsForMove } from "$lib/services/sessions";
+  } from "#lib/utils.js";
+  import { isAdmin, addToast } from "#lib/stores.js";
+  import { resolve } from "$app/paths";
+  import { deleteMove } from "#lib/services/moves.js";
+  import { getVideoRefsForMove } from "#lib/services/videos.js";
+  import { getSessionsForMove } from "#lib/services/sessions.js";
   import DOMPurify from "dompurify";
   import ConfirmModal from "./ConfirmModal.svelte";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n.js";
 
   interface Props {
     move: Move;
@@ -190,7 +190,7 @@
     <div class="flex items-center gap-2 mt-0.5 shrink-0">
       {#if $isAdmin}
         <a
-          href="{base}/edit/{move.move_id}"
+          href={resolve("/edit/[id]", { id: String(move.move_id) })}
           onclick={(e) => e.stopPropagation()}
           class="p-1.5 rounded-md text-gray-300 hover:text-blue-500 hover:bg-blue-50 dark:text-gray-600 dark:hover:text-blue-400 dark:hover:bg-blue-950/30 transition-all"
           title={t("edit_move")}

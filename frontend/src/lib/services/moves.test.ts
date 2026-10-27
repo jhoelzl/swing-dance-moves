@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('$lib/supabase', () => ({
+vi.mock('#lib/supabase.js', () => ({
 	supabase: {}
 }));
 
-import type { Move } from '$lib/types';
-import { filterMovesByTags, getRandomMoves, searchMoves } from '$lib/services/moves';
+import type { Move } from '#lib/types.js';
+import { filterMovesByTags, getRandomMoves, searchMoves } from '#lib/services/moves.js';
 
 const moves: Move[] = [
 	{
