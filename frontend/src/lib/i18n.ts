@@ -56,6 +56,10 @@ const translations: Record<string, { de: string; en: string }> = {
 
   // ── Moves Page ──
   'search_moves': { de: 'Moves suchen...', en: 'Search moves...' },
+  'search_tags': { de: 'Tags suchen...', en: 'Search tags...' },
+  'no_tags_found': { de: 'Keine Tags gefunden', en: 'No tags found' },
+  'with_video': { de: 'Mit Video', en: 'With video' },
+  'without_video': { de: 'Ohne Video', en: 'Without video' },
   'filter': { de: 'Filter', en: 'Filter' },
   'reset': { de: 'Zurücksetzen', en: 'Reset' },
   'out_of_moves': { de: 'Mir fällt nichts ein!', en: 'Out of moves!' },

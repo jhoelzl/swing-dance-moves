@@ -46,9 +46,11 @@ export async function getAllMoves(): Promise<Move[]> {
 	}
 
 	// Fetch all move-to-video mappings to know which moves have videos
-	const { data: videoMappings } = await db
+	const { data: videoMappings, error: videoError } = await db
 		.from('moves_to_videos')
 		.select('move_id');
+
+	if (videoError) throw videoError;
 
 	const moveIdsWithVideo = new Set((videoMappings ?? []).map((m: any) => m.move_id));
 
@@ -85,6 +87,17 @@ export function filterMovesByTags(moves: Move[], tagIds: number[]): Move[] {
 		const moveTagIds = new Set(move.tags?.map((t) => t.tag_id) ?? []);
 		return [...groups.values()].every((ids) => [...ids].some((id) => moveTagIds.has(id)));
 	});
+}
+
+export function searchTagGroups(groups: TagGroup[], query: string): TagGroup[] {
+	const q = query.trim().toLowerCase();
+	if (!q) return groups;
+	return groups
+		.map((group) => ({
+			...group,
+			tags: group.tags.filter((tag) => tag.tag_name.toLowerCase().includes(q))
+		}))
+		.filter((group) => group.tags.length > 0);
 }
 
 /**
