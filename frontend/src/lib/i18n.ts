@@ -30,8 +30,6 @@ const translations: Record<string, { de: string; en: string }> = {
   'studio_navigation': { de: 'Hauptnavigation', en: 'Main navigation' },
   'studio_your_space': { de: 'Dein Bereich', en: 'Your space' },
   'studio_library': { de: 'DEINE TANZBIBLIOTHEK', en: 'YOUR DANCE LIBRARY' },
-  'studio_note_title': { de: 'Bleib im Rhythmus.', en: 'Keep the rhythm going.' },
-  'studio_note_text': { de: 'Deine Moves an einem Ort.', en: 'Your moves, all in one place.' },
   'studio_moves_title': { de: 'Deine Moves', en: 'Your moves' },
   'studio_moves_text': { de: 'Alles, was du gelernt hast, an einem Ort.', en: "Everything you've learned, in one place." },
   'sign_in_prompt': { de: 'Bitte melde dich an, um Moves zu sehen.', en: 'Please sign in to view moves.' },

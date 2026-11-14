@@ -53,8 +53,6 @@
     return {
       navigation: t("studio_navigation"),
       yourSpace: t("studio_your_space"),
-      noteTitle: t("studio_note_title"),
-      noteText: t("studio_note_text"),
       library: t("studio_library"),
       reload: t("reload_app"),
       darkMode: t("toggle_dark_mode"),
@@ -202,7 +200,6 @@
             </a>
           {/each}
         </nav>
-        <div class="studio-sidebar-note"><strong>{labels.noteTitle}</strong><span>{labels.noteText}</span></div>
       {/if}
     </aside>
 
