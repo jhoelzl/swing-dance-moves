@@ -6,6 +6,8 @@
 	"scripts": {
 		"dev": "op run --env-file=.env -- vite dev",
 		"build": "vite build",
+		"ios:sync": "op run --env-file=.env -- sh -c 'npm run build && cap sync ios'",
+		"ios:open": "cap open ios",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"audit": "npm audit --omit=dev --audit-level=high",
@@ -21,6 +23,7 @@
 		"ci": "npm run audit && npm run spellcheck && npm run lint && npm run check && npm run test && npm run build"
 	},
 	"devDependencies": {
+		"@capacitor/cli": "^8.6.2",
 		"@eslint/js": "^10.0.1",
 		"@katama-labs/vite-pwa-sveltekit": "^2.0.0",
 		"@supabase/supabase-js": "^2.119.0",
@@ -46,6 +49,8 @@
 		"vitest": "^5.1.0"
 	},
 	"dependencies": {
+		"@capacitor/core": "^8.6.2",
+		"@capacitor/ios": "^8.6.2",
 		"dompurify": "^3.4.17"
 	},
 	"overrides": {

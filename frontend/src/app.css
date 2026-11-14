@@ -259,7 +259,7 @@ html.dark .studio-hero-eyebrow, html.dark .studio-hero-text { color: #b6d2b5; }
 		padding-bottom: 88px;
 	}
 	.studio-sidebar { display: none; }
-	.studio-content { padding: 20px 20px 40px; }
+	.studio-content { 	padding: max(20px, env(safe-area-inset-top)) 20px 40px; }
 	.studio-mobile-brand { display: inline-flex; }
 	.studio-top-bar-label { display: none; }
 	.studio-main { padding-top: 24px; }

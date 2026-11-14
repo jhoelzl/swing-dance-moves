@@ -40,3 +40,19 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+
+## iOS
+
+The iOS app uses Capacitor to package the same web app. Install Xcode and
+the iOS platform, configure 1Password CLI access for `frontend/.env`, and run:
+
+```sh
+npm install
+npm run ios:sync
+npm run ios:open
+```
+
+In Xcode, select your development team under Signing & Capabilities and run
+the `App` scheme on your iPhone. Run `npm run ios:sync` after changing the web
+app, before rebuilding in Xcode. Generated web assets in `ios/App/App/public`
+are local build output and must not be committed.

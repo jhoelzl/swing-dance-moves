@@ -25,9 +25,10 @@
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
   import { useRegisterSW } from "virtual:pwa-register/svelte";
+  import { Capacitor } from "@capacitor/core";
 
   let { children } = $props();
-  useRegisterSW();
+  if (!Capacitor.isNativePlatform()) useRegisterSW();
 
   let isLoginPage = $derived(page.url.pathname.endsWith("/login"));
   let loadError = $state(false);
