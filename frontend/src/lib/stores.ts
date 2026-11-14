@@ -17,6 +17,14 @@ export const allSessions = writable<Session[]>([]);
 // All tag groups loaded from Supabase
 export const tagGroups = writable<TagGroup[]>([]);
 
+export const tagDisplayOrder = derived(tagGroups, ($tagGroups) => {
+	const order = new Map<number, number>();
+	for (const group of $tagGroups) {
+		for (const tag of group.tags) order.set(tag.tag_id, order.size);
+	}
+	return order;
+});
+
 // Currently active filter tag IDs
 export const activeFilters = writable<number[]>([]);
 

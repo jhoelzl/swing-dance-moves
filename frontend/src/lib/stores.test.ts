@@ -3,7 +3,7 @@ import { get } from 'svelte/store';
 
 vi.mock('#lib/supabase.js', () => ({ supabase: {} }));
 
-import { activeFilters, allMoves, clearFilters, filteredMoves, searchQuery, videoFilter } from '#lib/stores.js';
+import { activeFilters, allMoves, clearFilters, filteredMoves, searchQuery, tagDisplayOrder, tagGroups, videoFilter } from '#lib/stores.js';
 import type { Move } from '#lib/types.js';
 
 const moves: Move[] = [
@@ -17,6 +17,25 @@ const moves: Move[] = [
 afterEach(() => {
 	clearFilters();
 	allMoves.set([]);
+	tagGroups.set([]);
+});
+
+describe('tag display order', () => {
+	it('tracks the sequence of groups and tags when the groups change', () => {
+		const groups = [
+			{ tagType: { tag_type_id: 1, tag_type_name: 'Teachers', sort_order: 0, tag_type_css: '' }, tags: [
+				{ tag_id: 2, tag_type_id: 1, tag_name: 'B', tag_label: '', tag_css: '', tag_sort: 0 },
+				{ tag_id: 1, tag_type_id: 1, tag_name: 'A', tag_label: '', tag_css: '', tag_sort: 0 }
+			] },
+			{ tagType: { tag_type_id: 2, tag_type_name: 'Festivals', sort_order: 0, tag_type_css: '' }, tags: [
+				{ tag_id: 3, tag_type_id: 2, tag_name: 'Festival', tag_label: '', tag_css: '', tag_sort: 0 }
+			] }
+		];
+		tagGroups.set(groups);
+		expect([...get(tagDisplayOrder).keys()]).toEqual([2, 1, 3]);
+		tagGroups.set([...groups].reverse());
+		expect([...get(tagDisplayOrder).keys()]).toEqual([3, 2, 1]);
+	});
 });
 
 describe('video filter', () => {

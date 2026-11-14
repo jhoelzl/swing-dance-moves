@@ -100,6 +100,18 @@ export function searchTagGroups(groups: TagGroup[], query: string): TagGroup[] {
 		.filter((group) => group.tags.length > 0);
 }
 
+export function sortMoveTags(tags: Tag[], tagOrder: Map<number, number>): Tag[] {
+	return [...tags].sort((a, b) => {
+		const aOrder = tagOrder.get(a.tag_id);
+		const bOrder = tagOrder.get(b.tag_id);
+		if (aOrder !== undefined && bOrder !== undefined) return aOrder - bOrder;
+		if (aOrder !== undefined) return -1;
+		if (bOrder !== undefined) return 1;
+		return a.tag_type_id - b.tag_type_id || a.tag_sort - b.tag_sort ||
+			a.tag_name.localeCompare(b.tag_name) || a.tag_id - b.tag_id;
+	});
+}
+
 /**
  * Search moves by text query in name, synonyms, and description.
  */
@@ -134,7 +146,8 @@ export async function getAllTagsGrouped(): Promise<TagGroup[]> {
 	const { data: tagTypes, error: typesError } = await db
 		.from('tag_types')
 		.select('*')
-		.order('sort_order');
+		.order('sort_order')
+		.order('tag_type_id');
 
 	if (typesError) throw typesError;
 
@@ -142,7 +155,8 @@ export async function getAllTagsGrouped(): Promise<TagGroup[]> {
 		.from('tags')
 		.select('*')
 		.order('tag_sort')
-		.order('tag_name');
+		.order('tag_name')
+		.order('tag_id');
 
 	if (tagsError) throw tagsError;
 
