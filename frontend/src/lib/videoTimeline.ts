@@ -27,6 +27,16 @@ export function formatVideoTime(seconds: number): string {
 	return hours ? `${hours}:${String(minutes).padStart(2, '0')}:${remainder}` : `${minutes}:${remainder}`;
 }
 
+export function youtubeEmbedUrl(id: string, start: number, end: number | null, autoplay: boolean): string {
+	const params = new URLSearchParams();
+	if (start > 0) params.set('start', String(start));
+	if (end !== null) params.set('end', String(end));
+	if (autoplay) params.set('autoplay', '1');
+	if (autoplay && end !== null) params.set('playsinline', '1');
+	const query = params.toString();
+	return `https://www.youtube.com/embed/${id}${query ? `?${query}` : ''}`;
+}
+
 export function buildVideoTimeline(duration: number, moves: TimelineMove[]): {
 	ranges: TimelineRange[];
 	incomplete: boolean;

@@ -12,7 +12,8 @@
   import ConfirmModal from "./ConfirmModal.svelte";
   import { t } from "#lib/i18n.js";
   import VideoTimeline from "./VideoTimeline.svelte";
-  import type { TimelineMove } from "#lib/videoTimeline.js";
+  import { youtubeEmbedUrl, type TimelineMove } from "#lib/videoTimeline.js";
+  import { tick } from "svelte";
 
   // Parsed description segment: either plain text or a clickable timestamp
   interface DescSegment {
@@ -33,6 +34,8 @@
   let deleting = $state(false);
   let showDeleteConfirm = $state(false);
   let currentStartTime = $state(0);
+  let currentEndTime = $state<number | null>(null);
+  let pendingStartTime: number | null = null;
   let shouldAutoplay = $state(false);
   // Increment key to force iframe reload when seeking
   let embedKey = $state(0);
@@ -44,15 +47,11 @@
   );
 
   let videoElement: HTMLVideoElement | undefined = $state();
+  let playerContainer: HTMLDivElement | undefined = $state();
 
   const embedUrl = $derived(() => {
     if (!youtubeId) return "";
-    let url = `https://www.youtube.com/embed/${youtubeId}`;
-    const params: string[] = [];
-    if (currentStartTime > 0) params.push(`start=${currentStartTime}`);
-    if (shouldAutoplay) params.push("autoplay=1");
-    if (params.length > 0) url += `?${params.join("&")}`;
-    return url;
+    return youtubeEmbedUrl(youtubeId, currentStartTime, currentEndTime, shouldAutoplay);
   });
 
   /**
@@ -100,6 +99,8 @@
   const descriptionSegments = $derived(parseDescription(video.description));
 
   function seekTo(seconds: number) {
+    currentEndTime = null;
+    pendingStartTime = null;
     // For Dropbox videos, seek directly on the HTML5 video element
     if (isDropbox && videoElement) {
       videoElement.currentTime = seconds;
@@ -112,8 +113,58 @@
     embedKey++;
   }
 
+  async function playRange(start: number, end: number) {
+    currentStartTime = start;
+    currentEndTime = end;
+    shouldAutoplay = true;
+    isOpen = true;
+    if (youtubeId) {
+      embedKey++;
+      await tick();
+      playerContainer?.scrollIntoView({ block: "nearest" });
+      return;
+    }
+    if (isDropbox) {
+      await tick();
+      playerContainer?.scrollIntoView({ block: "nearest" });
+      if (!videoElement) {
+        addToast(t("timeline_play_failed"), "error");
+        return;
+      }
+      try {
+        if (videoElement.readyState >= 1) videoElement.currentTime = start;
+        else pendingStartTime = start;
+        await videoElement.play();
+      } catch (error) {
+        pendingStartTime = null;
+        console.error("Failed to play video segment:", error);
+        addToast(t("timeline_play_failed"), "error");
+      }
+    }
+  }
+
+  function applyPendingStart() {
+    if (videoElement && pendingStartTime !== null) {
+      videoElement.currentTime = pendingStartTime;
+      pendingStartTime = null;
+    }
+  }
+
+  function stopAtRangeEnd() {
+    if (videoElement && currentEndTime !== null && videoElement.currentTime >= currentEndTime) {
+      videoElement.pause();
+      currentEndTime = null;
+    }
+  }
+
   function toggle() {
     isOpen = !isOpen;
+    if (!isOpen && currentEndTime !== null) {
+      currentStartTime = 0;
+      currentEndTime = null;
+      pendingStartTime = null;
+      shouldAutoplay = false;
+    }
   }
 
   async function handleDelete() {
@@ -238,7 +289,7 @@
   </button>
 
   <div class="px-5 pb-5">
-    <VideoTimeline {video} moves={linkedMoves} />
+    <VideoTimeline {video} moves={linkedMoves} onPlayRange={playRange} />
   </div>
 
   <!-- Body (collapsible) -->
@@ -269,7 +320,7 @@
         {/if}
 
         {#if youtubeId}
-          <div class="video-container rounded-xl overflow-hidden shadow-sm">
+          <div bind:this={playerContainer} class="video-container rounded-xl overflow-hidden shadow-sm">
             {#key embedKey}
               <iframe
                 src={embedUrl()}
@@ -281,13 +332,16 @@
             {/key}
           </div>
         {:else if isDropbox && dropboxDirectUrl}
-          <div class="rounded-xl overflow-hidden shadow-sm">
+          <div bind:this={playerContainer} class="rounded-xl overflow-hidden shadow-sm">
             <!-- svelte-ignore a11y_media_has_caption -->
             <video
               bind:this={videoElement}
               src={dropboxDirectUrl}
               controls
+              playsinline
               preload="metadata"
+              onloadedmetadata={applyPendingStart}
+              ontimeupdate={stopAtRangeEnd}
               class="w-full rounded-xl"
               title={video.title}
             ></video>

@@ -105,7 +105,12 @@ const translations: Record<string, { de: string; en: string }> = {
   'timeline_loading': { de: 'Videolänge wird geladen…', en: 'Loading video duration…' },
   'timeline_unavailable': { de: 'Videolänge nicht verfügbar; die Zeitleiste kann nicht angezeigt werden.', en: 'Video duration unavailable; the timeline cannot be displayed.' },
   'timeline_incomplete': { de: 'Einige Moves haben fehlende oder ungültige Zeitangaben und sind nicht auf der Zeitleiste enthalten.', en: 'Some moves have missing or invalid timestamps and are not shown on the timeline.' },
-  'timeline_select': { de: 'Wähle einen Abschnitt, um seinen Zeitraum zu sehen.', en: 'Select a segment to see its time range.' },
+  'timeline_select': { de: 'Berühre oder wähle einen Abschnitt, um Details und Aktionen zu sehen.', en: 'Hover over or select a segment for details and actions.' },
+  'timeline_play_segment': { de: 'Abschnitt abspielen', en: 'Play segment' },
+  'timeline_show_move': { de: 'Move anzeigen', en: 'Show move' },
+  'timeline_close_move': { de: 'Move schließen', en: 'Close move' },
+  'timeline_move_unavailable': { de: 'Der zugehörige Move ist nicht verfügbar.', en: 'The related move is unavailable.' },
+  'timeline_play_failed': { de: 'Der Abschnitt konnte nicht abgespielt werden. Bitte benutze die Videosteuerung.', en: 'Could not play the segment. Please use the video controls.' },
 
   // ── Tags Page ──
   'manage_tags': { de: 'Tags verwalten', en: 'Manage Tags' },
