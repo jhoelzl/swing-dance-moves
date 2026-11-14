@@ -19,6 +19,7 @@ const translations: Record<string, { de: string; en: string }> = {
     en: 'Data could not be loaded. Please check your internet connection and try again.',
   },
   'toggle_dark_mode': { de: 'Dunkelmodus umschalten', en: 'Toggle Dark Mode' },
+  'reload_app': { de: 'App neu laden', en: 'Reload app' },
   'logout': { de: 'Abmelden', en: 'Logout' },
   'login': { de: 'Anmelden', en: 'Login' },
   'nav_moves': { de: 'Moves', en: 'Moves' },
