@@ -134,6 +134,19 @@
     <SkeletonCard count={5} variant="move" />
   </div>
 {:else}
+  <section class="studio-hero">
+    <p class="studio-hero-eyebrow">{t("studio_hero_eyebrow")}</p>
+    <h1>{t("studio_hero_title")}</h1>
+    <p class="studio-hero-text">{t("studio_hero_text")}</p>
+  </section>
+
+  <div class="studio-section-heading">
+    <div>
+      <h2>{t("studio_moves_title")}</h2>
+      <p>{t("studio_moves_text")}</p>
+    </div>
+  </div>
+
   <!-- Search -->
   <div class="mb-5">
     <div class="relative">
@@ -153,23 +166,25 @@
       <input
         type="text"
         placeholder={t("search_moves")}
+        aria-label={t("search_moves")}
         oninput={handleSearchInput}
         value={searchInputValue}
-        class="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 dark:focus:border-blue-500 outline-none transition-all shadow-sm"
+        class="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:ring-2 focus:ring-green-700/40 focus:border-green-600 dark:focus:border-green-500 outline-none transition-all shadow-sm"
       />
     </div>
   </div>
 
   <!-- Toolbar: Filter + Count + Random -->
-  <div class="flex items-center justify-between mb-5 gap-3">
+  <div class="flex flex-wrap items-center justify-between mb-5 gap-3">
     <div class="flex items-center gap-2">
       <button
         onclick={() => (showFilters = !showFilters)}
+        aria-expanded={showFilters}
         class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer
         {$activeFilters.length > 0
-          ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+          ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
           : $videoOnly
-            ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+            ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
             : 'bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 shadow-sm'}"
       >
         <svg
@@ -188,7 +203,7 @@
         {t("filter")}
         {#if $activeFilters.length > 0 || $videoOnly}
           <span
-            class="inline-flex items-center justify-center w-5 h-5 text-[11px] font-bold bg-blue-500 text-white rounded-full"
+            class="inline-flex items-center justify-center w-5 h-5 text-[11px] font-bold bg-green-700 text-white rounded-full"
           >
             {$activeFilters.length + ($videoOnly ? 1 : 0)}
           </span>
@@ -224,7 +239,7 @@
       {#if $isAdmin}
         <a
           href={resolve("/new")}
-          class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow cursor-pointer no-underline"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl bg-green-800 hover:bg-green-900 text-white transition-all shadow-sm hover:shadow cursor-pointer no-underline"
         >
           <svg
             class="w-4 h-4"
@@ -294,7 +309,7 @@
 
   <!-- Move List -->
   {#if $filteredMoves.length > 0}
-    <div class="space-y-3">
+    <div class="studio-move-grid">
       {#each $filteredMoves as move (move.move_id)}
         <MoveCard
           {move}

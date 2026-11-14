@@ -13,7 +13,6 @@
     allVideos,
     tagGroups,
     isLoading,
-    activeTab,
     userSettings,
     allSessions,
   } from "#lib/stores.js";
@@ -24,18 +23,51 @@
   import { t } from "#lib/i18n.js";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
+  import { page } from "$app/state";
   import { useRegisterSW } from "virtual:pwa-register/svelte";
 
   let { children } = $props();
   useRegisterSW();
 
-  // Check if current page is the login page
-  import { page } from "$app/state";
   let isLoginPage = $derived(page.url.pathname.endsWith("/login"));
-
-  // Error state for failed data loading
   let loadError = $state(false);
   let loadErrorMessage = $state("");
+
+  const navigation = [
+    { path: "/", key: "nav_moves", icon: "▦" },
+    { path: "/random", key: "nav_random", icon: "↝" },
+    { path: "/videos", key: "nav_videos", icon: "▷" },
+    { path: "/tags", key: "nav_tags", icon: "◇" },
+    { path: "/sessions", key: "nav_sessions", icon: "▤" },
+    { path: "/calendar", key: "nav_calendar", icon: "▣" },
+  ] as const;
+
+  let translatedNavigation = $derived.by(() => {
+    void $userSettings?.language;
+    return navigation.map((item) => ({ ...item, label: t(item.key) }));
+  });
+
+  let labels = $derived.by(() => {
+    void $userSettings?.language;
+    return {
+      navigation: t("studio_navigation"),
+      yourSpace: t("studio_your_space"),
+      noteTitle: t("studio_note_title"),
+      noteText: t("studio_note_text"),
+      library: t("studio_library"),
+      darkMode: t("toggle_dark_mode"),
+      settings: t("nav_settings"),
+      logout: t("logout"),
+      login: t("login"),
+    };
+  });
+
+  function isCurrent(path: (typeof navigation)[number]["path"]) {
+    const target = resolve(path);
+    return path === "/"
+      ? page.url.pathname === target || page.url.pathname === target.replace(/\/$/, "")
+      : page.url.pathname === target || page.url.pathname.startsWith(`${target}/`);
+  }
 
   function resetAppState() {
     allMoves.set([]);
@@ -72,24 +104,19 @@
 
   async function syncSessionState(session: AuthSession | null) {
     isAdmin.set(!!session);
-
     if (session) {
       isLoading.set(true);
       await loadData();
       return;
     }
-
     resetAppState();
     isLoading.set(false);
     goto(resolve("/login"));
   }
 
-  // Reactively update the lang attribute on <html> based on user language setting
   $effect(() => {
     const lang = $userSettings?.language;
-    if (lang) {
-      document.documentElement.lang = lang;
-    }
+    if (lang) document.documentElement.lang = lang;
   });
 
   onMount(() => {
@@ -97,40 +124,27 @@
 
     async function init() {
       initDarkMode();
-
-      // Abort initialization if Supabase credentials are missing
       if (supabaseConfigError) {
         isLoading.set(false);
         return;
       }
 
-      // Check auth state
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       await syncSessionState(session);
-
       const { data } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === "TOKEN_REFRESHED") {
           isAdmin.set(!!session);
           return;
         }
-
-        // Supabase recommends avoiding awaited client calls inside this callback.
         window.setTimeout(() => {
           void syncSessionState(session);
         }, 0);
       });
-
       subscription = data.subscription;
     }
 
     void init();
-
-    // Cleanup subscription on component destroy to prevent memory leak
-    return () => {
-      subscription?.unsubscribe();
-    };
+    return () => subscription?.unsubscribe();
   });
 
   async function retryLoad() {
@@ -149,399 +163,84 @@
 </script>
 
 {#if loadError}
-  <div
-    class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-6"
-  >
-    <div
-      class="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-red-200 dark:border-red-800 p-8 text-center"
-    >
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-6">
+    <div class="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-red-200 dark:border-red-800 p-8 text-center">
       <div class="text-5xl mb-4">😵</div>
-      <h1 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">
-        {t("loading_failed")}
-      </h1>
-      <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-2">
-        {t("data_load_error")}
-      </p>
+      <h1 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">{t("loading_failed")}</h1>
+      <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-2">{t("data_load_error")}</p>
       {#if loadErrorMessage}
-        <p
-          class="text-xs text-gray-400 dark:text-gray-500 font-mono bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 mb-5"
-        >
-          {loadErrorMessage}
-        </p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 font-mono bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 mb-5">{loadErrorMessage}</p>
       {/if}
-      <button
-        onclick={retryLoad}
-        class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors cursor-pointer"
-      >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
-        </svg>
-        {t("try_again")}
-      </button>
+      <button onclick={retryLoad} class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl cursor-pointer">{t("try_again")}</button>
     </div>
   </div>
 {:else if supabaseConfigError}
-  <div
-    class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-6"
-  >
-    <div
-      class="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-red-200 dark:border-red-800 p-8 text-center"
-    >
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-6">
+    <div class="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-red-200 dark:border-red-800 p-8 text-center">
       <div class="text-5xl mb-4">⚠️</div>
-      <h1 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">
-        {t("config_error")}
-      </h1>
-      <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4">
-        {t("config_error_desc")}
-      </p>
-      <div
-        class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-left text-xs font-mono text-gray-700 dark:text-gray-300"
-      >
+      <h1 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">{t("config_error")}</h1>
+      <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4">{t("config_error_desc")}</p>
+      <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-left text-xs font-mono text-gray-700 dark:text-gray-300">
         <p class="mb-1">Create a <strong>.env</strong> file:</p>
-        <p class="text-red-500 dark:text-red-400">
-          VITE_SUPABASE_URL=https://...
-        </p>
-        <p class="text-red-500 dark:text-red-400">
-          VITE_SUPABASE_ANON_KEY=eyJ...
-        </p>
+        <p class="text-red-500 dark:text-red-400">VITE_SUPABASE_URL=https://...</p>
+        <p class="text-red-500 dark:text-red-400">VITE_SUPABASE_ANON_KEY=eyJ...</p>
       </div>
     </div>
   </div>
 {:else}
-  <div
-    class="min-h-screen bg-gray-50/80 dark:bg-gray-950 transition-colors duration-300"
-  >
-    <!-- Navigation -->
-    <nav
-      class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/60 dark:border-gray-800"
-    >
-      <div class="max-w-3xl mx-auto px-5 py-3.5">
-        <div class="flex items-center justify-between">
-          <a
-            href={resolve("/")}
-            class="flex items-center gap-2.5 text-gray-900 dark:text-white no-underline group"
-          >
-            <span
-              class="text-2xl group-hover:scale-110 transition-transform duration-200"
-              >🕺</span
-            >
-            <h1 class="text-lg font-bold tracking-tight">Swing Moves</h1>
-          </a>
-
-          <div class="flex items-center gap-1">
-            <!-- Dark Mode Toggle -->
-            <button
-              onclick={toggleDarkMode}
-              class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer"
-              title={t("toggle_dark_mode")}
-            >
-              {#if $darkMode}
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              {:else}
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                  />
-                </svg>
-              {/if}
-            </button>
-
-            <!-- Settings -->
-            {#if $isAdmin}
-              <a
-                href={resolve("/settings")}
-                class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                title={t("nav_settings")}
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                  />
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              </a>
-            {/if}
-
-            <!-- Admin Login/Logout -->
-            {#if $isAdmin}
-              <button
-                onclick={handleLogout}
-                class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer"
-                title={t("logout")}
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
-              </button>
-            {:else}
-              <a
-                href={resolve("/login")}
-                class="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                title={t("login")}
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-              </a>
-            {/if}
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab Navigation -->
+  <div class="studio-shell">
+    <aside class="studio-sidebar">
+      <a class="studio-brand" href={resolve("/")}><span class="studio-brand-mark" aria-hidden="true">♪</span> swing moves<span class="studio-brand-dot">.</span></a>
       {#if $isAdmin && !isLoginPage}
-        <div class="max-w-3xl mx-auto px-5">
-          <div
-            class="flex gap-1 border-t border-gray-100 dark:border-gray-800 pt-2"
-          >
-            <a
-              href={resolve("/")}
-              onclick={(e) => {
-                e.preventDefault();
-                activeTab.set("moves");
-                goto(resolve("/"));
-              }}
-              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
-            {$activeTab === 'moves'
-                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
-            >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                />
-              </svg>
-              {t("nav_moves")}
+        <nav class="studio-sidebar-nav" aria-label={labels.navigation}>
+          <p class="studio-overline">{labels.yourSpace}</p>
+          {#each translatedNavigation as item}
+            <a href={resolve(item.path)} class:current={isCurrent(item.path)} aria-current={isCurrent(item.path) ? "page" : undefined}>
+              <span class="studio-nav-icon" aria-hidden="true">{item.icon}</span><span>{item.label}</span>
             </a>
-            <a
-              href={resolve("/random")}
-              onclick={(e) => {
-                e.preventDefault();
-                activeTab.set("random");
-                goto(resolve("/random"));
-              }}
-              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
-            {$activeTab === 'random'
-                ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
-            >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              {t("nav_random")}
-            </a>
-            <a
-              href={resolve("/videos")}
-              onclick={(e) => {
-                e.preventDefault();
-                activeTab.set("videos");
-                goto(resolve("/videos"));
-              }}
-              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
-            {$activeTab === 'videos'
-                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
-            >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                />
-              </svg>
-              {t("nav_videos")}
-            </a>
-            <a
-              href={resolve("/tags")}
-              onclick={(e) => {
-                e.preventDefault();
-                activeTab.set("tags");
-                goto(resolve("/tags"));
-              }}
-              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
-            {$activeTab === 'tags'
-                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
-            >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"
-                />
-              </svg>
-              {t("nav_tags")}
-            </a>
-            <a
-              href={resolve("/sessions")}
-              onclick={(e) => {
-                e.preventDefault();
-                activeTab.set("sessions");
-                goto(resolve("/sessions"));
-              }}
-              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
-            {$activeTab === 'sessions'
-                ? 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
-            >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              {t("nav_sessions")}
-            </a>
-            <a
-              href={resolve("/calendar")}
-              onclick={(e) => {
-                e.preventDefault();
-                activeTab.set("calendar");
-                goto(resolve("/calendar"));
-              }}
-              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all no-underline
-            {$activeTab === 'calendar'
-                ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}"
-            >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              {t("nav_calendar")}
-            </a>
-          </div>
-        </div>
+          {/each}
+        </nav>
+        <div class="studio-sidebar-note"><strong>{labels.noteTitle}</strong><span>{labels.noteText}</span></div>
       {/if}
-    </nav>
+    </aside>
 
-    <!-- Page Content -->
-    <main class="max-w-3xl mx-auto px-5 py-8">
-      {#if $isAdmin || isLoginPage}
-        {@render children()}
-      {:else if !$isLoading}
-        <div class="text-center py-24">
-          <span class="text-4xl">🕺</span>
-          <p class="text-gray-400 dark:text-gray-500 mt-4 mb-5">
-            {t("sign_in_prompt")}
-          </p>
-          <a
-            href={resolve("/login")}
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all shadow-sm hover:shadow font-medium text-sm"
-            >{t("sign_in")}</a
-          >
+    <div class="studio-content">
+      <header class="studio-top-bar">
+        <a class="studio-mobile-brand studio-brand" href={resolve("/")}><span class="studio-brand-mark" aria-hidden="true">♪</span> swing moves<span class="studio-brand-dot">.</span></a>
+        <span class="studio-top-bar-label">{labels.library}</span>
+        <div class="studio-actions">
+          <button onclick={toggleDarkMode} class="studio-action" aria-label={labels.darkMode} title={labels.darkMode}>{$darkMode ? "☀" : "☾"}</button>
+          {#if $isAdmin}
+            <a href={resolve("/settings")} class="studio-action" aria-label={labels.settings} title={labels.settings}>⚙</a>
+            <button onclick={handleLogout} class="studio-action" aria-label={labels.logout} title={labels.logout}>↪</button>
+          {:else}
+            <a href={resolve("/login")} class="studio-action" aria-label={labels.login} title={labels.login}>↪</a>
+          {/if}
         </div>
-      {/if}
-    </main>
+      </header>
+
+      <main class="studio-main">
+        {#if $isAdmin || isLoginPage}
+          {@render children()}
+        {:else if !$isLoading}
+          <div class="text-center py-24">
+            <span class="text-4xl">🕺</span>
+            <p class="text-gray-400 dark:text-gray-500 mt-4 mb-5">{t("sign_in_prompt")}</p>
+            <a href={resolve("/login")} class="inline-flex px-5 py-2.5 bg-green-700 text-white rounded-xl font-medium text-sm">{t("sign_in")}</a>
+          </div>
+        {/if}
+      </main>
+    </div>
+
+    {#if $isAdmin && !isLoginPage}
+      <nav class="studio-mobile-nav" aria-label={labels.navigation}>
+        {#each translatedNavigation as item}
+          <a href={resolve(item.path)} class:current={isCurrent(item.path)} aria-current={isCurrent(item.path) ? "page" : undefined}>
+            <span aria-hidden="true">{item.icon}</span><span>{item.label}</span>
+          </a>
+        {/each}
+      </nav>
+    {/if}
   </div>
 {/if}
 
