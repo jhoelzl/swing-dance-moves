@@ -7,9 +7,9 @@
     isDropboxUrl,
     getDropboxDirectUrl,
   } from "#lib/utils.js";
-  import { isAdmin, addToast } from "#lib/stores.js";
+  import { isAdmin, addToast, tagDisplayOrder } from "#lib/stores.js";
   import { resolve } from "$app/paths";
-  import { deleteMove } from "#lib/services/moves.js";
+  import { deleteMove, sortMoveTags } from "#lib/services/moves.js";
   import { getVideoRefsForMove } from "#lib/services/videos.js";
   import { getSessionsForMove } from "#lib/services/sessions.js";
   import DOMPurify from "dompurify";
@@ -40,6 +40,7 @@
   let showDeleteConfirm = $state(false);
 
   const hasVideo = $derived(move.hasVideo ?? false);
+  const sortedTags = $derived(sortMoveTags(move.tags ?? [], $tagDisplayOrder));
 
   function formatSessionDate(iso: string): string {
     const [y, m, d] = iso.split("-");
@@ -163,7 +164,7 @@
       {/if}
       {#if move.tags && move.tags.length > 0}
         <div class="flex flex-wrap gap-1.5 mt-2">
-          {#each move.tags as tag}
+          {#each sortedTags as tag (tag.tag_id)}
             <TagBadge {tag} small />
           {/each}
           {#if hasVideo}

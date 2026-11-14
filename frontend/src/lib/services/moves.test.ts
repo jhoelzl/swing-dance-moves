@@ -4,8 +4,8 @@ vi.mock('#lib/supabase.js', () => ({
 	supabase: {}
 }));
 
-import type { Move, TagGroup } from '#lib/types.js';
-import { filterMovesByTags, getRandomMoves, searchMoves, searchTagGroups } from '#lib/services/moves.js';
+import type { Move, Tag, TagGroup } from '#lib/types.js';
+import { filterMovesByTags, getRandomMoves, searchMoves, searchTagGroups, sortMoveTags } from '#lib/services/moves.js';
 
 const moves: Move[] = [
 	{
@@ -91,6 +91,29 @@ describe('searchTagGroups', () => {
 
 	it('shows all tags for a blank query', () => {
 		expect(searchTagGroups(groups, '  ')).toEqual(groups);
+	});
+});
+
+describe('sortMoveTags', () => {
+	it('follows the displayed group and tag order regardless of mapping order', () => {
+		const tags: Tag[] = [
+			{ tag_id: 3, tag_type_id: 2, tag_name: 'Festival', tag_label: '', tag_css: '', tag_sort: 0 },
+			{ tag_id: 2, tag_type_id: 1, tag_name: 'Zoe', tag_label: '', tag_css: '', tag_sort: 0 },
+			{ tag_id: 1, tag_type_id: 1, tag_name: 'Alice', tag_label: '', tag_css: '', tag_sort: 0 }
+		];
+		const order = new Map([[1, 0], [2, 1], [3, 2]]);
+		expect(sortMoveTags(tags, order).map((tag) => tag.tag_id)).toEqual([1, 2, 3]);
+		expect(sortMoveTags(tags, new Map([[3, 0], [2, 1], [1, 2]])).map((tag) => tag.tag_id)).toEqual([3, 2, 1]);
+		expect(tags.map((tag) => tag.tag_id)).toEqual([3, 2, 1]);
+	});
+
+	it('keeps tags missing from the groups in a deterministic order after known tags', () => {
+		const tags: Tag[] = [
+			{ tag_id: 3, tag_type_id: 2, tag_name: 'Zoe', tag_label: '', tag_css: '', tag_sort: 0 },
+			{ tag_id: 2, tag_type_id: 2, tag_name: 'Alice', tag_label: '', tag_css: '', tag_sort: 0 },
+			{ tag_id: 1, tag_type_id: 1, tag_name: 'Known', tag_label: '', tag_css: '', tag_sort: 0 }
+		];
+		expect(sortMoveTags(tags, new Map([[1, 0]])).map((tag) => tag.tag_id)).toEqual([1, 2, 3]);
 	});
 });
 
