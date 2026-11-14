@@ -15,6 +15,7 @@
   import DOMPurify from "dompurify";
   import ConfirmModal from "./ConfirmModal.svelte";
   import { t } from "#lib/i18n.js";
+  import { onMount } from "svelte";
 
   interface Props {
     move: Move;
@@ -50,11 +51,8 @@
     return `${d}.${m}.${y}`;
   }
 
-  async function toggle() {
-    isOpen = !isOpen;
-
-    // Lazy-load references when opening
-    if (isOpen && !videoRefsLoaded) {
+  async function loadReferences() {
+    if (!videoRefsLoaded) {
       try {
         videoRefs = await getVideoRefsForMove(move.move_id);
       } catch (err) {
@@ -62,7 +60,7 @@
       }
       videoRefsLoaded = true;
     }
-    if (isOpen && !sessionRefsLoaded) {
+    if (!sessionRefsLoaded) {
       try {
         sessionRefs = await getSessionsForMove(move.move_id);
       } catch (err) {
@@ -70,6 +68,15 @@
       }
       sessionRefsLoaded = true;
     }
+  }
+
+  onMount(() => {
+    if (isOpen) void loadReferences();
+  });
+
+  async function toggle() {
+    isOpen = !isOpen;
+    if (isOpen) await loadReferences();
   }
 
   async function handleDelete() {

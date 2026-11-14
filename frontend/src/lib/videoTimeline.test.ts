@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildVideoTimeline, formatVideoTime, type TimelineMove } from './videoTimeline.js';
+import { buildVideoTimeline, formatVideoTime, youtubeEmbedUrl, type TimelineMove } from './videoTimeline.js';
 
 const move = (id: number, start_time: string | null, end_time: string | null): TimelineMove =>
 	({ id, move_id: id, move_name: `Move ${id}`, start_time, end_time });
@@ -18,6 +18,7 @@ describe('buildVideoTimeline', () => {
 				{ start: 60, end: 80, moves: [] }
 			]
 		});
+
 	});
 
 	it('flags missing, malformed, inverted and out-of-bounds timestamps', () => {
@@ -27,6 +28,21 @@ describe('buildVideoTimeline', () => {
 		]);
 		expect(result.incomplete).toBe(true);
 		expect(result.ranges).toEqual([{ start: 0, end: 60, moves: [] }]);
+	});
+
+	describe('youtubeEmbedUrl', () => {
+		it('plays the selected segment inline and stops at its end', () => {
+			const url = new URL(youtubeEmbedUrl('M7lc1UVf-VE', 30, 50, true));
+			expect(url.searchParams.get('start')).toBe('30');
+			expect(url.searchParams.get('end')).toBe('50');
+			expect(url.searchParams.get('autoplay')).toBe('1');
+			expect(url.searchParams.get('playsinline')).toBe('1');
+		});
+
+		it('does not retain an end boundary when playing the full video', () => {
+			const url = new URL(youtubeEmbedUrl('M7lc1UVf-VE', 0, null, false));
+			expect(url.search).toBe('');
+		});
 	});
 
 	it('handles zero assignments and unavailable durations', () => {
