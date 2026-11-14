@@ -8,16 +8,11 @@
   } from "#lib/utils.js";
   import { isAdmin, addToast } from "#lib/stores.js";
   import { resolve } from "$app/paths";
-  import { deleteVideo, getLinkedMovesForVideo } from "#lib/services/videos.js";
+  import { deleteVideo } from "#lib/services/videos.js";
   import ConfirmModal from "./ConfirmModal.svelte";
   import { t } from "#lib/i18n.js";
-
-  interface LinkedMove {
-    move_id: number;
-    move_name: string;
-    start_time: string;
-    end_time: string;
-  }
+  import VideoTimeline from "./VideoTimeline.svelte";
+  import type { TimelineMove } from "#lib/videoTimeline.js";
 
   // Parsed description segment: either plain text or a clickable timestamp
   interface DescSegment {
@@ -28,16 +23,14 @@
 
   interface Props {
     video: Video;
-    linkedMoveCount?: number;
+    linkedMoves?: TimelineMove[];
     ondeleted?: () => void;
   }
 
-  let { video, linkedMoveCount = 0, ondeleted }: Props = $props();
+  let { video, linkedMoves = [], ondeleted }: Props = $props();
 
   let isOpen = $state(false);
   let deleting = $state(false);
-  let linkedMoves = $state<LinkedMove[]>([]);
-  let linkedMovesLoaded = $state(false);
   let showDeleteConfirm = $state(false);
   let currentStartTime = $state(0);
   let shouldAutoplay = $state(false);
@@ -119,18 +112,8 @@
     embedKey++;
   }
 
-  async function toggle() {
+  function toggle() {
     isOpen = !isOpen;
-
-    // Lazy-load linked moves when opening
-    if (isOpen && !linkedMovesLoaded) {
-      try {
-        linkedMoves = await getLinkedMovesForVideo(video.video_id);
-      } catch (err) {
-        console.error("Failed to load linked moves:", err);
-      }
-      linkedMovesLoaded = true;
-    }
   }
 
   async function handleDelete() {
@@ -206,7 +189,7 @@
               d="M13 10V3L4 14h7v7l9-11h-7z"
             />
           </svg>
-          {linkedMoveCount}
+          {linkedMoves.length}
         </span>
       </div>
     </div>
@@ -253,6 +236,10 @@
       </svg>
     </div>
   </button>
+
+  <div class="px-5 pb-5">
+    <VideoTimeline {video} moves={linkedMoves} />
+  </div>
 
   <!-- Body (collapsible) -->
   {#if isOpen}

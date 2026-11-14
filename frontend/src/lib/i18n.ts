@@ -98,6 +98,14 @@ const translations: Record<string, { de: string; en: string }> = {
   'grid': { de: 'Raster', en: 'Grid' },
   'list_view': { de: 'Listenansicht', en: 'List view' },
   'grid_view': { de: 'Rasteransicht', en: 'Grid view' },
+  'video_links_load_failed': { de: 'Video-Verknüpfungen konnten nicht geladen werden.', en: 'Could not load video links.' },
+  'timeline_assigned': { de: 'Move zugeordnet', en: 'Assigned to a move' },
+  'timeline_unassigned': { de: 'Kein Move mit Zeitangabe zugeordnet', en: 'No timed move assigned' },
+  'timeline_explanation': { de: 'Rot zeigt Zeit ohne gültige Zuordnung. Das bedeutet nicht unbedingt, dass ein Move fehlt.', en: 'Red shows time without a valid assignment; it does not necessarily mean a move is missing.' },
+  'timeline_loading': { de: 'Videolänge wird geladen…', en: 'Loading video duration…' },
+  'timeline_unavailable': { de: 'Videolänge nicht verfügbar; die Zeitleiste kann nicht angezeigt werden.', en: 'Video duration unavailable; the timeline cannot be displayed.' },
+  'timeline_incomplete': { de: 'Einige Moves haben fehlende oder ungültige Zeitangaben und sind nicht auf der Zeitleiste enthalten.', en: 'Some moves have missing or invalid timestamps and are not shown on the timeline.' },
+  'timeline_select': { de: 'Wähle einen Abschnitt, um seinen Zeitraum zu sehen.', en: 'Select a segment to see its time range.' },
 
   // ── Tags Page ──
   'manage_tags': { de: 'Tags verwalten', en: 'Manage Tags' },
