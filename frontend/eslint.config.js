@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint';
 
 export default [
 	{
-		ignores: ['build/**', '.svelte-kit/**', 'node_modules/**']
+		ignores: ['build/**', '.svelte-kit/**', 'node_modules/**', 'ios/**']
 	},
 	{
 		files: ['**/*.{js,mjs,cjs,ts}'],
