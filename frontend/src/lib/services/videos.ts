@@ -3,6 +3,29 @@ import type { Video, VideoFormData, MoveToVideo } from '#lib/types.js';
 
 const db: any = supabase;
 
+export type VideoMoveLink = {
+	id: number;
+	video_id: number;
+	move_id: number;
+	start_time: string | null;
+	end_time: string | null;
+};
+
+export async function getAllVideoMoveLinks(): Promise<VideoMoveLink[]> {
+	const links: VideoMoveLink[] = [];
+	const pageSize = 1000;
+	for (let offset = 0; ; offset += pageSize) {
+		const { data, error } = await supabase
+			.from('moves_to_videos')
+			.select('id, video_id, move_id, start_time, end_time')
+			.order('id')
+			.range(offset, offset + pageSize - 1);
+		if (error) throw error;
+		links.push(...data);
+		if (data.length < pageSize) return links;
+	}
+}
+
 function createDeleteConstraintError(message: string): Error {
 	const error = new Error(message);
 	error.name = 'DeleteConstraintError';
@@ -138,42 +161,4 @@ export async function getVideoRefsForMove(moveId: number): Promise<MoveToVideo[]
 		...m,
 		video: videoMap.get(m.video_id),
 	})) as MoveToVideo[];
-}
-
-/**
- * Get linked moves for a video (move_id, name, start_time, end_time).
- */
-export async function getLinkedMovesForVideo(videoId: number): Promise<{
-	move_id: number;
-	move_name: string;
-	start_time: string;
-	end_time: string;
-}[]> {
-	const { data: mappings, error: mapError } = await db
-		.from('moves_to_videos')
-		.select('*')
-		.eq('video_id', videoId);
-
-	if (mapError) throw mapError;
-	if (!mappings || mappings.length === 0) return [];
-
-	const moveIds = mappings.map((m: any) => m.move_id);
-	const { data: moves, error: movError } = await db
-		.from('moves')
-		.select('move_id, name')
-		.in('move_id', moveIds);
-
-	if (movError) throw movError;
-
-	const moveMap = new Map<number, string>();
-	for (const m of moves ?? []) {
-		moveMap.set(m.move_id, m.name);
-	}
-
-	return mappings.map((m: any) => ({
-		move_id: m.move_id,
-		move_name: moveMap.get(m.move_id) ?? 'Unknown',
-		start_time: m.start_time ?? '',
-		end_time: m.end_time ?? '',
-	}));
 }

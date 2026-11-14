@@ -1,11 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 
+const { range } = vi.hoisted(() => ({ range: vi.fn() }));
+
 vi.mock('#lib/supabase.js', () => ({
-	supabase: {}
+	supabase: {
+		from: () => ({ select: () => ({ order: () => ({ range }) }) })
+	}
 }));
 
 import type { Video } from '#lib/types.js';
-import { searchVideos } from '#lib/services/videos.js';
+import { getAllVideoMoveLinks, searchVideos } from '#lib/services/videos.js';
 
 const videos: Video[] = [
 	{
@@ -27,6 +31,23 @@ const videos: Video[] = [
 describe('searchVideos', () => {
 	it('returns all videos for an empty query', () => {
 		expect(searchVideos(videos, '   ')).toEqual(videos);
+	});
+
+	describe('getAllVideoMoveLinks', () => {
+		it('loads every page of links', async () => {
+			const link = { id: 1, video_id: 2, move_id: 3, start_time: null, end_time: null };
+			range.mockReset()
+				.mockResolvedValueOnce({ data: Array(1000).fill(link), error: null })
+				.mockResolvedValueOnce({ data: [link], error: null });
+			expect(await getAllVideoMoveLinks()).toHaveLength(1001);
+			expect(range).toHaveBeenNthCalledWith(1, 0, 999);
+			expect(range).toHaveBeenNthCalledWith(2, 1000, 1999);
+		});
+
+		it('surfaces a database error rather than treating links as empty', async () => {
+			range.mockReset().mockResolvedValueOnce({ data: null, error: new Error('failed') });
+			await expect(getAllVideoMoveLinks()).rejects.toThrow('failed');
+		});
 	});
 
 	it('matches title and description case-insensitively', () => {

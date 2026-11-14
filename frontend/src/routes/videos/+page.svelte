@@ -1,15 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { allVideos, isLoading, isAdmin, activeTab } from "#lib/stores.js";
+  import { allVideos, allMoves, isLoading, isAdmin, activeTab } from "#lib/stores.js";
   import SkeletonCard from "#lib/components/SkeletonCard.svelte";
-  import { searchVideos } from "#lib/services/videos.js";
-  import type { Video } from "#lib/types.js";
+  import { searchVideos, getAllVideoMoveLinks, type VideoMoveLink } from "#lib/services/videos.js";
+  import type { TimelineMove } from "#lib/videoTimeline.js";
   import VideoCard from "#lib/components/VideoCard.svelte";
   import VideoGridCard from "#lib/components/VideoGridCard.svelte";
   import { getAllVideos } from "#lib/services/videos.js";
   import { debounce } from "#lib/utils.js";
   import { resolve } from "$app/paths";
-  import { supabase } from "#lib/supabase.js";
   import { t } from "#lib/i18n.js";
 
   let searchQuery = $state("");
@@ -20,16 +19,27 @@
   // Filter: 'all' | 'with-moves' | 'without-moves'
   let moveFilter = $state<"all" | "with-moves" | "without-moves">("all");
 
-  // Set of video IDs that have at least one linked move
-  let videoIdsWithMoves = $state<Set<number>>(new Set());
-  let videoMoveCountMap = $state<Record<number, number>>({});
+  let links = $state<VideoMoveLink[]>([]);
+  let linksLoading = $state(true);
+  let linksError = $state(false);
+  const videoMoves = $derived.by(() => {
+    const names = new Map($allMoves.map((move) => [move.move_id, move.name]));
+    const byVideo: Record<number, TimelineMove[]> = {};
+    for (const link of links) {
+      (byVideo[link.video_id] ??= []).push({
+        ...link,
+        move_name: names.get(link.move_id) ?? `#${link.move_id}`,
+      });
+    }
+    return byVideo;
+  });
 
   const displayVideos = $derived.by(() => {
     let result = searchVideos($allVideos, searchQuery);
     if (moveFilter === "with-moves") {
-      result = result.filter((v) => videoIdsWithMoves.has(v.video_id));
+      result = result.filter((v) => (videoMoves[v.video_id]?.length ?? 0) > 0);
     } else if (moveFilter === "without-moves") {
-      result = result.filter((v) => !videoIdsWithMoves.has(v.video_id));
+      result = result.filter((v) => !videoMoves[v.video_id]?.length);
     }
     return result;
   });
@@ -40,20 +50,15 @@
   });
 
   async function loadVideoMoveLinks() {
+    linksLoading = true;
+    linksError = false;
     try {
-      const { data } = await supabase
-        .from("moves_to_videos")
-        .select("video_id");
-      const links = (data ?? []) as Array<{ video_id: number }>;
-      videoIdsWithMoves = new Set(links.map((d) => d.video_id));
-
-      const counts: Record<number, number> = {};
-      for (const link of links) {
-        counts[link.video_id] = (counts[link.video_id] ?? 0) + 1;
-      }
-      videoMoveCountMap = counts;
+      links = await getAllVideoMoveLinks();
     } catch (err) {
       console.error("Failed to load video-move links:", err);
+      linksError = true;
+    } finally {
+      linksLoading = false;
     }
   }
 
@@ -292,14 +297,25 @@
     </div>
   {/if}
 
-  <!-- Video Collection -->
-  {#if displayVideos.length > 0}
+  {#if linksLoading}
+    <SkeletonCard count={4} variant="video" />
+  {:else if linksError}
+    <div role="alert" class="rounded-xl bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-700 dark:text-red-300">
+      {t("video_links_load_failed")}
+      <button onclick={loadVideoMoveLinks} class="ml-2 underline cursor-pointer">{t("try_again")}</button>
+    </div>
+  {:else if displayVideos.length > 0}
     {#if viewMode === "list"}
+      <div class="flex flex-wrap gap-x-4 gap-y-1 mb-3 text-xs text-gray-500 dark:text-gray-400">
+        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></span>{t("timeline_assigned")}</span>
+        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-400 mr-1"></span>{t("timeline_unassigned")}</span>
+      </div>
+      <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">{t("timeline_explanation")}</p>
       <div class="space-y-3">
         {#each displayVideos as video (video.video_id)}
           <VideoCard
             {video}
-            linkedMoveCount={videoMoveCountMap[video.video_id] ?? 0}
+            linkedMoves={videoMoves[video.video_id] ?? []}
             ondeleted={handleVideoDeleted}
           />
         {/each}
@@ -309,7 +325,7 @@
         {#each displayVideos as video (video.video_id)}
           <VideoGridCard
             {video}
-            linkedMoveCount={videoMoveCountMap[video.video_id] ?? 0}
+            linkedMoveCount={videoMoves[video.video_id]?.length ?? 0}
           />
         {/each}
       </div>
