@@ -210,6 +210,7 @@ html.dark .studio-sidebar-nav a:hover, html.dark .studio-sidebar-nav a.current {
 		display: block;
 		padding-bottom: 88px;
 	}
+
 	.studio-sidebar { display: none; }
 	.studio-content { 	padding: max(20px, env(safe-area-inset-top)) 20px 40px; }
 	.studio-mobile-brand { display: inline-flex; }
@@ -254,6 +255,14 @@ html.dark .studio-sidebar-nav a:hover, html.dark .studio-sidebar-nav a.current {
 
 	}
 	.studio-mobile-nav a.current { color: var(--studio-accent); }
+}
+
+@media (width <= 400px) {
+	.studio-content { padding-inline: 12px; }
+	.studio-top-bar { gap: 8px; }
+	.studio-mobile-brand { font-size: 17px; }
+	.studio-mobile-brand .studio-brand-mark { display: none; }
+	.studio-actions { gap: 0; }
 }
 
 /* YouTube embed responsive */

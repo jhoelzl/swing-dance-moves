@@ -16,6 +16,7 @@ A **Progressive Web App (PWA)** for browsing, filtering, and discovering swing d
 - **Video timelines** — list cards show timestamped move assignments in green and unassigned time in red. Hover or tap an assigned segment to play it or view its moves. Red does not necessarily mean a move is missing. Incomplete timestamps are flagged; duration is fetched from YouTube or Dropbox as cards come into view and may be unavailable for restricted or unsupported videos.
 - **Bookmarkable filters** — filter state is synced to the URL (`?tags=1,2&q=search&video=1`)
 - **Dark mode** — toggle or auto-detect from system preference, persisted in localStorage
+- **Reload app** — refresh the current page from the header, including in the installed app
 - **PWA / installable** — works offline, installable on iOS and Android home screens
 - **Admin mode** — authenticated users can create and edit moves via Supabase Auth
 - **Responsive design** — mobile-first, optimized for phones and tablets

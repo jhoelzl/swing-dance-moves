@@ -56,6 +56,7 @@
       noteTitle: t("studio_note_title"),
       noteText: t("studio_note_text"),
       library: t("studio_library"),
+      reload: t("reload_app"),
       darkMode: t("toggle_dark_mode"),
       settings: t("nav_settings"),
       logout: t("logout"),
@@ -210,6 +211,12 @@
         <a class="studio-mobile-brand studio-brand" href={resolve("/")}><span class="studio-brand-mark" aria-hidden="true">♪</span> swing moves<span class="studio-brand-dot">.</span></a>
         <span class="studio-top-bar-label">{labels.library}</span>
         <div class="studio-actions">
+          <button onclick={() => window.location.reload()} class="studio-action" aria-label={labels.reload} title={labels.reload}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 7v5h-5" />
+              <path d="M4.93 16A8 8 0 0 0 20 12M4 12A8 8 0 0 1 19.07 8" />
+            </svg>
+          </button>
           <button onclick={toggleDarkMode} class="studio-action" aria-label={labels.darkMode} title={labels.darkMode}>{$darkMode ? "☀" : "☾"}</button>
           {#if $isAdmin}
             <a href={resolve("/settings")} class="studio-action" aria-label={labels.settings} title={labels.settings}>⚙</a>
