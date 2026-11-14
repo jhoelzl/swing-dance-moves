@@ -2,16 +2,33 @@
   import type { TagGroup } from "#lib/types.js";
   import { activeFilters, toggleFilter } from "#lib/stores.js";
   import { getTagColors } from "#lib/utils.js";
+  import { searchTagGroups } from "#lib/services/moves.js";
+  import { t } from "#lib/i18n.js";
 
   interface Props {
     tagGroups: TagGroup[];
+    searchable?: boolean;
   }
 
-  let { tagGroups }: Props = $props();
+  let { tagGroups, searchable = false }: Props = $props();
+  let tagSearch = $state("");
+  let visibleGroups = $derived(searchTagGroups(tagGroups, tagSearch));
 </script>
 
 <div class="space-y-4">
-  {#each tagGroups as group}
+  {#if searchable}
+    <input
+      type="search"
+      bind:value={tagSearch}
+      placeholder={t("search_tags")}
+      aria-label={t("search_tags")}
+      class="w-full px-3 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-green-700/40 focus:border-green-600 outline-none"
+    />
+    {#if tagSearch.trim() && visibleGroups.length === 0}
+      <p class="text-sm text-gray-400 dark:text-gray-500">{t("no_tags_found")}</p>
+    {/if}
+  {/if}
+  {#each visibleGroups as group}
     <div>
       <h3
         class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2"
@@ -24,6 +41,7 @@
           {@const isActive = $activeFilters.includes(tag.tag_id)}
           <button
             onclick={() => toggleFilter(tag.tag_id)}
+            aria-pressed={isActive}
             class="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border
 						{isActive
               ? colors.activeBg + ' text-white border-transparent shadow-sm'

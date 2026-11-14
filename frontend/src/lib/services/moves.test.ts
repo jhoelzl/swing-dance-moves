@@ -4,8 +4,8 @@ vi.mock('#lib/supabase.js', () => ({
 	supabase: {}
 }));
 
-import type { Move } from '#lib/types.js';
-import { filterMovesByTags, getRandomMoves, searchMoves } from '#lib/services/moves.js';
+import type { Move, TagGroup } from '#lib/types.js';
+import { filterMovesByTags, getRandomMoves, searchMoves, searchTagGroups } from '#lib/services/moves.js';
 
 const moves: Move[] = [
 	{
@@ -63,6 +63,34 @@ describe('searchMoves', () => {
 		expect(searchMoves(moves, 'open out')).toHaveLength(1);
 		expect(searchMoves(moves, 'partner')).toHaveLength(1);
 		expect(searchMoves(moves, 'charleston')).toHaveLength(1);
+	});
+});
+
+describe('searchTagGroups', () => {
+	const groups: TagGroup[] = [
+		{
+			tagType: { tag_type_id: 1, tag_type_name: 'Teachers', sort_order: 0, tag_type_css: '' },
+			tags: [
+				{ tag_id: 1, tag_type_id: 1, tag_name: 'Alice Smith', tag_label: '', tag_css: '', tag_sort: 0 },
+				{ tag_id: 2, tag_type_id: 1, tag_name: 'Bob Jones', tag_label: '', tag_css: '', tag_sort: 1 }
+			]
+		},
+		{
+			tagType: { tag_type_id: 2, tag_type_name: 'Level', sort_order: 1, tag_type_css: '' },
+			tags: [{ tag_id: 3, tag_type_id: 2, tag_name: 'Beginner', tag_label: '', tag_css: '', tag_sort: 0 }]
+		}
+	];
+
+	it('matches tag names case-insensitively and omits groups without matches', () => {
+		const result = searchTagGroups(groups, '  ALICE  ');
+		expect(result).toHaveLength(1);
+		expect(result[0].tags.map((tag) => tag.tag_name)).toEqual(['Alice Smith']);
+		expect(groups[0].tags).toHaveLength(2);
+		expect(searchTagGroups(groups, 'not found')).toEqual([]);
+	});
+
+	it('shows all tags for a blank query', () => {
+		expect(searchTagGroups(groups, '  ')).toEqual(groups);
 	});
 });
 

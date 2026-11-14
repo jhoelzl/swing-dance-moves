@@ -9,7 +9,7 @@
     searchQuery,
     isLoading,
     clearFilters,
-    videoOnly,
+    videoFilter,
     activeTab,
     sortOrder,
     isAdmin,
@@ -18,6 +18,7 @@
   import { getAllMoves } from "#lib/services/moves.js";
   import type { Move } from "#lib/types.js";
   import FilterChips from "#lib/components/FilterChips.svelte";
+  import VideoFilter from "#lib/components/VideoFilter.svelte";
   import MoveCard from "#lib/components/MoveCard.svelte";
   import SkeletonCard from "#lib/components/SkeletonCard.svelte";
   import { debounce } from "#lib/utils.js";
@@ -32,7 +33,7 @@
   let showFilters = $state(false);
   let searchInputValue = $state("");
   let expandMoves = $state(false);
-  let urlSyncReady = false;
+  let urlSyncReady = $state(false);
 
   const sortOptions: { value: SortOrder; label: string; key: string }[] = [
     { value: "a-z", label: "A – Z", key: "" },
@@ -76,7 +77,9 @@
 
     const videoParam = params.get("video");
     if (videoParam === "1") {
-      videoOnly.set(true);
+      videoFilter.set("with");
+    } else if (videoParam === "0") {
+      videoFilter.set("without");
     }
 
     // Enable URL sync after initial state is restored
@@ -89,7 +92,7 @@
 
     const filters = $activeFilters;
     const query = $searchQuery;
-    const video = $videoOnly;
+    const video = $videoFilter;
 
     const params = new URLSearchParams();
     if (filters.length > 0) {
@@ -98,9 +101,10 @@
     if (query) {
       params.set("q", query);
     }
-    if (video) {
-      params.set("video", "1");
+    if (video !== "all") {
+      params.set("video", video === "with" ? "1" : "0");
     }
+    if (expandMoves) params.set("expand", "1");
 
     const search = params.toString();
     const basePath = resolve("/");
@@ -177,7 +181,7 @@
         class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer
         {$activeFilters.length > 0
           ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
-          : $videoOnly
+          : $videoFilter !== "all"
             ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
             : 'bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 shadow-sm'}"
       >
@@ -195,16 +199,16 @@
           />
         </svg>
         {t("filter")}
-        {#if $activeFilters.length > 0 || $videoOnly}
+        {#if $activeFilters.length > 0 || $videoFilter !== "all"}
           <span
             class="inline-flex items-center justify-center w-5 h-5 text-[11px] font-bold bg-green-700 text-white rounded-full"
           >
-            {$activeFilters.length + ($videoOnly ? 1 : 0)}
+            {$activeFilters.length + ($videoFilter !== "all" ? 1 : 0)}
           </span>
         {/if}
       </button>
 
-      {#if $activeFilters.length > 0 || $videoOnly}
+      {#if $activeFilters.length > 0 || $videoFilter !== "all"}
         <button
           onclick={clearFilters}
           class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
@@ -259,45 +263,8 @@
     <div
       class="filter-panel mb-6 p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm"
     >
-      <FilterChips tagGroups={$tagGroups} />
-
-      <!-- Video Filter -->
-      <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-        <h3
-          class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2"
-        >
-          {t("media")}
-        </h3>
-        <button
-          onclick={() => videoOnly.update((v) => !v)}
-          class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border
-          {$videoOnly
-            ? 'bg-red-500 dark:bg-red-600 text-white border-transparent shadow-sm'
-            : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800 hover:shadow-sm'}"
-        >
-          {#if $videoOnly}
-            <svg
-              class="w-3 h-3 mr-0.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2.5"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          {/if}
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"
-            />
-          </svg>
-          Video
-        </button>
-      </div>
+      <FilterChips tagGroups={$tagGroups} searchable />
+      <VideoFilter />
     </div>
   {/if}
 

@@ -39,17 +39,17 @@ export const userSettings = writable<UserSettings | null>(null);
 export type SortOrder = 'a-z' | 'z-a' | 'newest' | 'oldest';
 export const sortOrder = writable<SortOrder>('a-z');
 
-// Filter to show only moves with videos
-export const videoOnly = writable<boolean>(false);
+export type VideoFilter = 'all' | 'with' | 'without';
+export const videoFilter = writable<VideoFilter>('all');
 
 // Filtered, searched, and sorted moves (derived)
 export const filteredMoves = derived(
-	[allMoves, activeFilters, searchQuery, videoOnly, sortOrder],
-	([$allMoves, $activeFilters, $searchQuery, $videoOnly, $sortOrder]) => {
+	[allMoves, activeFilters, searchQuery, videoFilter, sortOrder],
+	([$allMoves, $activeFilters, $searchQuery, $videoFilter, $sortOrder]) => {
 		let result = filterMovesByTags($allMoves, $activeFilters);
 		result = searchMoves(result, $searchQuery);
-		if ($videoOnly) {
-			result = result.filter((m) => m.hasVideo);
+		if ($videoFilter !== 'all') {
+			result = result.filter((m) => $videoFilter === 'with' ? m.hasVideo === true : m.hasVideo === false);
 		}
 		// Sort
 		result = [...result].sort((a, b) => {
@@ -84,7 +84,7 @@ export function toggleFilter(tagId: number) {
 export function clearFilters() {
 	activeFilters.set([]);
 	searchQuery.set('');
-	videoOnly.set(false);
+	videoFilter.set('all');
 }
 
 // Initialize dark mode from localStorage or system preference
