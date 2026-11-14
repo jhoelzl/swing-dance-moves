@@ -134,15 +134,9 @@
     <SkeletonCard count={5} variant="move" />
   </div>
 {:else}
-  <section class="studio-hero">
-    <p class="studio-hero-eyebrow">{t("studio_hero_eyebrow")}</p>
-    <h1>{t("studio_hero_title")}</h1>
-    <p class="studio-hero-text">{t("studio_hero_text")}</p>
-  </section>
-
   <div class="studio-section-heading">
     <div>
-      <h2>{t("studio_moves_title")}</h2>
+      <h1>{t("studio_moves_title")}</h1>
       <p>{t("studio_moves_text")}</p>
     </div>
   </div>
