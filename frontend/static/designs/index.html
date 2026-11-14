@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f3ed">
+  <title>Three directions · Swing Moves</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #242a29; background: #e8e7e2; }
+    body { margin: 0; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #ec8c60; outline-offset: 3px; }
+    .chooser { background: #202625; color: #fff; padding: 14px 24px; }
+    .chooser-inner { max-width: 1440px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .chooser-title { font-size: 13px; font-weight: 750; letter-spacing: .02em; }
+    .chooser-title span { display: block; color: #b6c0ba; font-size: 11px; font-weight: 450; margin-top: 3px; }
+    .choices { display: flex; gap: 5px; background: #343c39; padding: 4px; border-radius: 12px; }
+    .choices button { border: 0; background: transparent; color: #c4cdc6; padding: 9px 14px; border-radius: 9px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .choices button[aria-pressed="true"] { color: #202625; background: #fff; }
+    .prototype { min-height: calc(100vh - 70px); }
+    .prototype[hidden] { display: none; }
+    .shell { max-width: 1440px; margin: 0 auto; min-height: calc(100vh - 70px); }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.04em; font-size: 19px; }
+    .brand-mark { width: 35px; height: 35px; display: grid; place-items: center; border-radius: 11px; font-size: 20px; font-weight: 800; }
+    .eyebrow { text-transform: uppercase; letter-spacing: .16em; font-size: 10px; font-weight: 800; }
+    .muted { color: #7d8580; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 13px; border-radius: 10px; font-size: 13px; font-weight: 650; color: inherit; text-decoration: none; }
+    .nav-item .icon { width: 20px; text-align: center; font-size: 16px; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+    .section-heading h2 { font-size: 22px; letter-spacing: -.04em; margin: 0; }
+    .section-heading p { margin: 5px 0 0; font-size: 13px; }
+    .count { font-size: 12px; font-weight: 700; color: #8b918c; }
+    .search { display: flex; align-items: center; gap: 10px; border: 1px solid #e1e4dc; background: #fff; border-radius: 12px; padding: 0 14px; color: #8a928b; }
+    .search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #26332c; padding: 14px 0; font-size: 13px; }
+    .search input:focus-visible { outline: none; }
+    .search:focus-within { outline: 3px solid #ec8c60; outline-offset: 2px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filters button { padding: 8px 13px; border: 1px solid transparent; border-radius: 999px; background: #fff; color: #6f7972; font-size: 12px; font-weight: 700; }
+    .filters button[aria-pressed="true"] { background: #243f34; color: #fff; }
+    .cards { display: grid; gap: 12px; }
+    .card { background: #fff; border: 1px solid #e8ebe4; border-radius: 16px; padding: 20px; min-width: 0; }
+    .card-top { display: flex; justify-content: space-between; gap: 10px; align-items: start; }
+    .card h3 { margin: 0; font-size: 16px; letter-spacing: -.025em; }
+    .card p { font-size: 12px; color: #8a928b; margin: 7px 0 16px; line-height: 1.5; }
+    .card-arrow { font-size: 18px; color: #8f9b8f; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { background: #eef4ed; color: #52705c; border-radius: 6px; padding: 5px 7px; font-size: 10px; font-weight: 750; }
+    .tag.alt { background: #f9eee8; color: #ab7058; }
+    .empty { color: #7d8580; font-size: 14px; padding: 25px 0; }
+    .mobile-nav { display: none; }
+
+    /* The Studio: calm, spacious and organized. */
+    .studio { background: #f5f6f0; }
+    .studio .shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); }
+    .studio .sidebar { background: #fff; border-right: 1px solid #e6e9e1; padding: 30px 18px; display: flex; flex-direction: column; gap: 38px; }
+    .studio .brand-mark { color: #fff; background: #385b46; }
+    .studio .nav-item { color: #818a82; }
+    .studio .nav-item.active { background: #edf3eb; color: #355a43; }
+    .sidebar-label { padding: 0 13px; margin: 0 0 12px; }
+    .studio-main { padding: 30px 46px 55px; min-width: 0; }
+    .topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 12px; color: #8e978f; }
+    .avatar { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 50%; background: #dce8d8; color: #42644b; font-size: 12px; font-weight: 800; }
+    .studio-hero { position: relative; overflow: hidden; margin: 36px 0 36px; border-radius: 22px; background: #dfeadd; padding: 34px 38px; min-height: 190px; }
+    .studio-hero::after { content: "✳"; position: absolute; right: 7%; top: -60px; color: #c8dbc6; font-size: 250px; line-height: 1; }
+    .studio-hero > * { position: relative; z-index: 1; }
+    .studio-hero .eyebrow { color: #5e8068; }
+    .studio-hero h1 { margin: 15px 0 8px; font-size: clamp(29px, 4vw, 43px); letter-spacing: -.055em; line-height: 1.06; color: #294b37; }
+    .studio-hero p { color: #678471; font-size: 13px; margin: 0; }
+    .studio .tools { margin: 22px 0; display: flex; gap: 12px; justify-content: space-between; align-items: center; }
+    .studio .search { flex: 1; max-width: 400px; }
+    .studio .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    /* The Social: bright and editorial, inspired by a dance poster. */
+    .social { background: #faf4e9; color: #30243b; }
+    .social .shell { padding: 0 6% 60px; }
+    .social-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 25px 0; border-bottom: 1px solid #e9dfd0; }
+    .social .brand-mark { background: #f07556; color: #fff; border-radius: 50%; }
+    .social-nav { display: flex; align-items: center; gap: 25px; color: #887b87; font-size: 12px; font-weight: 700; }
+    .social-nav strong { color: #e46c50; }
+    .social-hero { display: grid; grid-template-columns: 1.25fr 1fr; gap: 35px; align-items: center; padding: 54px 0 48px; }
+    .social-hero .eyebrow { color: #e66c4e; }
+    .social-hero h1 { font-family: Georgia, serif; font-size: clamp(42px, 6vw, 76px); line-height: .98; letter-spacing: -.055em; font-weight: 500; margin: 17px 0; }
+    .social-hero h1 em { color: #e76d50; font-weight: 500; }
+    .social-hero p { color: #887b82; font-size: 14px; line-height: 1.7; max-width: 360px; }
+    .poster { position: relative; min-height: 230px; background: #f5bc9b; border-radius: 120px 120px 24px 24px; overflow: hidden; display: grid; place-items: center; }
+    .poster::before, .poster::after { content: ""; position: absolute; border: 1px solid #e49375; border-radius: 50%; width: 240px; height: 240px; }
+    .poster::after { width: 170px; height: 170px; }
+    .poster-symbol { position: relative; z-index: 1; font-family: Georgia, serif; font-size: 95px; color: #9c4a3e; transform: rotate(-15deg); }
+    .poster-caption { position: absolute; bottom: 20px; font-size: 10px; letter-spacing: .2em; font-weight: 800; color: #9c4a3e; }
+    .social .library { background: #fffdf8; padding: 26px; border-radius: 22px; border: 1px solid #f0e7dc; }
+    .social .tools { display: flex; gap: 16px; align-items: center; justify-content: space-between; margin: 20px 0; }
+    .social .search { width: 300px; background: #faf7f0; border-color: #eee7dc; }
+    .social .filters button { background: #f7f1e7; color: #9a8b8b; }
+    .social .filters button[aria-pressed="true"] { background: #f07758; color: #fff; }
+    .social .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .social .card { border-color: #f1eae0; background: #fff; }
+    .social .card h3 { font-family: Georgia, serif; font-size: 20px; font-weight: 500; }
+    .social .tag { background: #fdf0e8; color: #b96c4b; }
+    .social .tag.alt { background: #f3ebf5; color: #8b6a95; }
+
+    /* The Practice Room: dark, focused and information-dense. */
+    .practice { background: #10191c; color: #e8f0ed; }
+    .practice .shell { display: grid; grid-template-columns: 78px minmax(0, 1fr); }
+    .practice .rail { border-right: 1px solid #2a3637; display: flex; flex-direction: column; align-items: center; gap: 25px; padding: 27px 0; color: #71817e; }
+    .practice .brand-mark { background: #b7ee7a; color: #17241b; }
+    .rail-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; font-size: 18px; }
+    .rail-icon.active { background: #273a31; color: #b7ee7a; }
+    .practice-main { padding: 32px 5% 60px; min-width: 0; }
+    .practice .topline { color: #84948e; }
+    .practice .avatar { background: #354940; color: #c8eeb6; }
+    .practice-layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 28px; margin-top: 45px; }
+    .practice h1 { margin: 12px 0 8px; font-size: clamp(32px, 4vw, 46px); letter-spacing: -.05em; }
+    .practice .eyebrow { color: #b7ee7a; }
+    .practice-intro { color: #8d9f98; font-size: 13px; }
+    .practice .search { margin: 28px 0 15px; background: #1b292b; border-color: #314140; color: #9caea3; }
+    .practice .search input { color: #e8f0ed; }
+    .practice .filters button { background: #1c292a; color: #9baca4; border-color: #31413d; }
+    .practice .filters button[aria-pressed="true"] { background: #b7ee7a; color: #1d2b20; border-color: #b7ee7a; }
+    .practice .section-heading { margin: 36px 0 17px; }
+    .practice .section-heading h2 { font-size: 17px; }
+    .practice .cards { gap: 8px; }
+    .practice .card { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: #1a2829; border-color: #2a3938; border-radius: 12px; padding: 17px 20px; }
+    .practice .card-top { flex: 1; }
+    .practice .card h3 { color: #eaf2ed; font-size: 14px; }
+    .practice .card p { color: #80928a; margin: 5px 0 0; }
+    .practice .card-arrow { display: none; }
+    .practice .tag { background: #314638; color: #b4dba4; }
+    .practice .tag.alt { background: #3a3730; color: #e4c28e; }
+    .practice-panel { padding-top: 5px; }
+    .practice-feature { background: #b7ee7a; color: #243727; padding: 23px; border-radius: 18px; min-height: 200px; display: flex; flex-direction: column; justify-content: space-between; }
+    .practice-feature .eyebrow { color: #557a43; }
+    .practice-feature strong { font-size: 27px; letter-spacing: -.05em; line-height: 1.1; }
+    .practice-feature span:last-child { font-size: 12px; font-weight: 700; }
+    .practice-tip { margin-top: 14px; border: 1px solid #31413d; padding: 20px; border-radius: 16px; color: #93a59d; font-size: 12px; line-height: 1.6; }
+    .practice-tip strong { display: block; color: #e6efe9; margin-bottom: 6px; }
+    .preview-note { text-align: center; font-size: 11px; line-height: 1.5; color: #8f9991; margin: 35px 0 0; }
+    .social .preview-note { color: #a79596; }
+
+    @media (max-width: 760px) {
+      .chooser { padding: 12px 15px; }
+      .chooser-inner { display: block; }
+      .choices { margin-top: 12px; display: grid; grid-template-columns: repeat(3, 1fr); }
+      .choices button { padding: 9px 5px; font-size: 11px; }
+      .studio .shell, .practice .shell { display: block; }
+      .sidebar, .practice .rail { display: none !important; }
+      .studio-main, .practice-main { padding: 22px 20px 80px; }
+      .studio-hero { margin: 24px 0; padding: 28px 24px; min-height: 170px; }
+      .studio-hero::after { right: -40px; top: -20px; font-size: 190px; }
+      .studio .tools, .social .tools { align-items: stretch; flex-direction: column; }
+      .studio .search, .social .search { max-width: none; width: 100%; }
+      .studio .cards, .social .cards { grid-template-columns: 1fr; }
+      .mobile-nav { display: flex; position: sticky; bottom: 0; z-index: 2; justify-content: space-around; padding: 12px 8px max(12px, env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid #e6e9e1; color: #88948b; font-size: 10px; font-weight: 700; }
+      .mobile-nav span { text-align: center; }
+      .mobile-nav span:first-child { color: #456b50; }
+      .mobile-nav b { display: block; font-size: 17px; line-height: 1.3; }
+      .social .shell { padding: 0 20px 40px; }
+      .social-header { padding: 20px 0; }
+      .social-nav { gap: 12px; font-size: 11px; }
+      .social-nav span:last-child { display: none; }
+      .social-hero { grid-template-columns: 1fr; gap: 20px; padding: 35px 0; }
+      .social-hero h1 { font-size: 48px; }
+      .poster { min-height: 155px; border-radius: 90px 90px 20px 20px; }
+      .poster::before { width: 170px; height: 170px; }
+      .poster::after { width: 120px; height: 120px; }
+      .poster-symbol { font-size: 65px; }
+      .poster-caption { bottom: 12px; }
+      .social .library { padding: 20px; }
+      .practice-layout { display: flex; flex-direction: column; margin-top: 30px; }
+      .practice-panel { order: -1; }
+      .practice-feature { min-height: 130px; }
+      .practice-tip { display: none; }
+      .practice .mobile-nav { background: #1a2829; border-color: #31413d; color: #84968d; }
+      .practice .mobile-nav span:first-child { color: #b7ee7a; }
+      .practice .card { flex-wrap: wrap; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <header class="chooser">
+    <div class="chooser-inner">
+      <div class="chooser-title">Choose your direction <span>Three concepts for Swing Moves · sample data, not your library</span></div>
+      <div class="choices" aria-label="Design options">
+        <button type="button" aria-pressed="true" data-choice="studio">01 · Studio</button>
+        <button type="button" aria-pressed="false" data-choice="social">02 · Social</button>
+        <button type="button" aria-pressed="false" data-choice="practice">03 · Practice</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="prototype studio" id="studio">
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">♪</span> swing moves<span style="color:#7b9b80">.</span></div>
+        <div>
+          <p class="eyebrow muted sidebar-label">Your space</p>
+          <div class="nav-item active"><span class="icon">▦</span> Moves</div>
+          <div class="nav-item"><span class="icon">↝</span> Random move</div>
+          <div class="nav-item"><span class="icon">▷</span> Videos</div>
+          <div class="nav-item"><span class="icon">◇</span> Tags</div>
+          <div class="nav-item"><span class="icon">▤</span> Sessions</div>
+          <div class="nav-item"><span class="icon">▣</span> Calendar</div>
+        </div>
+      </aside>
+      <main class="studio-main">
+        <div class="topline"><span>YOUR DANCE LIBRARY / MOVES</span><span class="avatar">SM</span></div>
+        <section class="studio-hero">
+          <span class="eyebrow">A little progress, every dance</span>
+          <h1>Find your next move.</h1>
+          <p>Your favorite steps, ready when you are.</p>
+        </section>
+        <section>
+          <div class="section-heading"><div><h2>Your moves</h2><p class="muted">Everything you've learned, in one place.</p></div><span class="count" data-count></span></div>
+          <div class="tools"><label class="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search your moves..." aria-label="Search sample moves"></label><div class="filters" aria-label="Filter sample moves"></div></div>
+          <div class="cards"></div>
+        </section>
+        <p class="preview-note">Design preview · Sample content and navigation. Search and filters are interactive.</p>
+      </main>
+    </div>
+    <div class="mobile-nav" aria-hidden="true"><span><b>▦</b>Moves</span><span><b>↝</b>Random</span><span><b>▷</b>Videos</span><span><b>▤</b>Sessions</span><span><b>▣</b>Calendar</span></div>
+  </div>
+
+  <div class="prototype social" id="social" hidden>
+    <div class="shell">
+      <header class="social-header"><div class="brand"><span class="brand-mark">♪</span> swing moves<span style="color:#ed765a">.</span></div><div class="social-nav" aria-label="Example navigation"><strong>Moves</strong><span>Random</span><span>Videos</span><span>Sessions</span></div></header>
+      <main>
+        <section class="social-hero">
+          <div><span class="eyebrow">For the love of swing</span><h1>Good moves.<br><em>Great dances.</em></h1><p>A little collection of everything you've learned, ready to take back to the dance floor.</p></div>
+          <div class="poster" aria-hidden="true"><span class="poster-symbol">♪</span><span class="poster-caption">LET'S DANCE · LET'S DANCE</span></div>
+        </section>
+        <section class="library">
+          <div class="section-heading"><div><span class="eyebrow" style="color:#e77b60">The collection</span><h2 style="margin-top:8px">All your moves</h2><p class="muted">Find an old favorite or try something new.</p></div><span class="count" data-count></span></div>
+          <div class="tools"><div class="filters" aria-label="Filter sample moves"></div><label class="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Find a move..." aria-label="Search sample moves"></label></div>
+          <div class="cards"></div>
+        </section>
+        <p class="preview-note">Design preview · Sample content and navigation. Search and filters are interactive.</p>
+      </main>
+    </div>
+  </div>
+
+  <div class="prototype practice" id="practice" hidden>
+    <div class="shell">
+      <aside class="rail" aria-hidden="true"><span class="brand-mark">♪</span><span class="rail-icon active">▦</span><span class="rail-icon">↝</span><span class="rail-icon">▷</span><span class="rail-icon">◇</span><span class="rail-icon">▤</span><span class="rail-icon">▣</span></aside>
+      <main class="practice-main">
+        <div class="topline"><div class="brand"><span style="color:#b7ee7a">●</span> swing moves <span class="muted" style="font-size:12px; font-weight:500; letter-spacing:0">/ your library</span></div><span class="avatar">SM</span></div>
+        <div class="practice-layout">
+          <section>
+            <span class="eyebrow">Your practice space</span>
+            <h1>Let's get moving.</h1>
+            <p class="practice-intro">Find a move, press play, and make it your own.</p>
+            <label class="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search moves, styles..." aria-label="Search sample moves"></label>
+            <div class="filters" aria-label="Filter sample moves"></div>
+            <div class="section-heading"><div><h2>Move library</h2><p class="muted">Your next idea is right here.</p></div><span class="count" data-count></span></div>
+            <div class="cards"></div>
+          </section>
+          <aside class="practice-panel"><div class="practice-feature"><span class="eyebrow">A little inspiration</span><strong>One more<br>dance?</strong><span>Keep exploring ↗</span></div><div class="practice-tip"><strong>Make it a practice.</strong>Save the moves you love and come back whenever you need a little inspiration.</div></aside>
+        </div>
+        <p class="preview-note">Design preview · Sample content and navigation. Search and filters are interactive.</p>
+      </main>
+    </div>
+    <div class="mobile-nav" aria-hidden="true"><span><b>▦</b>Moves</span><span><b>↝</b>Random</span><span><b>▷</b>Videos</span><span><b>▤</b>Sessions</span><span><b>▣</b>Calendar</span></div>
+  </div>
+
+  <script>
+    const moves = [
+      { name: 'Swing Out', style: 'Lindy Hop', level: 'Classic', description: 'The move that keeps us coming back.' },
+      { name: 'Sugar Push', style: 'Lindy Hop', level: 'Basics', description: 'A little rhythm, a lot of possibility.' },
+      { name: 'Tuck Turn', style: 'Lindy Hop', level: 'Turn', description: 'A playful turn for any social dance.' },
+      { name: 'Balboa Basic', style: 'Balboa', level: 'Basics', description: 'Small steps, big connection.' },
+      { name: 'Shag Basic', style: 'Shag', level: 'Basics', description: 'Find your bounce and settle in.' },
+      { name: 'Charleston', style: 'Lindy Hop', level: 'Footwork', description: 'Bring a little extra energy.' }
+    ];
+    const categories = ['All', 'Lindy Hop', 'Balboa', 'Shag'];
+    document.querySelectorAll('.prototype').forEach((preview) => {
+      let selected = 'All';
+      const input = preview.querySelector('input');
+      const filters = preview.querySelector('.filters');
+      const cards = preview.querySelector('.cards');
+      const count = preview.querySelector('[data-count]');
+      function render() {
+        filters.replaceChildren();
+        categories.forEach((category) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = category;
+          button.setAttribute('aria-pressed', String(category === selected));
+          button.addEventListener('click', () => { selected = category; render(); });
+          filters.append(button);
+        });
+        const query = input.value.trim().toLowerCase();
+        const results = moves.filter((move) => (selected === 'All' || move.style === selected) && `${move.name} ${move.style} ${move.level}`.toLowerCase().includes(query));
+        count.textContent = `${results.length} ${results.length === 1 ? 'move' : 'moves'}`;
+        cards.replaceChildren();
+        if (!results.length) {
+          const empty = document.createElement('p');
+          empty.className = 'empty';
+          empty.textContent = 'No sample moves found. Try another search or style.';
+          cards.append(empty);
+        }
+        results.forEach((move) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          const top = document.createElement('div');
+          top.className = 'card-top';
+          const details = document.createElement('div');
+          const title = document.createElement('h3');
+          title.textContent = move.name;
+          const description = document.createElement('p');
+          description.textContent = move.description;
+          details.append(title, description);
+          const arrow = document.createElement('span');
+          arrow.className = 'card-arrow';
+          arrow.setAttribute('aria-hidden', 'true');
+          arrow.textContent = '↗';
+          top.append(details, arrow);
+          const tags = document.createElement('div');
+          tags.className = 'tags';
+          [move.style, move.level].forEach((label, index) => {
+            const tag = document.createElement('span');
+            tag.className = index ? 'tag alt' : 'tag';
+            tag.textContent = label;
+            tags.append(tag);
+          });
+          card.append(top, tags);
+          cards.append(card);
+        });
+      }
+      input.addEventListener('input', render);
+      render();
+    });
+    document.querySelectorAll('[data-choice]').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-choice]').forEach((choice) => choice.setAttribute('aria-pressed', String(choice === button)));
+        document.querySelectorAll('.prototype').forEach((preview) => { preview.hidden = preview.id !== button.dataset.choice; });
+      });
+    });
+  </script>
+</body>
+</html>

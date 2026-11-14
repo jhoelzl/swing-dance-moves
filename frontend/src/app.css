@@ -119,24 +119,6 @@ html.dark .studio-sidebar-nav a:hover, html.dark .studio-sidebar-nav a.current {
 
 }
 
-.studio-sidebar-note {
-	display: grid;
-	gap: 4px;
-	margin-top: auto;
-	padding: 16px;
-	border: 1px solid var(--studio-border);
-	border-radius: 14px;
-	color: var(--studio-muted);
-	font-size: 12px;
-	line-height: 1.6;
-}
-
-.studio-sidebar-note strong {
-	color: var(--studio-accent);
-	font-size: 13px;
-
-}
-
 .studio-content {
 	min-width: 0;
 	padding: 30px 46px 55px;
