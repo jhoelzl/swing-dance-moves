@@ -133,6 +133,7 @@
   <!-- Header -->
   <button
     onclick={toggle}
+    aria-expanded={isOpen}
     class="w-full px-5 py-4 text-left flex items-start justify-between gap-3 transition-colors cursor-pointer group"
   >
     <div class="flex-1 min-w-0">
