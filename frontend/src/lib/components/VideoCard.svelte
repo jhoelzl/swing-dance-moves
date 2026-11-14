@@ -186,10 +186,11 @@
 <div
   class="move-card rounded-xl bg-white dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/50 overflow-hidden"
 >
-  <!-- Header -->
+  <div class="flex items-start">
   <button
     onclick={toggle}
-    class="w-full px-5 py-4 text-left flex items-start justify-between gap-3 transition-colors cursor-pointer group"
+    aria-expanded={isOpen}
+    class="flex-1 min-w-0 px-5 py-4 text-left flex items-start justify-between gap-3 transition-colors cursor-pointer group"
   >
     <div class="flex-1 min-w-0">
       <div class="flex items-baseline flex-wrap gap-x-2 gap-y-0.5">
@@ -246,30 +247,6 @@
     </div>
 
     <div class="flex items-center gap-2 mt-0.5 shrink-0">
-      {#if $isAdmin}
-        <a
-          href={resolve("/videos/edit/[id]", {
-            id: String(video.video_id),
-          })}
-          onclick={(e) => e.stopPropagation()}
-          class="p-1.5 rounded-md text-gray-300 hover:text-blue-500 hover:bg-blue-50 dark:text-gray-600 dark:hover:text-blue-400 dark:hover:bg-blue-950/30 transition-all"
-          title={t("edit_video")}
-        >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-            />
-          </svg>
-        </a>
-      {/if}
       <svg
         class="w-4 h-4 text-gray-300 dark:text-gray-600 transition-transform duration-200 {isOpen
           ? 'rotate-180'
@@ -287,38 +264,22 @@
       </svg>
     </div>
   </button>
-
-  <div class="px-5 pb-5">
-    <VideoTimeline {video} moves={linkedMoves} onPlayRange={playRange} />
+  {#if $isAdmin}
+    <a
+      href={resolve("/videos/edit/[id]", { id: String(video.video_id) })}
+      class="mt-4 mr-4 p-2 rounded-md text-gray-400 hover:text-green-700 hover:bg-green-50 dark:text-gray-500 dark:hover:text-green-300 dark:hover:bg-green-950/30 transition-all"
+      title={t("edit_video")}
+      aria-label="{t('edit_video')}: {video.title.trim()}"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+    </a>
+  {/if}
   </div>
 
-  <!-- Body (collapsible) -->
-  {#if isOpen}
-    <div class="px-5 pb-5">
-      <div class="border-t border-gray-100 dark:border-gray-700/50 pt-4">
-        {#if video.description}
-          <div
-            class="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-line leading-relaxed mb-4"
-          >
-            {#each descriptionSegments as seg}
-              {#if seg.type === "timestamp" && (youtubeId || isDropbox)}
-                <button
-                  onclick={() => seekTo(seg.seconds!)}
-                  class="inline-flex items-center gap-0.5 font-mono text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-1.5 py-0.5 rounded transition-colors cursor-pointer border-none text-sm"
-                  title="Jump to {seg.value}"
-                >
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                  {seg.value}
-                </button>
-              {:else}
-                {seg.value}
-              {/if}
-            {/each}
-          </div>
-        {/if}
-
+  <div class="px-5 pb-5">
+      {#if isOpen}
         {#if youtubeId}
           <div bind:this={playerContainer} class="video-container rounded-xl overflow-hidden shadow-sm">
             {#key embedKey}
@@ -372,64 +333,24 @@
           </div>
         {/if}
 
-        <!-- Linked Moves -->
-        {#if linkedMoves.length > 0}
-          <div
-            class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50"
-          >
-            <h4
-              class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2"
-            >
-              {t("linked_moves")}
-            </h4>
-            <div class="space-y-1.5">
-              {#each linkedMoves as lm}
-                <a
-                  href={`${resolve("/")}?q=${encodeURIComponent(
-                    lm.move_name.trim(),
-                  )}&expand=1`}
-                  class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:border-blue-200 dark:hover:border-blue-800 transition-all no-underline group/move"
-                >
-                  <svg
-                    class="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                  <span
-                    class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/move:text-blue-600 dark:group-hover/move:text-blue-400 transition-colors"
-                    >{lm.move_name}</span
-                  >
-                  {#if lm.start_time}
-                    <span
-                      class="text-[11px] font-mono text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded"
-                    >
-                      {lm.start_time}{lm.end_time ? ` – ${lm.end_time}` : ""}
-                    </span>
-                  {/if}
-                  <svg
-                    class="w-3 h-3 text-gray-300 dark:text-gray-600 group-hover/move:text-blue-400 ml-auto shrink-0 transition-colors"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </a>
-              {/each}
-            </div>
+      {/if}
+      <div class:mt-4={isOpen}>
+        <VideoTimeline {video} moves={linkedMoves} expanded={isOpen} canPlay={!!youtubeId || !!dropboxDirectUrl} onPlayRange={playRange} />
+      </div>
+      {#if isOpen}
+        {#if video.description}
+          <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50 text-sm text-gray-600 dark:text-gray-300 whitespace-pre-line leading-relaxed">
+            {#each descriptionSegments as seg}
+              {#if seg.type === "timestamp" && (youtubeId || isDropbox)}
+                <button
+                  onclick={() => seekTo(seg.seconds!)}
+                  class="inline-flex items-center gap-0.5 font-mono text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded transition-colors cursor-pointer border-none text-sm"
+                  title="Jump to {seg.value}"
+                >{seg.value}</button>
+              {:else}
+                {seg.value}
+              {/if}
+            {/each}
           </div>
         {/if}
 
@@ -446,9 +367,8 @@
             </button>
           </div>
         {/if}
-      </div>
-    </div>
-  {/if}
+      {/if}
+  </div>
 </div>
 
 <ConfirmModal

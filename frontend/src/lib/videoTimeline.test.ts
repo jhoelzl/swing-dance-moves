@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildVideoTimeline, formatVideoTime, youtubeEmbedUrl, type TimelineMove } from './videoTimeline.js';
+import { buildVideoTimeline, formatVideoTime, getMoveInterval, sortTimelineMoves, youtubeEmbedUrl, type TimelineMove } from './videoTimeline.js';
 
 const move = (id: number, start_time: string | null, end_time: string | null): TimelineMove =>
 	({ id, move_id: id, move_name: `Move ${id}`, start_time, end_time });
@@ -37,6 +37,23 @@ describe('buildVideoTimeline', () => {
 			expect(url.searchParams.get('end')).toBe('50');
 			expect(url.searchParams.get('autoplay')).toBe('1');
 			expect(url.searchParams.get('playsinline')).toBe('1');
+		});
+
+		describe('chapter playback', () => {
+			it('orders moves by start time and puts missing timestamps last', () => {
+				const missing = move(1, null, null);
+				const later = move(2, '2:00', '2:10');
+				const earlier = move(3, '0:05', null);
+				expect(sortTimelineMoves([missing, later, earlier])).toEqual([earlier, later, missing]);
+			});
+
+			it('only plays complete valid ranges, including when duration is unknown', () => {
+				const chapter = move(1, '0:10', '0:40');
+				expect(getMoveInterval(chapter, null)).toEqual({ start: 10, end: 40 });
+				expect(getMoveInterval(chapter, 30)).toBeNull();
+				expect(getMoveInterval(move(2, '0:10', null), null)).toBeNull();
+				expect(getMoveInterval(move(3, '0:50', '0:20'), null)).toBeNull();
+			});
 		});
 
 		it('does not retain an end boundary when playing the full video', () => {

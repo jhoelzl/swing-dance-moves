@@ -19,6 +19,18 @@ function parseTime(value: string | null): number | null {
 	return text.split(':').reduce((seconds, part) => seconds * 60 + Number(part), 0);
 }
 
+export function getMoveInterval(move: TimelineMove, duration: number | null): { start: number; end: number } | null {
+	const start = parseTime(move.start_time);
+	const end = parseTime(move.end_time);
+	if (start === null || end === null || start >= end) return null;
+	if (duration !== null && (!Number.isFinite(duration) || duration <= 0 || start >= duration || end > duration)) return null;
+	return { start, end };
+}
+
+export function sortTimelineMoves(moves: TimelineMove[]): TimelineMove[] {
+	return [...moves].sort((a, b) => (parseTime(a.start_time) ?? Infinity) - (parseTime(b.start_time) ?? Infinity));
+}
+
 export function formatVideoTime(seconds: number): string {
 	const whole = Math.floor(seconds);
 	const hours = Math.floor(whole / 3600);
@@ -45,13 +57,12 @@ export function buildVideoTimeline(duration: number, moves: TimelineMove[]): {
 	let incomplete = false;
 	const intervals: { start: number; end: number; move: TimelineMove }[] = [];
 	for (const move of moves) {
-		const start = parseTime(move.start_time);
-		const end = parseTime(move.end_time);
-		if (start === null || end === null || start >= end || start >= duration || end > duration) {
+		const interval = getMoveInterval(move, duration);
+		if (!interval) {
 			incomplete = true;
 			continue;
 		}
-		intervals.push({ start, end, move });
+		intervals.push({ ...interval, move });
 	}
 	const boundaries = [...new Set([0, duration, ...intervals.flatMap(({ start, end }) => [start, end])])].sort((a, b) => a - b);
 	const ranges: TimelineRange[] = [];
