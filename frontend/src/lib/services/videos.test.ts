@@ -9,7 +9,7 @@ vi.mock('#lib/supabase.js', () => ({
 }));
 
 import type { Tag, TagGroup, Video } from '#lib/types.js';
-import { filterVideosByTagPresence, getAllVideoMoveLinks, searchVideos } from '#lib/services/videos.js';
+import { filterVideosByTagPresence, filterVideosByTags, getVideoTagGroups, getAllVideoMoveLinks, searchVideos } from '#lib/services/videos.js';
 
 const videos: Video[] = [
 	{
@@ -27,6 +27,49 @@ const videos: Video[] = [
 		created_at: '2026-03-28T11:00:00Z'
 	}
 ];
+
+describe('video tag filters', () => {
+	const tag = (id: number, type: number): Tag => ({
+		tag_id: id, tag_type_id: type, tag_name: '', tag_label: '', tag_css: '', tag_sort: 0
+	});
+	const festival1 = tag(1, 10);
+	const festival2 = tag(2, 10);
+	const teacher1 = tag(3, 20);
+	const teacher2 = tag(4, 20);
+	const group = (id: number, name: string, tags: Tag[]): TagGroup => ({
+		tagType: { tag_type_id: id, tag_type_name: name, sort_order: 0, tag_type_css: '' }, tags
+	});
+	const groups = [
+		group(10, ' Festival / Classes ', [festival1, festival2, tag(5, 10)]),
+		group(20, 'TEACHERS', [teacher1, teacher2]),
+		group(30, 'Other', [])
+	];
+	const tagged = [
+		{ ...videos[0], video_id: 1, tags: [festival1, teacher1] },
+		{ ...videos[0], video_id: 2, tags: [festival2, teacher1] },
+		{ ...videos[0], video_id: 3, tags: [festival1, teacher2] },
+		{ ...videos[0], video_id: 4, tags: [festival1] },
+		{ ...videos[0], video_id: 5 }
+	];
+
+	it('offers all festival and teacher tags, including the alternate festival group', () => {
+		expect(getVideoTagGroups(groups)).toEqual(groups.slice(0, 2));
+		expect(getVideoTagGroups([group(10, 'Festivals', [festival1])])).toHaveLength(1);
+	});
+
+	it('combines tags within a group with OR and different groups with AND', () => {
+		expect(filterVideosByTags(tagged, [], groups)).toBe(tagged);
+		expect(filterVideosByTags(tagged, [1, 2], groups).map((v) => v.video_id)).toEqual([1, 2, 3, 4]);
+		expect(filterVideosByTags(tagged, [1, 2, 3], groups).map((v) => v.video_id)).toEqual([1, 2]);
+		expect(filterVideosByTags(tagged, [1, 3], groups).map((v) => v.video_id)).toEqual([1]);
+	});
+
+	it('keeps an unassigned selection in its group and does not broaden unknown selections', () => {
+		expect(filterVideosByTags(tagged, [1, 5], groups).map((v) => v.video_id)).toEqual([1, 3, 4]);
+		expect(filterVideosByTags(tagged, [1, 2, 3, 4], groups).map((v) => v.video_id)).toEqual([1, 2, 3]);
+		expect(filterVideosByTags(tagged, [999], groups)).toEqual([]);
+	});
+});
 
 describe('searchVideos', () => {
 	it('returns all videos for an empty query', () => {

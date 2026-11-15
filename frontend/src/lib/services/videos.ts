@@ -177,6 +177,30 @@ export function searchVideos(videos: Video[], query: string): Video[] {
 
 export type VideoTagFilter = 'all' | 'missing-tags';
 
+export function getVideoTagGroups(groups: TagGroup[]): TagGroup[] {
+	return groups.filter((group) => {
+		const name = group.tagType.tag_type_name.trim().toLowerCase();
+		return name === 'festivals' || name === 'festival / classes' || name === 'teachers';
+	});
+}
+
+export function filterVideosByTags(videos: Video[], tagIds: number[], groups: TagGroup[]): Video[] {
+	if (tagIds.length === 0) return videos;
+	const typeOf = new Map(groups.flatMap((group) =>
+		group.tags.map((tag) => [tag.tag_id, group.tagType.tag_type_id] as const)
+	));
+	const selectedGroups = new Map<number, Set<number>>();
+	for (const id of tagIds) {
+		const type = typeOf.get(id) ?? -id;
+		if (!selectedGroups.has(type)) selectedGroups.set(type, new Set());
+		selectedGroups.get(type)!.add(id);
+	}
+	return videos.filter((video) => {
+		const assigned = new Set(video.tags?.map((tag) => tag.tag_id) ?? []);
+		return [...selectedGroups.values()].every((ids) => [...ids].some((id) => assigned.has(id)));
+	});
+}
+
 export function filterVideosByTagPresence(videos: Video[], filter: VideoTagFilter, groups: TagGroup[]): Video[] {
 	if (filter === 'all') return videos;
 	const festivalTypes = new Set<number>();

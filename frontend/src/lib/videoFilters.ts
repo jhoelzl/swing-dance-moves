@@ -6,6 +6,7 @@ export interface VideoFilters {
 	query: string;
 	moves: VideoMoveFilter;
 	tags: VideoTagFilter;
+	tagIds: number[];
 }
 
 export function readVideoFilters(url: URL): VideoFilters {
@@ -14,7 +15,11 @@ export function readVideoFilters(url: URL): VideoFilters {
 	return {
 		query: url.searchParams.get('q') ?? '',
 		moves: moves === 'with-moves' || moves === 'without-moves' ? moves : 'all',
-		tags: tags === 'missing-tags' || tags === 'without-tags' ? 'missing-tags' : 'all'
+		tags: tags === 'missing-tags' || tags === 'without-tags' ? 'missing-tags' : 'all',
+		tagIds: [...new Set((url.searchParams.get('tagIds') ?? '').split(',')
+			.filter((value) => /^[1-9]\d*$/.test(value))
+			.map(Number)
+			.filter(Number.isSafeInteger))]
 	};
 }
 
@@ -23,7 +28,8 @@ export function videoFiltersUrl(url: URL, filters: VideoFilters): URL {
 	for (const [key, value] of [
 		['q', filters.query],
 		['moves', filters.moves === 'all' ? '' : filters.moves],
-		['tags', filters.tags === 'all' ? '' : filters.tags]
+		['tags', filters.tags === 'all' ? '' : filters.tags],
+		['tagIds', filters.tagIds.join(',')]
 	]) {
 		if (value) next.searchParams.set(key, value);
 		else next.searchParams.delete(key);
