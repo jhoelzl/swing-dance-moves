@@ -6,10 +6,12 @@
     isDropboxUrl,
     getDropboxDirectUrl,
   } from "#lib/utils.js";
-  import { isAdmin, addToast } from "#lib/stores.js";
+  import { isAdmin, addToast, tagDisplayOrder } from "#lib/stores.js";
   import { resolve } from "$app/paths";
   import { deleteVideo } from "#lib/services/videos.js";
+  import { sortMoveTags } from "#lib/services/moves.js";
   import ConfirmModal from "./ConfirmModal.svelte";
+  import TagBadge from "./TagBadge.svelte";
   import { t } from "#lib/i18n.js";
   import VideoTimeline from "./VideoTimeline.svelte";
   import { youtubeEmbedUrl, type TimelineMove } from "#lib/videoTimeline.js";
@@ -249,6 +251,13 @@
           {linkedMoves.length}
         </span>
       </div>
+      {#if video.tags?.length}
+        <div class="flex flex-wrap gap-1.5 mt-2">
+          {#each sortMoveTags(video.tags, $tagDisplayOrder) as tag (tag.tag_id)}
+            <TagBadge {tag} small />
+          {/each}
+        </div>
+      {/if}
       <span class="mt-2 block text-sm font-medium text-green-700 dark:text-green-400">{isOpen ? t("festival_close_video") : `▶ ${t("festival_watch")}`}</span>
     </div>
 
