@@ -208,7 +208,7 @@ html.dark .studio-sidebar-nav a:hover, html.dark .studio-sidebar-nav a.current {
 		bottom: 0;
 		left: 0;
 		display: grid;
-		grid-template-columns: repeat(6, minmax(0, 1fr));
+		grid-template-columns: repeat(7, minmax(0, 1fr));
 		padding: 8px 4px max(8px, env(safe-area-inset-bottom));
 		border-top: 1px solid var(--studio-border);
 		background: var(--studio-surface);
