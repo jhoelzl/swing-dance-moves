@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { replaceState } from "$app/navigation";
   import { page } from "$app/state";
-  import { allVideos, allMoves, isLoading, isAdmin, activeTab } from "#lib/stores.js";
+  import { allVideos, allMoves, isLoading, isAdmin, activeTab, tagGroups } from "#lib/stores.js";
   import SkeletonCard from "#lib/components/SkeletonCard.svelte";
   import { searchVideos, filterVideosByTagPresence, getAllVideoMoveLinks, type VideoMoveLink, type VideoTagFilter } from "#lib/services/videos.js";
   import { groupTimelineMoves } from "#lib/videoTimeline.js";
@@ -39,7 +39,7 @@
     } else if (moveFilter === "without-moves") {
       result = result.filter((v) => !videoMoves[v.video_id]?.length);
     }
-    return filterVideosByTagPresence(result, tagFilter);
+    return filterVideosByTagPresence(result, tagFilter, $tagGroups);
   });
 
   function restoreFilters() {
@@ -323,14 +323,14 @@
       </h3>
       <div class="flex flex-wrap gap-2">
         <button
-          onclick={() => (tagFilter = tagFilter === "without-tags" ? "all" : "without-tags")}
-          aria-pressed={tagFilter === "without-tags"}
+          onclick={() => (tagFilter = tagFilter === "missing-tags" ? "all" : "missing-tags")}
+          aria-pressed={tagFilter === "missing-tags"}
           class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border
-          {tagFilter === 'without-tags'
+          {tagFilter === 'missing-tags'
             ? 'bg-purple-500 dark:bg-purple-600 text-white border-transparent shadow-sm'
             : 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 hover:shadow-sm'}"
         >
-          {t("without_tags")}
+          {t("missing_tags")}
         </button>
       </div>
     </div>
