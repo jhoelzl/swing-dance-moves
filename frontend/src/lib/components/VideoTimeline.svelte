@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import type { Video } from "#lib/types.js";
-  import { getVideoDuration } from "#lib/services/videoDuration.js";
+  import { loadVideoDuration } from "#lib/services/videoDurationCache.js";
   import { buildVideoTimeline, formatVideoTime, getMoveInterval, sortTimelineMoves, type TimelineMove, type TimelineRange } from "#lib/videoTimeline.js";
   import { t } from "#lib/i18n.js";
   import { allMoves } from "#lib/stores.js";
@@ -21,39 +20,47 @@
   let selected = $state<TimelineRange | null>(null);
   let selectedMoveId = $state<number | null>(null);
   const selectedMove = $derived($allMoves.find((move) => move.move_id === selectedMoveId));
-  let mounted = false;
+  let generation = 0;
   const timeline = $derived(duration === null ? null : buildVideoTimeline(duration, moves));
   const chapters = $derived(sortTimelineMoves(moves));
 
-  async function loadDuration() {
+  async function loadDuration(currentVideo: Video, currentGeneration: number) {
     status = "loading";
     try {
-      const value = await getVideoDuration(video.url);
-      if (mounted) {
+      const value = await loadVideoDuration(currentVideo);
+      if (generation === currentGeneration) {
         duration = value;
         status = "ready";
       }
     } catch (error) {
       console.error("Failed to load video duration:", error);
-      if (mounted) status = "error";
+      if (generation === currentGeneration) status = "error";
     }
   }
 
-  onMount(() => {
-    mounted = true;
+  $effect(() => {
+    const currentVideo = video;
+    const currentGeneration = ++generation;
+    duration = null;
+    status = "loading";
+    if (currentVideo.duration_seconds != null && Number.isFinite(currentVideo.duration_seconds) && currentVideo.duration_seconds > 0) {
+      duration = currentVideo.duration_seconds;
+      status = "ready";
+      return () => { generation++; };
+    }
     if (!("IntersectionObserver" in window)) {
-      void loadDuration();
-      return () => { mounted = false; };
+      void loadDuration(currentVideo, currentGeneration);
+      return () => { generation++; };
     }
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
         observer.disconnect();
-        void loadDuration();
+        void loadDuration(currentVideo, currentGeneration);
       }
     }, { rootMargin: "200px" });
     observer.observe(root);
     return () => {
-      mounted = false;
+      generation++;
       observer.disconnect();
     };
   });
@@ -83,7 +90,7 @@
   {:else if status === "error"}
     <p class="text-xs text-gray-500 dark:text-gray-400">
       {t("timeline_unavailable")}
-      <button onclick={loadDuration} class="ml-1 underline cursor-pointer">{t("try_again")}</button>
+      <button onclick={() => loadDuration(video, generation)} class="ml-1 underline cursor-pointer">{t("try_again")}</button>
     </p>
   {:else if timeline && duration !== null}
     <div class="flex justify-between gap-2 mb-2 text-xs font-semibold text-gray-600 dark:text-gray-300">

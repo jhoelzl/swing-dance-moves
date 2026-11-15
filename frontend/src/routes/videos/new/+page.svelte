@@ -4,6 +4,7 @@
   import { resolve } from "$app/paths";
   import { isAdmin, allVideos, activeTab, addToast, tagGroups } from "#lib/stores.js";
   import { createVideo, getAllVideos } from "#lib/services/videos.js";
+  import { loadVideoDuration } from "#lib/services/videoDurationCache.js";
   import type { VideoFormData } from "#lib/types.js";
   import VideoForm from "#lib/components/VideoForm.svelte";
   import { t } from "#lib/i18n.js";
@@ -27,10 +28,11 @@
     loading = true;
     error = "";
     try {
-      await createVideo(data);
+      const video = await createVideo(data);
       // Reload all videos
       const videos = await getAllVideos();
       allVideos.set(videos);
+      void loadVideoDuration(video).catch((err: unknown) => console.error("Failed to load video duration:", err));
       addToast(t("video_created"));
       goto(resolve("/videos"));
     } catch (err) {

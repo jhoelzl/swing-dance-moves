@@ -196,6 +196,7 @@ To set up the Supabase database from scratch:
 
 For an existing database, run `scripts/reorder_tag_groups.sql` in the Supabase SQL Editor before deploying the tag-group reorder controls.
 Run `scripts/add_video_tags.sql` before deploying direct festival and teacher tags on videos. This migration also copies existing festival and teacher tags from linked moves to their videos.
+Run `scripts/add_video_duration.sql` before deploying video duration caching. Existing durations are filled as timelines are viewed; unavailable durations are retried later, and changing a video URL clears its cached duration.
 
 ---
 

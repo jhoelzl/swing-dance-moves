@@ -14,6 +14,7 @@
   import VideoForm from "#lib/components/VideoForm.svelte";
   import ConfirmModal from "#lib/components/ConfirmModal.svelte";
   import { t } from "#lib/i18n.js";
+  import { loadVideoDuration } from "#lib/services/videoDurationCache.js";
 
   let loading = $state(false);
   let deleting = $state(false);
@@ -60,9 +61,10 @@
     loading = true;
     error = "";
     try {
-      await updateVideo(videoId, data);
+      const video = await updateVideo(videoId, data);
       const videos = await getAllVideos();
       allVideos.set(videos);
+      void loadVideoDuration(video).catch((err: unknown) => console.error("Failed to load video duration:", err));
       addToast(t("video_updated"));
       goto(resolve("/videos"));
     } catch (err) {
