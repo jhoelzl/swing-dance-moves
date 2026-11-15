@@ -42,7 +42,7 @@
           <button
             onclick={() => toggleFilter(tag.tag_id)}
             aria-pressed={isActive}
-            class="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border
+            class="inline-flex min-h-11 items-center rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer border
 						{isActive
               ? colors.activeBg + ' text-white border-transparent shadow-sm'
               : colors.bg +

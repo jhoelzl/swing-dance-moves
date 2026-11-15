@@ -21,7 +21,7 @@
   import { getUserSettings } from "#lib/services/settings.js";
   import { getAllSessions } from "#lib/services/sessions.js";
   import { t } from "#lib/i18n.js";
-  import { goto } from "$app/navigation";
+  import { afterNavigate, goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
   import { useRegisterSW } from "virtual:pwa-register/svelte";
@@ -33,6 +33,9 @@
   let isLoginPage = $derived(page.url.pathname.endsWith("/login"));
   let loadError = $state(false);
   let loadErrorMessage = $state("");
+  let moreOpen = $state(false);
+  let moreButton: HTMLButtonElement | undefined = $state();
+  let moreContainer: HTMLDivElement | undefined = $state();
 
   const navigation = [
     { path: "/", key: "nav_moves", icon: "▦" },
@@ -48,6 +51,23 @@
     void $userSettings?.language;
     return navigation.map((item) => ({ ...item, label: t(item.key) }));
   });
+  const primaryPaths = ["/", "/videos", "/festivals"];
+  const primaryNavigation = $derived(translatedNavigation.filter((item) => primaryPaths.includes(item.path)));
+  const moreNavigation = $derived(translatedNavigation.filter((item) => !primaryPaths.includes(item.path)));
+  const moreCurrent = $derived(moreNavigation.some((item) => isCurrent(item.path)));
+
+  afterNavigate(() => { moreOpen = false; });
+
+  function handleNavigationKeydown(event: KeyboardEvent) {
+    if (event.key === "Escape" && moreOpen) {
+      moreOpen = false;
+      moreButton?.focus();
+    }
+  }
+
+  function closeMoreOnOutsideClick(event: MouseEvent) {
+    if (moreOpen && event.target instanceof Node && !moreContainer?.contains(event.target)) moreOpen = false;
+  }
 
   let labels = $derived.by(() => {
     void $userSettings?.language;
@@ -163,6 +183,9 @@
   }
 </script>
 
+<svelte:window onkeydown={handleNavigationKeydown} />
+<svelte:document onclick={closeMoreOnOutsideClick} />
+
 {#if loadError}
   <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-6">
     <div class="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-red-200 dark:border-red-800 p-8 text-center">
@@ -240,11 +263,23 @@
 
     {#if $isAdmin && !isLoginPage}
       <nav class="studio-mobile-nav" aria-label={labels.navigation}>
-        {#each translatedNavigation as item}
+        {#each primaryNavigation as item}
           <a href={resolve(item.path)} class:current={isCurrent(item.path)} aria-current={isCurrent(item.path) ? "page" : undefined}>
             <span aria-hidden="true">{item.icon}</span><span>{item.label}</span>
           </a>
         {/each}
+        <div bind:this={moreContainer} class="studio-mobile-more">
+          <button bind:this={moreButton} type="button" class:current={moreCurrent} aria-expanded={moreOpen} aria-controls="mobile-more-menu" onclick={() => (moreOpen = !moreOpen)}>
+            <span aria-hidden="true">⋯</span><span>{t("nav_more")}</span>
+          </button>
+          <div class="studio-mobile-more-menu" id="mobile-more-menu" hidden={!moreOpen}>
+            {#each moreNavigation as item}
+              <a href={resolve(item.path)} class:current={isCurrent(item.path)} aria-current={isCurrent(item.path) ? "page" : undefined}>
+                <span aria-hidden="true">{item.icon}</span><span>{item.label}</span>
+              </a>
+            {/each}
+          </div>
+        </div>
       </nav>
     {/if}
   </div>

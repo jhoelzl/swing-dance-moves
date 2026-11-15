@@ -6,6 +6,7 @@
     getAllTagTypes,
     createTagType,
     updateTagType,
+    moveTagGroup,
     deleteTagType,
     getTagsByType,
     createTag,
@@ -15,6 +16,8 @@
   import { getTagColors } from "#lib/utils.js";
   import type { Tag, TagType, TagGroup } from "#lib/types.js";
   import ConfirmModal from "#lib/components/ConfirmModal.svelte";
+  import SkeletonCard from "#lib/components/SkeletonCard.svelte";
+  import LoadError from "#lib/components/LoadError.svelte";
   import { t } from "#lib/i18n.js";
 
   // Available label colors for the color picker
@@ -61,6 +64,9 @@
 
   let groups = $state<TagGroup[]>([]);
   let loading = $state(true);
+  let loadError = $state(false);
+  let reordering = $state(false);
+  let reorderUnavailable = $state(false);
 
   // Tag Type editing
   let editingTypeId = $state<number | null>(null);
@@ -98,6 +104,7 @@
     type: "success" | "error";
     text: string;
   } | null>(null);
+  let statusTimer: ReturnType<typeof setTimeout> | undefined;
 
   // Derived preview colors
   let newTagPreviewColors = $derived(getTagColors(newTagLabel));
@@ -110,19 +117,21 @@
 
   async function loadGroups() {
     loading = true;
+    loadError = false;
     try {
       groups = await getAllTagsGrouped();
     } catch (err) {
       console.error("Failed to load tags:", err);
-      showStatus("error", t("failed_load_tags"));
+      loadError = true;
     } finally {
       loading = false;
     }
   }
 
   function showStatus(type: "success" | "error", text: string) {
+    clearTimeout(statusTimer);
     statusMessage = { type, text };
-    setTimeout(() => (statusMessage = null), 4000);
+    if (type === "success") statusTimer = setTimeout(() => (statusMessage = null), 4000);
   }
 
   // ── Tag Type CRUD ──
@@ -136,6 +145,30 @@
 
   function cancelEditType() {
     editingTypeId = null;
+  }
+
+  async function reorderGroup(id: number, direction: -1 | 1) {
+    if (reordering || reorderUnavailable) return;
+    reordering = true;
+    let updateFailed = false;
+    try {
+      await moveTagGroup(id, direction);
+    } catch (error) {
+      console.error("Failed to reorder tag groups:", error);
+      updateFailed = true;
+    }
+    try {
+      const freshGroups = await getAllTagsGrouped();
+      groups = freshGroups;
+      tagGroups.set(freshGroups);
+      showStatus(updateFailed ? "error" : "success", t(updateFailed ? "group_order_failed" : "group_order_updated"));
+    } catch (error) {
+      console.error("Failed to refresh tag group order:", error);
+      reorderUnavailable = true;
+      showStatus("error", t("group_order_refresh_failed"));
+    } finally {
+      reordering = false;
+    }
   }
 
   async function saveEditType() {
@@ -279,9 +312,8 @@
   }
 
   async function reloadAll() {
-    await loadGroups();
-    // Also update the global store so other pages reflect the changes
     const freshGroups = await getAllTagsGrouped();
+    groups = freshGroups;
     tagGroups.set(freshGroups);
   }
 </script>
@@ -291,20 +323,13 @@
 </svelte:head>
 
 {#if loading}
-  <div class="flex items-center justify-center py-24">
-    <div class="text-center">
-      <div
-        class="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
-      ></div>
-      <p class="mt-4 text-sm text-gray-400 dark:text-gray-500">
-        {t("loading_tags")}
-      </p>
-    </div>
-  </div>
+  <div role="status" aria-label={t("loading_tags")}><SkeletonCard count={3} variant="video" /></div>
+{:else if loadError}
+  <LoadError message={t("failed_load_tags")} retry={loadGroups} />
 {:else}
   <!-- Status Message -->
   {#if statusMessage}
-    <div
+    <div role={statusMessage.type === "error" ? "alert" : "status"}
       class="mb-5 px-4 py-3 rounded-xl text-sm font-medium
         {statusMessage.type === 'success'
         ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
@@ -351,37 +376,40 @@
       </h3>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label
+          <label for="new-type-name"
             class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
             >Name</label
           >
           <input
             type="text"
             bind:value={newTypeName}
+            id="new-type-name"
             placeholder="z.B. Level"
             class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
           />
         </div>
         <div>
-          <label
+          <label for="new-type-css"
             class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-            >CSS-Klasse ({t("css_optional").split(" ")[1] || "optional"})</label
+            >{t("css_optional")}</label
           >
           <input
             type="text"
             bind:value={newTypeCss}
+            id="new-type-css"
             placeholder="z.B. badge-info"
             class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
           />
         </div>
         <div>
-          <label
+          <label for="new-type-order"
             class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-            >Order</label
+            >{t("order")}</label
           >
           <input
             type="number"
             bind:value={newTypeSortOrder}
+            id="new-type-order"
             class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
           />
         </div>
@@ -405,7 +433,7 @@
 
   <!-- Tag Groups -->
   <div class="space-y-6">
-    {#each groups as group (group.tagType.tag_type_id)}
+    {#each groups as group, groupIndex (group.tagType.tag_type_id)}
       <div
         class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm overflow-hidden"
       >
@@ -415,35 +443,38 @@
           <div class="p-4 bg-gray-50 dark:bg-gray-800/50">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label
+                <label for="edit-type-name"
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
                   >Name</label
                 >
                 <input
                   type="text"
                   bind:value={editTypeName}
+                  id="edit-type-name"
                   class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </div>
               <div>
-                <label
+                <label for="edit-type-css"
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                  >CSS-Klasse</label
+                  >{t("css_class")}</label
                 >
                 <input
                   type="text"
                   bind:value={editTypeCss}
+                  id="edit-type-css"
                   class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </div>
               <div>
-                <label
+                <label for="edit-type-order"
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                  >Order</label
+                  >{t("order")}</label
                 >
                 <input
                   type="number"
                   bind:value={editTypeSortOrder}
+                  id="edit-type-order"
                   class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </div>
@@ -466,7 +497,7 @@
         {:else}
           <!-- Display tag type -->
           <div
-            class="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800"
+            class="flex flex-wrap items-center justify-between gap-2 p-4 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800"
           >
             <div class="flex items-center gap-3">
               <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
@@ -483,9 +514,26 @@
             </div>
             <div class="flex items-center gap-1">
               <button
+                type="button"
+                onclick={() => reorderGroup(group.tagType.tag_type_id, -1)}
+                disabled={reordering || reorderUnavailable || groupIndex === 0}
+                aria-label="{t('move_group_up')}: {group.tagType.tag_type_name}"
+                title={t("move_group_up")}
+                class="min-w-11 min-h-11 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              >↑</button>
+              <button
+                type="button"
+                onclick={() => reorderGroup(group.tagType.tag_type_id, 1)}
+                disabled={reordering || reorderUnavailable || groupIndex === groups.length - 1}
+                aria-label="{t('move_group_down')}: {group.tagType.tag_type_name}"
+                title={t("move_group_down")}
+                class="min-w-11 min-h-11 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              >↓</button>
+              <button
                 onclick={() => startEditType(group.tagType)}
-                class="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all cursor-pointer"
+                class="grid min-w-11 min-h-11 place-items-center rounded-lg text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all cursor-pointer"
                 title={t("edit_category")}
+                aria-label="{t('edit_category')}: {group.tagType.tag_type_name}"
               >
                 <svg
                   class="w-4 h-4"
@@ -503,8 +551,9 @@
               </button>
               <button
                 onclick={() => startAddTag(group.tagType.tag_type_id)}
-                class="p-1.5 rounded-lg text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-950/40 transition-all cursor-pointer"
+                class="grid min-w-11 min-h-11 place-items-center rounded-lg text-gray-500 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-950/40 transition-all cursor-pointer"
                 title={t("add_tag")}
+                aria-label="{t('add_tag')}: {group.tagType.tag_type_name}"
               >
                 <svg
                   class="w-4 h-4"
@@ -522,8 +571,9 @@
               </button>
               <button
                 onclick={() => confirmDeleteType(group.tagType)}
-                class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all cursor-pointer"
+                class="grid min-w-11 min-h-11 place-items-center rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all cursor-pointer"
                 title={t("delete_category")}
+                aria-label="{t('delete_category')}: {group.tagType.tag_type_name}"
               >
                 <svg
                   class="w-4 h-4"
@@ -550,24 +600,26 @@
           >
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <label
+                <label for="new-tag-name"
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
                   >Name</label
                 >
                 <input
                   type="text"
                   bind:value={newTagName}
+                  id="new-tag-name"
                   placeholder={t("tag_name_placeholder")}
                   class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </div>
               <div>
-                <label
+                <label for="new-tag-color"
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
                   >{t("color")}</label
                 >
                 <select
                   bind:value={newTagLabel}
+                  id="new-tag-color"
                   class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none cursor-pointer"
                 >
                   {#each labelOptions as opt}
@@ -576,25 +628,27 @@
                 </select>
               </div>
               <div>
-                <label
+                <label for="new-tag-css"
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
                   >{t("css_optional")}</label
                 >
                 <input
                   type="text"
                   bind:value={newTagCss}
+                  id="new-tag-css"
                   placeholder="tag_css"
                   class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </div>
               <div>
-                <label
+                <label for="new-tag-order"
                   class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                  >Order</label
+                  >{t("order")}</label
                 >
                 <input
                   type="number"
                   bind:value={newTagSort}
+                  id="new-tag-order"
                   class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </div>
@@ -635,23 +689,25 @@
               <div class="p-4 bg-yellow-50/30 dark:bg-yellow-950/10">
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
-                    <label
+                    <label for="edit-tag-name"
                       class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
                       >Name</label
                     >
                     <input
                       type="text"
                       bind:value={editTagName}
+                      id="edit-tag-name"
                       class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                     />
                   </div>
                   <div>
-                    <label
+                    <label for="edit-tag-color"
                       class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
                       >{t("color")}</label
                     >
                     <select
                       bind:value={editTagLabel}
+                      id="edit-tag-color"
                       class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none cursor-pointer"
                     >
                       {#each labelOptions as opt}
@@ -660,24 +716,26 @@
                     </select>
                   </div>
                   <div>
-                    <label
+                    <label for="edit-tag-css"
                       class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
                       >CSS</label
                     >
                     <input
                       type="text"
                       bind:value={editTagCss}
+                      id="edit-tag-css"
                       class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                     />
                   </div>
                   <div>
-                    <label
+                    <label for="edit-tag-order"
                       class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                      >Order</label
+                      >{t("order")}</label
                     >
                     <input
                       type="number"
                       bind:value={editTagSort}
+                      id="edit-tag-order"
                       class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/40"
                     />
                   </div>
@@ -732,8 +790,9 @@
                 <div class="flex items-center gap-1">
                   <button
                     onclick={() => startEditTag(tag)}
-                    class="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all cursor-pointer"
+                    class="grid min-w-11 min-h-11 place-items-center rounded-lg text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all cursor-pointer"
                     title={t("edit_tag")}
+                    aria-label="{t('edit_tag')}: {tag.tag_name}"
                   >
                     <svg
                       class="w-3.5 h-3.5"
@@ -751,8 +810,9 @@
                   </button>
                   <button
                     onclick={() => confirmDeleteTag(tag)}
-                    class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all cursor-pointer"
+                    class="grid min-w-11 min-h-11 place-items-center rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all cursor-pointer"
                     title={t("delete_tag")}
+                    aria-label="{t('delete_tag')}: {tag.tag_name}"
                   >
                     <svg
                       class="w-3.5 h-3.5"

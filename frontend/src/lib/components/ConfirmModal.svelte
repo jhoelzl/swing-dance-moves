@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from "svelte";
   import { t } from "#lib/i18n.js";
 
   interface Props {
@@ -20,6 +21,18 @@
     onconfirm,
     oncancel,
   }: Props = $props();
+  let modal: HTMLDivElement | undefined = $state();
+
+  $effect(() => {
+    if (!open) return;
+    const previousFocus = document.activeElement;
+    void tick().then(() => {
+      if (open) modal?.querySelector<HTMLButtonElement>("button")?.focus();
+    });
+    return () => {
+      if (previousFocus instanceof HTMLElement) previousFocus.focus();
+    };
+  });
 
   /**
    * Handle keyboard events: Escape to cancel, Enter to confirm
@@ -29,6 +42,18 @@
     if (e.key === "Escape") {
       e.preventDefault();
       oncancel();
+    } else if (e.key === "Tab" && modal) {
+      const buttons = [...modal.querySelectorAll<HTMLButtonElement>("button:not(:disabled)")];
+      if (!buttons.length) return;
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   }
 
@@ -54,6 +79,10 @@
   >
     <!-- Modal -->
     <div
+      bind:this={modal}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
       class="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-modal-in"
     >
       <!-- Header -->

@@ -190,6 +190,7 @@
             <div class="flex-1 space-y-2">
               <select
                 bind:value={ref.video_id}
+                aria-label={t("select_video")}
                 class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
               >
                 <option value={0}>{t("select_video")}</option>
@@ -199,11 +200,12 @@
               </select>
               <div class="flex gap-2">
                 <div class="flex-1">
-                  <label
+                  <label for="video-start-{i}"
                     class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5"
                     >{t("start_optional")}</label
                   >
                   <input
+                    id="video-start-{i}"
                     type="text"
                     bind:value={ref.start_time}
                     placeholder="e.g. 10:01"
@@ -211,11 +213,12 @@
                   />
                 </div>
                 <div class="flex-1">
-                  <label
+                  <label for="video-end-{i}"
                     class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5"
                     >{t("end_optional")}</label
                   >
                   <input
+                    id="video-end-{i}"
                     type="text"
                     bind:value={ref.end_time}
                     placeholder="e.g. 10:30"
@@ -229,6 +232,7 @@
               onclick={() => removeVideoRef(i)}
               class="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all cursor-pointer mt-1"
               title={t("remove")}
+              aria-label={t("remove")}
             >
               <svg
                 class="w-4 h-4"

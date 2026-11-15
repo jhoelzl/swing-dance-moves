@@ -10,6 +10,7 @@ A **Progressive Web App (PWA)** for browsing, filtering, and discovering swing d
 
 - **Swing dance moves** with descriptions, synonyms, and YouTube video embeds
 - **Multi-tag filtering** — filter by dance style, level, technical type, rating, and festival/class origin simultaneously
+- **Custom tag-group order** — use the up/down controls on the Tags page to change the shared order used throughout the app.
 - **Festival overview** — browse the `Festivals` tag group by festival, with inline YouTube and Dropbox class videos, move-coverage timelines, linked moves, and teacher tags. The selected festival is saved in the URL for refreshes and bookmarks. Select a move with a valid start timestamp to play it in the class video. Videos linked to moves tagged with multiple festivals are flagged for review rather than assigned to a class.
 - **Full-text search** — search across move names, synonyms, and descriptions
 - **"Out of moves!" button** — get 2 random moves matching your current filters
@@ -184,11 +185,13 @@ The app auto-deploys to GitHub Pages on every push to `main` via GitHub Actions.
 To set up the Supabase database from scratch:
 
 1. Create a project on [supabase.com](https://supabase.com) (Free Tier)
-2. Run `scripts/migrate.sql` in the Supabase SQL Editor
+2. Run `scripts/init.sql` in the Supabase SQL Editor
 3. Enable Email/Password auth and create your admin account
 4. Row Level Security is pre-configured:
    - **SELECT**: open for all (anon + authenticated)
    - **INSERT / UPDATE / DELETE**: authenticated users only
+
+For an existing database, run `scripts/reorder_tag_groups.sql` in the Supabase SQL Editor before deploying the tag-group reorder controls.
 
 ---
 

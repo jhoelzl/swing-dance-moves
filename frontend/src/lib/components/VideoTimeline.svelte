@@ -90,7 +90,7 @@
       <span>{t("timeline_coverage")}</span>
       <span class="font-normal text-gray-400 dark:text-gray-500">{t("timeline_full_video")}</span>
     </div>
-    <div class="flex h-6 rounded-lg overflow-hidden" aria-label={t("nav_videos")}>
+    <div class="flex h-11 rounded-lg overflow-hidden" aria-label={t("nav_videos")}>
       {#each timeline.ranges as range, index}
         <button
           type="button"
@@ -98,6 +98,7 @@
           style:flex-grow={range.end - range.start}
           style:flex-basis="0%"
           aria-label={rangeLabel(range)}
+          aria-pressed={selected === range}
           title={rangeLabel(range)}
           onpointerenter={(event) => {
             if (event.pointerType !== "touch" && range.moves.length) selectRange(range);
@@ -118,15 +119,15 @@
         <button
           type="button"
           onclick={playSelectedRange}
-          class="mt-3 rounded-lg bg-green-700 hover:bg-green-800 px-3 py-2 font-semibold text-white cursor-pointer"
-        >{t("timeline_play_segment")}</button>
+          class="mt-3 min-h-11 rounded-lg bg-green-700 hover:bg-green-800 px-3 py-2 text-sm font-semibold text-white cursor-pointer"
+        >▶ {t("timeline_play_segment")}</button>
         {/if}
         <div class="mt-3 flex flex-wrap gap-2">
           {#each selected.moves as move (move.id)}
             <button
               type="button"
               onclick={() => (selectedMoveId = move.move_id)}
-              class="rounded-lg border border-green-200 dark:border-green-800 px-3 py-2 text-green-800 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-950/40 cursor-pointer"
+              class="min-h-11 rounded-lg border border-green-200 dark:border-green-800 px-3 py-2 text-sm text-green-800 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-950/40 cursor-pointer"
             >{t("timeline_show_move")}: {move.move_name.trim()}</button>
           {/each}
         </div>

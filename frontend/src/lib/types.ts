@@ -244,7 +244,12 @@ export interface Database {
 			};
 		};
 		Views: Record<string, never>;
-		Functions: Record<string, never>;
+		Functions: {
+			move_tag_group: {
+				Args: { p_group_id: number; p_direction: number };
+				Returns: undefined;
+			};
+		};
 		Enums: Record<string, never>;
 	};
 }

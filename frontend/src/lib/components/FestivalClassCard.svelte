@@ -4,7 +4,7 @@
   import { extractYouTubeId, getDropboxDirectUrl } from "#lib/utils.js";
   import { tagDisplayOrder } from "#lib/stores.js";
   import { sortMoveTags } from "#lib/services/moves.js";
-  import { getMovePlayback, youtubeEmbedUrl, type TimelineMove } from "#lib/videoTimeline.js";
+  import { formatVideoTime, getMovePlayback, youtubeEmbedUrl, type TimelineMove } from "#lib/videoTimeline.js";
   import { t } from "#lib/i18n.js";
   import TagBadge from "./TagBadge.svelte";
   import VideoTimeline from "./VideoTimeline.svelte";
@@ -107,7 +107,7 @@
   <div class="flex flex-wrap justify-between items-start gap-3">
     <h3 class="font-bold text-gray-900 dark:text-white">{video.title}</h3>
     {#if canPlay}
-      <button type="button" onclick={isOpen ? closeVideo : openVideo} class="text-sm font-semibold text-green-700 dark:text-green-400 underline cursor-pointer">
+      <button type="button" onclick={isOpen ? closeVideo : openVideo} aria-expanded={isOpen} class="min-h-11 rounded-lg bg-green-700 hover:bg-green-800 px-3 text-sm font-semibold text-white cursor-pointer">
         {isOpen ? t("festival_close_video") : `▶ ${t("festival_watch")}`}
       </button>
     {:else}
@@ -153,8 +153,8 @@
       <li>
         {#if playback && canPlay}
           <button type="button" onclick={() => playSegment(playback.start, playback.end)}
-            aria-label="{t('festival_play_move')}: {move.name}"
-            class="text-sm font-semibold text-green-700 dark:text-green-400 underline cursor-pointer text-left">{move.name}</button>
+            aria-label="{t('festival_play_move')}: {move.name}, {formatVideoTime(playback.start)}"
+            class="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/40 cursor-pointer text-left"><span aria-hidden="true">▶</span>{move.name}<span class="font-normal tabular-nums">· {formatVideoTime(playback.start)}</span></button>
         {:else}
           <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{move.name}</span>
           <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">{canPlay ? t("timeline_timing_unavailable") : t("festival_inline_unavailable")}</span>

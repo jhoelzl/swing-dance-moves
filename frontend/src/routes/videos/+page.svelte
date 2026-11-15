@@ -6,6 +6,7 @@
   import { groupTimelineMoves } from "#lib/videoTimeline.js";
   import VideoCard from "#lib/components/VideoCard.svelte";
   import VideoGridCard from "#lib/components/VideoGridCard.svelte";
+  import LoadError from "#lib/components/LoadError.svelte";
   import { getAllVideos } from "#lib/services/videos.js";
   import { debounce } from "#lib/utils.js";
   import { resolve } from "$app/paths";
@@ -101,6 +102,7 @@
       <input
         type="text"
         placeholder={t("search_videos")}
+        aria-label={t("search_videos")}
         oninput={handleSearchInput}
         value={searchInputValue}
         class="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 dark:focus:border-blue-500 outline-none transition-all shadow-sm"
@@ -113,6 +115,7 @@
     <div class="flex items-center gap-2">
       <button
         onclick={() => (showFilters = !showFilters)}
+        aria-expanded={showFilters}
         class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer
         {moveFilter !== 'all'
           ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
@@ -163,6 +166,7 @@
             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}"
           title={t("list_view")}
           aria-label={t("list_view")}
+          aria-pressed={viewMode === "list"}
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -177,6 +181,7 @@
             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}"
           title={t("grid_view")}
           aria-label={t("grid_view")}
+          aria-pressed={viewMode === "grid"}
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z" />
@@ -290,10 +295,7 @@
   {#if linksLoading}
     <SkeletonCard count={4} variant="video" />
   {:else if linksError}
-    <div role="alert" class="rounded-xl bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-700 dark:text-red-300">
-      {t("video_links_load_failed")}
-      <button onclick={loadVideoMoveLinks} class="ml-2 underline cursor-pointer">{t("try_again")}</button>
-    </div>
+    <LoadError message={t("video_links_load_failed")} retry={loadVideoMoveLinks} />
   {:else if displayVideos.length > 0}
     {#if viewMode === "list"}
       <div class="flex flex-wrap gap-x-4 gap-y-1 mb-3 text-xs text-gray-500 dark:text-gray-400">
