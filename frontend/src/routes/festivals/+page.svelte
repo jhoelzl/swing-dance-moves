@@ -8,6 +8,8 @@
   import { getAllVideoMoveLinks, type VideoMoveLink } from "#lib/services/videos.js";
   import TagBadge from "#lib/components/TagBadge.svelte";
   import FestivalClassCard from "#lib/components/FestivalClassCard.svelte";
+  import VideoGridCard from "#lib/components/VideoGridCard.svelte";
+  import ViewModeToggle from "#lib/components/ViewModeToggle.svelte";
   import SkeletonCard from "#lib/components/SkeletonCard.svelte";
   import LoadError from "#lib/components/LoadError.svelte";
   import { groupTimelineMoves } from "#lib/videoTimeline.js";
@@ -15,6 +17,7 @@
 
   let links = $state<VideoMoveLink[]>([]);
   let linksError = $state(false);
+  let viewMode = $state<"list" | "grid">("list");
   const festivals = $derived(buildFestivalOverviews($tagGroups, $allMoves, $allVideos, links));
   const videoMoves = $derived(groupTimelineMoves(links, $allMoves));
   const selected = $derived(selectFestival(festivals, page.url.searchParams.get("festival")));
@@ -75,20 +78,31 @@
     <h2 class="text-xl font-bold text-gray-900 dark:text-white">{selected.festival.tag_name}</h2>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{selected.classes.length} {t("festival_classes")}</p>
     <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{t("festival_inferred")}</p>
-    <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-      <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></span>{t("timeline_assigned")}</span>
-      <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-400 mr-1"></span>{t("timeline_unassigned")}</span>
-    </div>
-    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{t("timeline_explanation")}</p>
+    <div class="mt-3"><ViewModeToggle bind:viewMode /></div>
+    {#if viewMode === "list"}
+      <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></span>{t("timeline_assigned")}</span>
+        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-400 mr-1"></span>{t("timeline_unassigned")}</span>
+      </div>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{t("timeline_explanation")}</p>
+    {/if}
   </div>
 
-  <div class="space-y-4">
-    {#each selected.classes as festivalClass (festivalClass.video.video_id)}
-      <FestivalClassCard video={festivalClass.video} moves={festivalClass.moves} teachers={festivalClass.teachers} timelineMoves={videoMoves[festivalClass.video.video_id] ?? []} />
-    {:else}
-      <p class="text-sm text-gray-500 dark:text-gray-400">{t("festival_no_classes")}</p>
-    {/each}
-  </div>
+  {#if selected.classes.length === 0}
+    <p class="text-sm text-gray-500 dark:text-gray-400">{t("festival_no_classes")}</p>
+  {:else if viewMode === "list"}
+    <div class="space-y-4">
+      {#each selected.classes as festivalClass (festivalClass.video.video_id)}
+        <FestivalClassCard video={festivalClass.video} moves={festivalClass.moves} teachers={festivalClass.teachers} timelineMoves={videoMoves[festivalClass.video.video_id] ?? []} />
+      {/each}
+    </div>
+  {:else}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      {#each selected.classes as festivalClass (festivalClass.video.video_id)}
+        <VideoGridCard video={festivalClass.video} linkedMoveCount={videoMoves[festivalClass.video.video_id]?.length ?? 0} />
+      {/each}
+    </div>
+  {/if}
 
   {#if selected.unassignedMoves.length}
     <section class="mt-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5">
