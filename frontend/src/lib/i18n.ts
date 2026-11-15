@@ -30,6 +30,8 @@ const translations: Record<string, { de: string; en: string }> = {
   'festival_intro': { de: 'Deine Festival-Klassen, Moves und Videos an einem Ort.', en: 'Your festival classes, moves and videos in one place.' },
   'festival_select': { de: 'Festival auswählen', en: 'Select a festival' },
   'festival_none': { de: 'Keine Tags in der Kategorie Festivals gefunden.', en: 'No tags found in the Festivals group.' },
+  'festival_not_found': { de: 'Das Festival in diesem Link wurde nicht gefunden. Bitte wähle ein anderes Festival.', en: 'The festival in this link was not found. Please select another festival.' },
+  'festival_selection_failed': { de: 'Das Festival konnte nicht ausgewählt werden. Bitte versuche es erneut.', en: 'Could not select the festival. Please try again.' },
   'festival_classes': { de: 'Klassen', en: 'Classes' },
   'festival_teachers': { de: 'Lehrer-Tags der Moves', en: 'Teacher tags on these moves' },
   'festival_no_teachers': { de: 'Keine Lehrer-Tags', en: 'No teacher tags' },

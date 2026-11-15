@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { allMoves, allVideos, isLoading, tagGroups, tagDisplayOrder } from "#lib/stores.js";
-  import { buildFestivalOverviews } from "#lib/festivals.js";
+  import { goto } from "$app/navigation";
+  import { page } from "$app/state";
+  import { allMoves, allVideos, isLoading, tagGroups, tagDisplayOrder, addToast } from "#lib/stores.js";
+  import { buildFestivalOverviews, festivalSelectionUrl, selectFestival } from "#lib/festivals.js";
   import { sortMoveTags } from "#lib/services/moves.js";
   import { getAllVideoMoveLinks, type VideoMoveLink } from "#lib/services/videos.js";
   import TagBadge from "#lib/components/TagBadge.svelte";
@@ -12,10 +14,20 @@
   let links = $state<VideoMoveLink[]>([]);
   let linksLoading = $state(true);
   let linksError = $state(false);
-  let selectedId = $state("");
   const festivals = $derived(buildFestivalOverviews($tagGroups, $allMoves, $allVideos, links));
   const videoMoves = $derived(groupTimelineMoves(links, $allMoves));
-  const selected = $derived(festivals.find((item) => String(item.festival.tag_id) === selectedId) ?? festivals[0]);
+  const selected = $derived(selectFestival(festivals, page.url.searchParams.get("festival")));
+
+  async function changeFestival(event: Event) {
+    const select = event.currentTarget as HTMLSelectElement;
+    try {
+      await goto(festivalSelectionUrl(page.url.href, select.value), { reset: false });
+    } catch (error) {
+      console.error("Failed to select festival:", error);
+      select.value = selected ? String(selected.festival.tag_id) : "";
+      addToast(t("festival_selection_failed"), "error");
+    }
+  }
 
   async function loadLinks() {
     linksLoading = true;
@@ -49,16 +61,20 @@
     <p>{t("video_links_load_failed")}</p>
     <button class="mt-2 underline cursor-pointer" onclick={loadLinks}>{t("try_again")}</button>
   </div>
-{:else if !selected}
+{:else if !festivals.length}
   <p class="text-sm text-gray-500 dark:text-gray-400">{t("festival_none")}</p>
 {:else}
   <label for="festival-select" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">{t("festival_select")}</label>
-  <select id="festival-select" value={String(selected.festival.tag_id)} onchange={(event) => selectedId = event.currentTarget.value} class="w-full sm:max-w-sm px-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
+  <select id="festival-select" value={selected ? String(selected.festival.tag_id) : ""} onchange={changeFestival} class="w-full sm:max-w-sm px-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
+    {#if !selected}<option value="" disabled>{t("festival_select")}</option>{/if}
     {#each festivals as item (item.festival.tag_id)}
       <option value={String(item.festival.tag_id)}>{item.festival.tag_name}</option>
     {/each}
   </select>
 
+  {#if !selected}
+    <p role="alert" class="mt-4 text-sm text-amber-700 dark:text-amber-400">{t("festival_not_found")}</p>
+  {:else}
   <div class="mt-6 mb-5">
     <h2 class="text-xl font-bold text-gray-900 dark:text-white">{selected.festival.tag_name}</h2>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{selected.classes.length} {t("festival_classes")}</p>
@@ -103,5 +119,6 @@
         {/each}
       </ul>
     </section>
+  {/if}
   {/if}
 {/if}
