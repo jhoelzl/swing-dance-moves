@@ -145,24 +145,26 @@
       <span class="text-sm text-gray-500">{t("festival_no_teachers")}</span>
     {/each}
   </div>
-  <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("move_plural")}</p>
-  <ul class="mt-2 space-y-3">
-    {#each moves as move (move.move_id)}
-      {@const link = timelineMoves.find((item) => item.move_id === move.move_id)}
-      {@const playback = link ? getMovePlayback(link) : null}
-      <li>
-        {#if playback && canPlay}
-          <button type="button" onclick={() => playSegment(playback.start, playback.end)}
-            aria-label="{t('festival_play_move')}: {move.name}, {formatVideoTime(playback.start)}"
-            class="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/40 cursor-pointer text-left"><span aria-hidden="true">▶</span>{move.name}<span class="font-normal tabular-nums">· {formatVideoTime(playback.start)}</span></button>
-        {:else}
-          <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{move.name}</span>
-          <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">{canPlay ? t("timeline_timing_unavailable") : t("festival_inline_unavailable")}</span>
-        {/if}
-        <div class="flex flex-wrap gap-1.5 mt-1">
-          {#each sortMoveTags(move.tags ?? [], $tagDisplayOrder) as tag (tag.tag_id)}<TagBadge {tag} small />{/each}
-        </div>
-      </li>
-    {/each}
-  </ul>
+  {#if moves.length}
+    <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("move_plural")}</p>
+    <ul class="mt-2 space-y-3">
+      {#each moves as move (move.move_id)}
+        {@const link = timelineMoves.find((item) => item.move_id === move.move_id)}
+        {@const playback = link ? getMovePlayback(link) : null}
+        <li>
+          {#if playback && canPlay}
+            <button type="button" onclick={() => playSegment(playback.start, playback.end)}
+              aria-label="{t('festival_play_move')}: {move.name}, {formatVideoTime(playback.start)}"
+              class="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/40 cursor-pointer text-left"><span aria-hidden="true">▶</span>{move.name}<span class="font-normal tabular-nums">· {formatVideoTime(playback.start)}</span></button>
+          {:else}
+            <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{move.name}</span>
+            <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">{canPlay ? t("timeline_timing_unavailable") : t("festival_inline_unavailable")}</span>
+          {/if}
+          <div class="flex flex-wrap gap-1.5 mt-1">
+            {#each sortMoveTags(move.tags ?? [], $tagDisplayOrder) as tag (tag.tag_id)}<TagBadge {tag} small />{/each}
+          </div>
+        </li>
+      {/each}
+    </ul>
+  {/if}
 </article>

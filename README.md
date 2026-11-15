@@ -11,7 +11,7 @@ A **Progressive Web App (PWA)** for browsing, filtering, and discovering swing d
 - **Swing dance moves** with descriptions, synonyms, and YouTube video embeds
 - **Multi-tag filtering** — filter by dance style, level, technical type, rating, and festival/class origin simultaneously
 - **Custom tag-group order** — use the up/down controls on the Tags page to change the shared order used throughout the app.
-- **Festival overview** — browse the `Festivals` tag group by festival, with inline YouTube and Dropbox class videos, move-coverage timelines, linked moves, and teacher tags. The selected festival is saved in the URL for refreshes and bookmarks. Select a move with a valid start timestamp to play it in the class video. Videos linked to moves tagged with multiple festivals are flagged for review rather than assigned to a class.
+- **Festival overview** — browse the `Festivals` tag group by festival, with inline YouTube and Dropbox class videos, move-coverage timelines, linked moves, and teacher tags. Festival and teacher assignments belong directly to videos; move links are only used for timelines and move details. The selected festival is saved in the URL for refreshes and bookmarks. Select a move with a valid start timestamp to play it in the class video.
 - **Full-text search** — search across move names, synonyms, and descriptions
 - **"Out of moves!" button** — get 2 random moves matching your current filters
 - **Video (Youtube/Dropbox) filter** — filter for moves that have a linked video
@@ -49,7 +49,8 @@ swing-dance-moves/
 │   ├── ci.yml                 # PR/main quality checks (audit, spellcheck, lint, test, build)
 │   └── deploy.yml             # GitHub Pages build & deploy workflow
 ├── scripts/
-│   └── init.sql               # PostgreSQL schema + seed + RLS setup for Supabase
+│   ├── init.sql               # PostgreSQL schema + seed + RLS setup for Supabase
+│   └── add_video_tags.sql     # Migration for direct video tag assignments
 ├── frontend/                  # SvelteKit application
 │   ├── .env.example           # Environment variable template
 │   ├── cspell.json            # Project dictionary for spell checking
@@ -192,6 +193,7 @@ To set up the Supabase database from scratch:
    - **INSERT / UPDATE / DELETE**: authenticated users only
 
 For an existing database, run `scripts/reorder_tag_groups.sql` in the Supabase SQL Editor before deploying the tag-group reorder controls.
+Run `scripts/add_video_tags.sql` before deploying direct festival and teacher tags on videos. This migration also copies existing festival and teacher tags from linked moves to their videos.
 
 ---
 

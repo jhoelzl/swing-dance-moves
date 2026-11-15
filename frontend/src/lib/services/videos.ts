@@ -1,5 +1,5 @@
 import { supabase } from '#lib/supabase.js';
-import type { Video, VideoFormData, MoveToVideo } from '#lib/types.js';
+import type { Tag, Video, VideoFormData, MoveToVideo } from '#lib/types.js';
 
 const db: any = supabase;
 
@@ -42,7 +42,45 @@ export async function getAllVideos(): Promise<Video[]> {
 		.order('title');
 
 	if (error) throw error;
-	return (data ?? []) as Video[];
+	return attachVideoTags((data ?? []) as Video[]);
+}
+
+async function getVideoTags(videoIds: number[]): Promise<Map<number, Tag[]>> {
+	if (!videoIds.length) return new Map();
+	const { data, error } = await db
+		.from('videos_to_tags')
+		.select('video_id, tag:tags(*)')
+		.in('video_id', videoIds);
+	if (error) throw error;
+
+	const tagsByVideo = new Map<number, Tag[]>();
+	for (const mapping of (data ?? []) as { video_id: number; tag: Tag | null }[]) {
+		if (!mapping.tag) continue;
+		const tags = tagsByVideo.get(mapping.video_id) ?? [];
+		tags.push(mapping.tag);
+		tagsByVideo.set(mapping.video_id, tags);
+	}
+	return tagsByVideo;
+}
+
+async function attachVideoTags(videos: Video[]): Promise<Video[]> {
+	const tagsByVideo = await getVideoTags(videos.map((video) => video.video_id));
+	return videos.map((video) => ({ ...video, tags: tagsByVideo.get(video.video_id) ?? [] }));
+}
+
+async function replaceVideoTags(videoId: number, tagIds: number[]): Promise<void> {
+	const { error: deleteError } = await db
+		.from('videos_to_tags')
+		.delete()
+		.eq('video_id', videoId);
+	if (deleteError) throw deleteError;
+
+	if (tagIds.length) {
+		const { error: insertError } = await db.from('videos_to_tags').insert(
+			[...new Set(tagIds)].map((tag_id) => ({ video_id: videoId, tag_id }))
+		);
+		if (insertError) throw insertError;
+	}
 }
 
 /**
@@ -56,7 +94,8 @@ export async function getVideoById(videoId: number): Promise<Video | null> {
 		.single();
 
 	if (error) return null;
-	return data as Video;
+	const [video] = await attachVideoTags([data as Video]);
+	return video;
 }
 
 /**
@@ -74,7 +113,9 @@ export async function createVideo(data: VideoFormData): Promise<Video> {
 		.single();
 
 	if (error) throw error;
-	return video as Video;
+	await replaceVideoTags(video.video_id, data.tagIds);
+	const [result] = await attachVideoTags([video as Video]);
+	return result;
 }
 
 /**
@@ -93,7 +134,9 @@ export async function updateVideo(videoId: number, data: VideoFormData): Promise
 		.single();
 
 	if (error) throw error;
-	return video as Video;
+	await replaceVideoTags(videoId, data.tagIds);
+	const [result] = await attachVideoTags([video as Video]);
+	return result;
 }
 
 /**

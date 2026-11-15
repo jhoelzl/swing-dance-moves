@@ -14,7 +14,6 @@
   import { t } from "#lib/i18n.js";
 
   let links = $state<VideoMoveLink[]>([]);
-  let linksLoading = $state(true);
   let linksError = $state(false);
   const festivals = $derived(buildFestivalOverviews($tagGroups, $allMoves, $allVideos, links));
   const videoMoves = $derived(groupTimelineMoves(links, $allMoves));
@@ -32,15 +31,12 @@
   }
 
   async function loadLinks() {
-    linksLoading = true;
     linksError = false;
     try {
       links = await getAllVideoMoveLinks();
     } catch (error) {
       console.error("Failed to load video-move links:", error);
       linksError = true;
-    } finally {
-      linksLoading = false;
     }
   }
 
@@ -56,13 +52,14 @@
   <p>{t("festival_intro")}</p>
 </div>
 
-{#if $isLoading || linksLoading}
+{#if $isLoading}
   <div role="status" aria-label={t("festival_loading")}><SkeletonCard count={3} variant="video" /></div>
-{:else if linksError}
-  <LoadError message={t("video_links_load_failed")} retry={loadLinks} />
 {:else if !festivals.length}
   <p class="text-sm text-gray-500 dark:text-gray-400">{t("festival_none")}</p>
 {:else}
+  {#if linksError}
+    <div class="mb-5"><LoadError message={t("video_links_load_failed")} retry={loadLinks} /></div>
+  {/if}
   <label for="festival-select" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">{t("festival_select")}</label>
   <select id="festival-select" value={selected ? String(selected.festival.tag_id) : ""} onchange={changeFestival} class="w-full sm:max-w-sm px-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
     {#if !selected}<option value="" disabled>{t("festival_select")}</option>{/if}
@@ -84,17 +81,6 @@
     </div>
     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{t("timeline_explanation")}</p>
   </div>
-
-  {#if selected.ambiguousVideos.length}
-    <div role="status" class="mb-5 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-900 dark:text-amber-200">
-      <p>{t("festival_ambiguous")}</p>
-      <ul class="mt-2 list-disc pl-5">
-        {#each selected.ambiguousVideos as video (video.video_id)}
-          <li><a href={video.url} target="_blank" rel="noopener noreferrer" class="underline">{video.title}</a></li>
-        {/each}
-      </ul>
-    </div>
-  {/if}
 
   <div class="space-y-4">
     {#each selected.classes as festivalClass (festivalClass.video.video_id)}

@@ -10,7 +10,6 @@ interface FestivalClass {
 interface FestivalOverview {
 	festival: Tag;
 	classes: FestivalClass[];
-	ambiguousVideos: Video[];
 	unassignedMoves: Move[];
 }
 
@@ -30,10 +29,12 @@ export function buildFestivalOverviews(
 	videos: Video[],
 	links: VideoMoveLink[]
 ): FestivalOverview[] {
-	const festivalGroup = groups.find((group) => group.tagType.tag_type_name.trim().toLowerCase() === 'festivals');
+	const festivalGroup = groups.find((group) => {
+		const name = group.tagType.tag_type_name.trim().toLowerCase();
+		return name === 'festivals' || name === 'festival / classes';
+	});
 	if (!festivalGroup) return [];
 	const teacherGroup = groups.find((group) => group.tagType.tag_type_name.trim().toLowerCase() === 'teachers');
-	const festivalIds = new Set(festivalGroup.tags.map((tag) => tag.tag_id));
 	const teacherIds = new Set(teacherGroup?.tags.map((tag) => tag.tag_id) ?? []);
 	const movesById = new Map(moves.map((move) => [move.move_id, move]));
 	const movesByVideo = new Map<number, Move[]>();
@@ -48,32 +49,18 @@ export function buildFestivalOverviews(
 	return festivalGroup.tags.map((festival) => {
 		const festivalMoves = moves.filter((move) => move.tags?.some((tag) => tag.tag_id === festival.tag_id));
 		const classes: FestivalClass[] = [];
-		const ambiguousVideos: Video[] = [];
 		const assignedMoveIds = new Set<number>();
 		for (const video of videos) {
+			if (!video.tags?.some((tag) => tag.tag_id === festival.tag_id)) continue;
 			const linkedMoves = movesByVideo.get(video.video_id) ?? [];
 			const taggedMoves = linkedMoves.filter((move) => move.tags?.some((tag) => tag.tag_id === festival.tag_id));
-			if (!taggedMoves.length) continue;
-			const linkedFestivalIds = new Set(linkedMoves.flatMap((move) =>
-				(move.tags ?? []).filter((tag) => festivalIds.has(tag.tag_id)).map((tag) => tag.tag_id)
-			));
-			if (linkedFestivalIds.size > 1) {
-				ambiguousVideos.push(video);
-				continue;
-			}
-			const teachers = new Map<number, Tag>();
-			for (const move of taggedMoves) {
-				assignedMoveIds.add(move.move_id);
-				for (const tag of move.tags ?? []) {
-					if (teacherIds.has(tag.tag_id)) teachers.set(tag.tag_id, tag);
-				}
-			}
+			for (const move of taggedMoves) assignedMoveIds.add(move.move_id);
+			const teachers = (video.tags ?? []).filter((tag) => teacherIds.has(tag.tag_id));
 			classes.push({ video, moves: taggedMoves, teachers: [...teachers.values()] });
 		}
 		return {
 			festival,
 			classes,
-			ambiguousVideos,
 			unassignedMoves: festivalMoves.filter((move) => !assignedMoveIds.has(move.move_id))
 		};
 	});

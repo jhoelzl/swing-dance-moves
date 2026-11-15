@@ -123,14 +123,20 @@ export async function updateTag(
 }
 
 export async function deleteTag(id: number): Promise<void> {
-	const { count, error: countError } = await supabase
+	const { count, error: moveCountError } = await supabase
 		.from('moves_to_tags')
 		.select('id', { count: 'exact', head: true })
 		.eq('tag_id', id);
-	if (countError) throw countError;
+	if (moveCountError) throw moveCountError;
 
-	if ((count ?? 0) > 0) {
-		throw createDeleteConstraintError('Cannot delete this tag while it is still assigned to moves.');
+	const { count: videoCount, error: videoCountError } = await supabase
+		.from('videos_to_tags')
+		.select('id', { count: 'exact', head: true })
+		.eq('tag_id', id);
+	if (videoCountError) throw videoCountError;
+
+	if ((count ?? 0) > 0 || (videoCount ?? 0) > 0) {
+		throw createDeleteConstraintError('Cannot delete this tag while it is still assigned to moves or videos.');
 	}
 
 	const { error } = await supabase

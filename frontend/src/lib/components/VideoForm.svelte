@@ -1,19 +1,26 @@
 <script lang="ts">
-  import type { VideoFormData } from "#lib/types.js";
+  import type { TagGroup, VideoFormData } from "#lib/types.js";
   import { resolve } from "$app/paths";
   import { t } from "#lib/i18n.js";
 
   interface Props {
     formData: VideoFormData;
+    tagGroups: TagGroup[];
     onsubmit: (data: VideoFormData) => void;
     loading: boolean;
     title: string;
   }
 
-  let { formData, onsubmit, loading, title }: Props = $props();
+  let { formData, tagGroups, onsubmit, loading, title }: Props = $props();
 
   let derivedFormData = $derived(formData);
-  let localData = $state<VideoFormData>({ ...formData });
+  let localData = $state<VideoFormData>({ ...$state.snapshot(formData) });
+  const videoTagGroups = $derived(
+    tagGroups.filter((group) => {
+      const name = group.tagType.tag_type_name.trim().toLowerCase();
+      return name === "festivals" || name === "festival / classes" || name === "teachers";
+    }),
+  );
 
   // Keep in sync when formData changes
   $effect(() => {
@@ -78,6 +85,22 @@
       placeholder={t("optional_description")}
     ></textarea>
   </div>
+
+  {#each videoTagGroups as group (group.tagType.tag_type_id)}
+    {#if group.tags.length}
+      <fieldset>
+        <legend class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{group.tagType.tag_type_name}</legend>
+        <div class="flex flex-wrap gap-2">
+          {#each group.tags as tag (tag.tag_id)}
+            <label class="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300">
+              <input type="checkbox" bind:group={localData.tagIds} value={tag.tag_id} />
+              {tag.tag_name}
+            </label>
+          {/each}
+        </div>
+      </fieldset>
+    {/if}
+  {/each}
 
   <div class="flex items-center gap-3 pt-2">
     <button

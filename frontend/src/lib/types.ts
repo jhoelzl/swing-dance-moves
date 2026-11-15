@@ -42,6 +42,8 @@ export interface Video {
 	url: string;
 	description: string | null;
 	created_at: string;
+	// Joined fields
+	tags?: Tag[];
 }
 
 export interface MoveToVideo {
@@ -58,6 +60,7 @@ export interface VideoFormData {
 	title: string;
 	url: string;
 	description: string;
+	tagIds: number[];
 }
 
 export interface MoveVideoRef {
@@ -175,6 +178,12 @@ interface DbMoveToVideoRow {
 	end_time: string | null;
 }
 
+interface DbVideoToTagRow {
+	id: number;
+	video_id: number;
+	tag_id: number;
+}
+
 interface DbUserSettingsRow {
 	id: number;
 	user_id: string;
@@ -222,6 +231,12 @@ export interface Database {
 				Row: DbMoveToVideoRow;
 				Insert: Omit<DbMoveToVideoRow, 'id'> & { id?: number };
 				Update: Partial<Omit<DbMoveToVideoRow, 'id'>>;
+				Relationships: [];
+			};
+			videos_to_tags: {
+				Row: DbVideoToTagRow;
+				Insert: Omit<DbVideoToTagRow, 'id'> & { id?: number };
+				Update: Partial<Omit<DbVideoToTagRow, 'id'>>;
 				Relationships: [];
 			};
 			user_settings: {
