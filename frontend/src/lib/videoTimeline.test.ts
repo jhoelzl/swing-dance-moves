@@ -47,7 +47,17 @@ describe('buildVideoTimeline', () => {
 				{ start: 60, end: 80, moves: [] }
 			]
 		});
+	});
 
+	it('keeps three touching move assignments as distinct consecutive sections', () => {
+		const a = move(1, '0:00', '0:30');
+		const b = move(2, '0:30', '1:00');
+		const c = move(3, '1:00', '1:30');
+		expect(buildVideoTimeline(90, [a, b, c]).ranges).toEqual([
+			{ start: 0, end: 30, moves: [a] },
+			{ start: 30, end: 60, moves: [b] },
+			{ start: 60, end: 90, moves: [c] }
+		]);
 	});
 
 	it('flags missing, malformed, inverted and out-of-bounds timestamps', () => {

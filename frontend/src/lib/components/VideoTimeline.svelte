@@ -91,10 +91,10 @@
       <span class="font-normal text-gray-400 dark:text-gray-500">{t("timeline_full_video")}</span>
     </div>
     <div class="flex h-6 rounded-lg overflow-hidden" aria-label={t("nav_videos")}>
-      {#each timeline.ranges as range}
+      {#each timeline.ranges as range, index}
         <button
           type="button"
-          class="min-w-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gray-900 dark:focus-visible:outline-white {range.moves.length ? 'bg-green-500 hover:bg-green-600 dark:bg-green-600' : 'bg-red-400 hover:bg-red-500 dark:bg-red-500'}"
+          class="min-w-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gray-900 dark:focus-visible:outline-white {range.moves.length ? 'bg-green-500 hover:bg-green-600 dark:bg-green-600' : 'bg-red-400 hover:bg-red-500 dark:bg-red-500'} {index > 0 && range.moves.length && timeline.ranges[index - 1].moves.length ? 'shadow-[inset_2px_0_0_#052e16]' : ''}"
           style:flex-grow={range.end - range.start}
           style:flex-basis="0%"
           aria-label={rangeLabel(range)}
