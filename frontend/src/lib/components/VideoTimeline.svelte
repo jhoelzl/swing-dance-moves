@@ -11,9 +11,10 @@
     moves: TimelineMove[];
     expanded: boolean;
     canPlay: boolean;
+    compact?: boolean;
     onPlayRange?: (start: number, end: number) => void;
   }
-  let { video, moves, expanded, canPlay, onPlayRange }: Props = $props();
+  let { video, moves, expanded, canPlay, compact = false, onPlayRange }: Props = $props();
   let root: HTMLDivElement;
   let duration = $state<number | null>(null);
   let status = $state<"loading" | "ready" | "error">("loading");
@@ -93,11 +94,13 @@
       <button onclick={() => loadDuration(video, generation)} class="ml-1 underline cursor-pointer">{t("try_again")}</button>
     </p>
   {:else if timeline && duration !== null}
-    <div class="flex justify-between gap-2 mb-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
-      <span>{t("timeline_coverage")}</span>
-      <span class="font-normal text-gray-400 dark:text-gray-500">{t("timeline_full_video")}</span>
-    </div>
-    <div class="flex h-11 rounded-lg overflow-hidden" aria-label={t("nav_videos")}>
+    {#if !compact}
+      <div class="flex justify-between gap-2 mb-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
+        <span>{t("timeline_coverage")}</span>
+        <span class="font-normal text-gray-400 dark:text-gray-500">{t("timeline_full_video")}</span>
+      </div>
+    {/if}
+    <div class="flex h-11 rounded-lg overflow-hidden" aria-label={t("timeline_coverage")}>
       {#each timeline.ranges as range, index}
         <button
           type="button"
@@ -140,7 +143,7 @@
         </div>
       {/if}
       </div>
-    {:else}
+    {:else if !compact}
       <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{t("timeline_select")}</p>
     {/if}
     {#if timeline.incomplete}

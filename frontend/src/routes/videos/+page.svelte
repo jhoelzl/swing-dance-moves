@@ -324,12 +324,12 @@
   {:else if linksError}
     <LoadError message={t("video_links_load_failed")} retry={loadVideoMoveLinks} />
   {:else if displayVideos.length > 0}
+    <div class="flex flex-wrap gap-x-4 gap-y-1 mb-3 text-xs text-gray-500 dark:text-gray-400">
+      <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></span>{t("timeline_assigned")}</span>
+      <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-400 mr-1"></span>{t("timeline_unassigned")}</span>
+    </div>
+    <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">{t("timeline_explanation")}</p>
     {#if viewMode === "list"}
-      <div class="flex flex-wrap gap-x-4 gap-y-1 mb-3 text-xs text-gray-500 dark:text-gray-400">
-        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></span>{t("timeline_assigned")}</span>
-        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-400 mr-1"></span>{t("timeline_unassigned")}</span>
-      </div>
-      <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">{t("timeline_explanation")}</p>
       <div class="space-y-3">
         {#each displayVideos as video (video.video_id)}
           <VideoCard
@@ -344,7 +344,7 @@
         {#each displayVideos as video (video.video_id)}
           <VideoGridCard
             {video}
-            linkedMoveCount={videoMoves[video.video_id]?.length ?? 0}
+            linkedMoves={videoMoves[video.video_id] ?? []}
           />
         {/each}
       </div>
