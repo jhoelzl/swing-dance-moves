@@ -17,6 +17,7 @@
 
   let links = $state<VideoMoveLink[]>([]);
   let linksError = $state(false);
+  let linksLoading = $state(true);
   let viewMode = $state<"list" | "grid">("list");
   const festivals = $derived(buildFestivalOverviews($tagGroups, $allMoves, $allVideos, links));
   const videoMoves = $derived(groupTimelineMoves(links, $allMoves));
@@ -35,11 +36,14 @@
 
   async function loadLinks() {
     linksError = false;
+    linksLoading = true;
     try {
       links = await getAllVideoMoveLinks();
     } catch (error) {
       console.error("Failed to load video-move links:", error);
       linksError = true;
+    } finally {
+      linksLoading = false;
     }
   }
 
@@ -79,13 +83,11 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{selected.classes.length} {t("festival_classes")}</p>
     <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{t("festival_inferred")}</p>
     <div class="mt-3"><ViewModeToggle bind:viewMode /></div>
-    {#if viewMode === "list"}
-      <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></span>{t("timeline_assigned")}</span>
-        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-400 mr-1"></span>{t("timeline_unassigned")}</span>
-      </div>
-      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{t("timeline_explanation")}</p>
-    {/if}
+    <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+      <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></span>{t("timeline_assigned")}</span>
+      <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-400 mr-1"></span>{t("timeline_unassigned")}</span>
+    </div>
+    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{t("timeline_explanation")}</p>
   </div>
 
   {#if selected.classes.length === 0}
@@ -99,7 +101,7 @@
   {:else}
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
       {#each selected.classes as festivalClass (festivalClass.video.video_id)}
-        <VideoGridCard video={festivalClass.video} linkedMoveCount={videoMoves[festivalClass.video.video_id]?.length ?? 0} />
+        <VideoGridCard video={festivalClass.video} linkedMoves={linksLoading || linksError ? undefined : (videoMoves[festivalClass.video.video_id] ?? [])} />
       {/each}
     </div>
   {/if}

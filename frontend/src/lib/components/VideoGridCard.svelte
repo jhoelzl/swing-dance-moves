@@ -10,13 +10,15 @@
   import { t } from "#lib/i18n.js";
   import { sortMoveTags } from "#lib/services/moves.js";
   import TagBadge from "./TagBadge.svelte";
+  import VideoTimeline from "./VideoTimeline.svelte";
+  import type { TimelineMove } from "#lib/videoTimeline.js";
 
   interface Props {
     video: Video;
-    linkedMoveCount?: number;
+    linkedMoves?: TimelineMove[];
   }
 
-  let { video, linkedMoveCount = 0 }: Props = $props();
+  let { video, linkedMoves }: Props = $props();
 
   let dropboxPreviewError = $state(false);
   let dropboxPreviewLoaded = $state(false);
@@ -127,25 +129,27 @@
         {/if}
       </div>
 
-      <div
-        class="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold bg-green-500/90 text-white"
-      >
-        <svg
-          class="w-3 h-3"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
+      {#if linkedMoves}
+        <div
+          class="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold bg-green-500/90 text-white"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M13 10V3L4 14h7v7l9-11h-7z"
-          />
-        </svg>
-        {linkedMoveCount}
-      </div>
+          <svg
+            class="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
+          </svg>
+          {linkedMoves.length}
+        </div>
+      {/if}
 
       <div class="absolute inset-x-0 bottom-0 p-3">
         <p
@@ -156,6 +160,12 @@
       </div>
     </div>
   </a>
+
+  {#if linkedMoves}
+    <div class="p-2.5">
+      <VideoTimeline {video} moves={linkedMoves} expanded={false} canPlay={false} compact />
+    </div>
+  {/if}
 
   {#if video.tags?.length || $isAdmin}
     <div class="flex items-start justify-between gap-2 p-2.5">
