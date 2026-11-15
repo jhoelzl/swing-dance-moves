@@ -38,6 +38,7 @@
     { path: "/", key: "nav_moves", icon: "▦" },
     { path: "/random", key: "nav_random", icon: "↝" },
     { path: "/videos", key: "nav_videos", icon: "▷" },
+    { path: "/festivals", key: "nav_festivals", icon: "♫" },
     { path: "/tags", key: "nav_tags", icon: "◇" },
     { path: "/sessions", key: "nav_sessions", icon: "▤" },
     { path: "/calendar", key: "nav_calendar", icon: "▣" },
