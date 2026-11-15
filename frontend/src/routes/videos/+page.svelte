@@ -4,11 +4,12 @@
   import { page } from "$app/state";
   import { allVideos, allMoves, isLoading, isAdmin, activeTab, tagGroups } from "#lib/stores.js";
   import SkeletonCard from "#lib/components/SkeletonCard.svelte";
-  import { searchVideos, filterVideosByTagPresence, getAllVideoMoveLinks, type VideoMoveLink, type VideoTagFilter } from "#lib/services/videos.js";
+  import { searchVideos, filterVideosByTagPresence, filterVideosByTags, getVideoTagGroups, getAllVideoMoveLinks, type VideoMoveLink, type VideoTagFilter } from "#lib/services/videos.js";
   import { groupTimelineMoves } from "#lib/videoTimeline.js";
   import VideoCard from "#lib/components/VideoCard.svelte";
   import VideoGridCard from "#lib/components/VideoGridCard.svelte";
   import LoadError from "#lib/components/LoadError.svelte";
+  import FilterChips from "#lib/components/FilterChips.svelte";
   import { getAllVideos } from "#lib/services/videos.js";
   import { debounce } from "#lib/utils.js";
   import { readVideoFilters, videoFiltersUrl, type VideoMoveFilter } from "#lib/videoFilters.js";
@@ -22,9 +23,11 @@
 
   let moveFilter = $state<VideoMoveFilter>("all");
   let tagFilter = $state<VideoTagFilter>("all");
+  let selectedTagIds = $state<number[]>([]);
+  const videoTagGroups = $derived(getVideoTagGroups($tagGroups));
   let urlSyncReady = $state(false);
   const activeFilterCount = $derived(
-    Number(moveFilter !== "all") + Number(tagFilter !== "all"),
+    Number(moveFilter !== "all") + Number(tagFilter !== "all") + selectedTagIds.length,
   );
 
   let links = $state<VideoMoveLink[]>([]);
@@ -39,7 +42,8 @@
     } else if (moveFilter === "without-moves") {
       result = result.filter((v) => !videoMoves[v.video_id]?.length);
     }
-    return filterVideosByTagPresence(result, tagFilter, $tagGroups);
+    result = filterVideosByTagPresence(result, tagFilter, $tagGroups);
+    return filterVideosByTags(result, selectedTagIds, videoTagGroups);
   });
 
   function restoreFilters() {
@@ -49,6 +53,7 @@
     debouncedSearch(filters.query);
     moveFilter = filters.moves;
     tagFilter = filters.tags;
+    selectedTagIds = filters.tagIds;
   }
 
   onMount(() => {
@@ -62,7 +67,7 @@
 
   $effect(() => {
     if (!urlSyncReady) return;
-    const filters = { query: searchInputValue, moves: moveFilter, tags: tagFilter };
+    const filters = { query: searchInputValue, moves: moveFilter, tags: tagFilter, tagIds: selectedTagIds };
     const current = new URL(window.location.href);
     const next = videoFiltersUrl(current, filters);
     if (next.href !== current.href) replaceState(next, page.state);
@@ -94,6 +99,13 @@
   function clearFilters() {
     moveFilter = "all";
     tagFilter = "all";
+    selectedTagIds = [];
+  }
+
+  function toggleVideoTag(tagId: number) {
+    selectedTagIds = selectedTagIds.includes(tagId)
+      ? selectedTagIds.filter((id) => id !== tagId)
+      : [...selectedTagIds, tagId];
   }
 
   async function handleVideoDeleted() {
@@ -332,6 +344,9 @@
         >
           {t("missing_tags")}
         </button>
+      </div>
+      <div class="mt-5">
+        <FilterChips tagGroups={videoTagGroups} searchable {selectedTagIds} ontoggle={toggleVideoTag} />
       </div>
     </div>
   {/if}

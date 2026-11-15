@@ -8,9 +8,11 @@
   interface Props {
     tagGroups: TagGroup[];
     searchable?: boolean;
+    selectedTagIds?: number[];
+    ontoggle?: (tagId: number) => void;
   }
 
-  let { tagGroups, searchable = false }: Props = $props();
+  let { tagGroups, searchable = false, selectedTagIds, ontoggle }: Props = $props();
   let tagSearch = $state("");
   let visibleGroups = $derived(searchTagGroups(tagGroups, tagSearch));
 </script>
@@ -38,9 +40,9 @@
       <div class="flex flex-wrap gap-2">
         {#each group.tags as tag}
           {@const colors = getTagColors(tag.tag_label)}
-          {@const isActive = $activeFilters.includes(tag.tag_id)}
+          {@const isActive = (selectedTagIds ?? $activeFilters).includes(tag.tag_id)}
           <button
-            onclick={() => toggleFilter(tag.tag_id)}
+            onclick={() => ontoggle ? ontoggle(tag.tag_id) : toggleFilter(tag.tag_id)}
             aria-pressed={isActive}
             class="inline-flex min-h-11 items-center rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer border
 						{isActive

@@ -2,6 +2,7 @@
   import type { TagGroup, VideoFormData } from "#lib/types.js";
   import { resolve } from "$app/paths";
   import { t } from "#lib/i18n.js";
+  import { getVideoTagGroups } from "#lib/services/videos.js";
 
   interface Props {
     formData: VideoFormData;
@@ -15,12 +16,7 @@
 
   let derivedFormData = $derived(formData);
   let localData = $state<VideoFormData>({ ...$state.snapshot(formData) });
-  const videoTagGroups = $derived(
-    tagGroups.filter((group) => {
-      const name = group.tagType.tag_type_name.trim().toLowerCase();
-      return name === "festivals" || name === "festival / classes" || name === "teachers";
-    }),
-  );
+  const videoTagGroups = $derived(getVideoTagGroups(tagGroups));
 
   // Keep in sync when formData changes
   $effect(() => {
