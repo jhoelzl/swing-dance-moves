@@ -5,9 +5,11 @@
     getVideoSourceType,
     getDropboxDirectUrl,
   } from "#lib/utils.js";
-  import { isAdmin } from "#lib/stores.js";
+  import { isAdmin, tagDisplayOrder } from "#lib/stores.js";
   import { resolve } from "$app/paths";
   import { t } from "#lib/i18n.js";
+  import { sortMoveTags } from "#lib/services/moves.js";
+  import TagBadge from "./TagBadge.svelte";
 
   interface Props {
     video: Video;
@@ -155,12 +157,19 @@
     </div>
   </a>
 
-  {#if $isAdmin}
+  {#if video.tags?.length || $isAdmin}
+    <div class="flex items-start justify-between gap-2 p-2.5">
+      <div class="flex flex-wrap gap-1.5 min-w-0">
+        {#each sortMoveTags(video.tags ?? [], $tagDisplayOrder) as tag (tag.tag_id)}
+          <TagBadge {tag} small />
+        {/each}
+      </div>
+      {#if $isAdmin}
     <a
       href={resolve("/videos/edit/[id]", {
         id: String(video.video_id),
       })}
-      class="absolute bottom-2 right-2 p-1.5 rounded-md text-white/90 bg-black/45 hover:bg-black/60 transition-colors"
+      class="shrink-0 p-1.5 rounded-md text-gray-400 hover:text-green-700 hover:bg-green-50 dark:text-gray-500 dark:hover:text-green-300 dark:hover:bg-green-950/30 transition-colors"
       title={t("edit_video")}
       aria-label="{t('edit_video')}: {video.title}"
     >
@@ -179,5 +188,7 @@
         />
       </svg>
     </a>
+      {/if}
+    </div>
   {/if}
 </div>
