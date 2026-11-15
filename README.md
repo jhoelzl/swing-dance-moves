@@ -16,7 +16,7 @@ A **Progressive Web App (PWA)** for browsing, filtering, and discovering swing d
 - **"Out of moves!" button** — get 2 random moves matching your current filters
 - **Video (Youtube/Dropbox) filter** — filter for moves that have a linked video
 - **Video timelines** — list cards show timestamped move assignments in green and unassigned time in red, with dividers between adjacent assigned sections. Hover or tap an assigned segment to play it or view its moves. Expanded cards show a chronological chapter list with playback and move details, including moves without valid timestamps. Red does not necessarily mean a move is missing. Incomplete timestamps are flagged; duration is fetched from YouTube or Dropbox as cards come into view and may be unavailable for restricted or unsupported videos.
-- **Bookmarkable filters** — filter state is synced to the URL (`?tags=1,2&q=search&video=1`)
+- **Bookmarkable filters** — move and video search and filter state is synced to the URL and restored on refresh.
 - **Dark mode** — toggle or auto-detect from system preference, persisted in localStorage
 - **Reload app** — refresh the current page from the header, including in the installed app
 - **PWA / installable** — works offline, installable on iOS and Android home screens
