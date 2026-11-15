@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildFestivalOverviews } from './festivals.js';
+import { buildFestivalOverviews, festivalSelectionUrl, selectFestival } from './festivals.js';
 import type { Move, Tag, TagGroup, Video } from './types.js';
 import type { VideoMoveLink } from './services/videos.js';
 
@@ -30,6 +30,31 @@ describe('buildFestivalOverviews', () => {
 		expect(result[0].classes).toEqual([{ video: video(1), moves: moves.slice(0, 2), teachers: [teacher] }]);
 		expect(result[0].unassignedMoves).toEqual([moves[2]]);
 		expect(result[1].classes).toEqual([]);
+	});
+
+	describe('festival URL selection', () => {
+		it('restores a selected festival from a bookmarked URL and preserves other URL parts', () => {
+			const festivals = buildFestivalOverviews(groups, [], [], []);
+			const original = new URL('https://example.com/app/festivals?other=1#section');
+			const selectedUrl = festivalSelectionUrl(original.href, '2');
+			expect(original.searchParams.has('festival')).toBe(false);
+			expect(selectedUrl.pathname).toBe('/app/festivals');
+			expect(selectedUrl.searchParams.get('other')).toBe('1');
+			expect(selectedUrl.hash).toBe('#section');
+			expect(selectFestival(festivals, new URL(selectedUrl.href).searchParams.get('festival'))?.festival).toEqual(festivalB);
+			expect(selectFestival(festivals, original.searchParams.get('festival'))?.festival).toEqual(festivalA);
+			const changedUrl = festivalSelectionUrl(selectedUrl.href, '1');
+			expect(changedUrl.searchParams.getAll('festival')).toEqual(['1']);
+			expect(selectFestival(festivals, changedUrl.searchParams.get('festival'))?.festival).toEqual(festivalA);
+			expect(selectFestival(festivals, selectedUrl.searchParams.get('festival'))?.festival).toEqual(festivalB);
+		});
+
+		it('does not silently select a different festival for an invalid or removed ID', () => {
+			const festivals = buildFestivalOverviews(groups, [], [], []);
+			expect(selectFestival(festivals, '99')).toBeUndefined();
+			expect(selectFestival(festivals, '')).toBeUndefined();
+			expect(selectFestival([], '1')).toBeUndefined();
+		});
 	});
 
 	it('flags videos linked to multiple festivals without presenting them as classes', () => {

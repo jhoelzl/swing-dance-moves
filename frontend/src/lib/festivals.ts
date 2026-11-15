@@ -14,6 +14,16 @@ interface FestivalOverview {
 	unassignedMoves: Move[];
 }
 
+export function selectFestival(festivals: FestivalOverview[], id: string | null): FestivalOverview | undefined {
+	return id === null ? festivals[0] : festivals.find((item) => String(item.festival.tag_id) === id);
+}
+
+export function festivalSelectionUrl(url: string, festivalId: string): URL {
+	const next = new URL(url);
+	next.searchParams.set('festival', festivalId);
+	return next;
+}
+
 export function buildFestivalOverviews(
 	groups: TagGroup[],
 	moves: Move[],
