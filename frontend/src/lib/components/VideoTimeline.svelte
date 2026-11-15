@@ -104,7 +104,7 @@
       {#each timeline.ranges as range, index}
         <button
           type="button"
-          class="min-w-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gray-900 dark:focus-visible:outline-white {range.moves.length ? 'bg-green-500 hover:bg-green-600 dark:bg-green-600' : 'bg-red-400 hover:bg-red-500 dark:bg-red-500'} {index > 0 && range.moves.length && timeline.ranges[index - 1].moves.length ? 'shadow-[inset_2px_0_0_#052e16]' : ''}"
+          class="group flex min-w-0 items-center cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gray-900 dark:focus-visible:outline-white"
           style:flex-grow={range.end - range.start}
           style:flex-basis="0%"
           aria-label={rangeLabel(range)}
@@ -115,7 +115,12 @@
           }}
           onfocus={() => selectRange(range)}
           onclick={() => selectRange(range)}
-        ></button>
+        >
+          <span
+            aria-hidden="true"
+            class="block w-full {compact ? 'h-3' : 'h-full'} {compact && index === 0 ? 'rounded-l-lg' : ''} {compact && index === timeline.ranges.length - 1 ? 'rounded-r-lg' : ''} {range.moves.length ? 'bg-green-500 group-hover:bg-green-600 dark:bg-green-600' : 'bg-red-400 group-hover:bg-red-500 dark:bg-red-500'} {index > 0 && range.moves.length && timeline.ranges[index - 1].moves.length ? 'shadow-[inset_2px_0_0_#052e16]' : ''}"
+          ></span>
+        </button>
       {/each}
     </div>
     <div class="flex justify-between mt-1 text-[11px] tabular-nums text-gray-400 dark:text-gray-500">
