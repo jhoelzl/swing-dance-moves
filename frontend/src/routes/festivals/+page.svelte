@@ -4,6 +4,8 @@
   import { buildFestivalOverviews } from "#lib/festivals.js";
   import { getAllVideoMoveLinks, type VideoMoveLink } from "#lib/services/videos.js";
   import TagBadge from "#lib/components/TagBadge.svelte";
+  import VideoTimeline from "#lib/components/VideoTimeline.svelte";
+  import { groupTimelineMoves } from "#lib/videoTimeline.js";
   import { t } from "#lib/i18n.js";
 
   let links = $state<VideoMoveLink[]>([]);
@@ -11,6 +13,7 @@
   let linksError = $state(false);
   let selectedId = $state("");
   const festivals = $derived(buildFestivalOverviews($tagGroups, $allMoves, $allVideos, links));
+  const videoMoves = $derived(groupTimelineMoves(links, $allMoves));
   const selected = $derived(festivals.find((item) => String(item.festival.tag_id) === selectedId) ?? festivals[0]);
 
   async function loadLinks() {
@@ -59,6 +62,11 @@
     <h2 class="text-xl font-bold text-gray-900 dark:text-white">{selected.festival.tag_name}</h2>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{selected.classes.length} {t("festival_classes")}</p>
     <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{t("festival_inferred")}</p>
+    <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+      <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></span>{t("timeline_assigned")}</span>
+      <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-400 mr-1"></span>{t("timeline_unassigned")}</span>
+    </div>
+    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{t("timeline_explanation")}</p>
   </div>
 
   {#if selected.ambiguousVideos.length}
@@ -78,6 +86,9 @@
         <div class="flex flex-wrap justify-between items-start gap-3">
           <h3 class="font-bold text-gray-900 dark:text-white">{festivalClass.video.title}</h3>
           <a href={festivalClass.video.url} target="_blank" rel="noopener noreferrer" class="text-sm font-semibold text-green-700 dark:text-green-400 underline">▶ {t("festival_watch")}</a>
+        </div>
+        <div class="mt-4">
+          <VideoTimeline video={festivalClass.video} moves={videoMoves[festivalClass.video.video_id] ?? []} expanded={false} canPlay={false} />
         </div>
         <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("festival_teachers")}</p>
         <div class="flex flex-wrap gap-1.5 mt-2">

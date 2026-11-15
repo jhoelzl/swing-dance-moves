@@ -3,7 +3,7 @@
   import { allVideos, allMoves, isLoading, isAdmin, activeTab } from "#lib/stores.js";
   import SkeletonCard from "#lib/components/SkeletonCard.svelte";
   import { searchVideos, getAllVideoMoveLinks, type VideoMoveLink } from "#lib/services/videos.js";
-  import type { TimelineMove } from "#lib/videoTimeline.js";
+  import { groupTimelineMoves } from "#lib/videoTimeline.js";
   import VideoCard from "#lib/components/VideoCard.svelte";
   import VideoGridCard from "#lib/components/VideoGridCard.svelte";
   import { getAllVideos } from "#lib/services/videos.js";
@@ -22,17 +22,7 @@
   let links = $state<VideoMoveLink[]>([]);
   let linksLoading = $state(true);
   let linksError = $state(false);
-  const videoMoves = $derived.by(() => {
-    const names = new Map($allMoves.map((move) => [move.move_id, move.name]));
-    const byVideo: Record<number, TimelineMove[]> = {};
-    for (const link of links) {
-      (byVideo[link.video_id] ??= []).push({
-        ...link,
-        move_name: names.get(link.move_id) ?? `#${link.move_id}`,
-      });
-    }
-    return byVideo;
-  });
+  const videoMoves = $derived(groupTimelineMoves(links, $allMoves));
 
   const displayVideos = $derived.by(() => {
     let result = searchVideos($allVideos, searchQuery);
