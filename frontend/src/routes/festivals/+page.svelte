@@ -4,7 +4,7 @@
   import { buildFestivalOverviews } from "#lib/festivals.js";
   import { getAllVideoMoveLinks, type VideoMoveLink } from "#lib/services/videos.js";
   import TagBadge from "#lib/components/TagBadge.svelte";
-  import VideoTimeline from "#lib/components/VideoTimeline.svelte";
+  import FestivalClassCard from "#lib/components/FestivalClassCard.svelte";
   import { groupTimelineMoves } from "#lib/videoTimeline.js";
   import { t } from "#lib/i18n.js";
 
@@ -82,34 +82,7 @@
 
   <div class="space-y-4">
     {#each selected.classes as festivalClass (festivalClass.video.video_id)}
-      <article class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
-        <div class="flex flex-wrap justify-between items-start gap-3">
-          <h3 class="font-bold text-gray-900 dark:text-white">{festivalClass.video.title}</h3>
-          <a href={festivalClass.video.url} target="_blank" rel="noopener noreferrer" class="text-sm font-semibold text-green-700 dark:text-green-400 underline">▶ {t("festival_watch")}</a>
-        </div>
-        <div class="mt-4">
-          <VideoTimeline video={festivalClass.video} moves={videoMoves[festivalClass.video.video_id] ?? []} expanded={false} canPlay={false} />
-        </div>
-        <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("festival_teachers")}</p>
-        <div class="flex flex-wrap gap-1.5 mt-2">
-          {#each festivalClass.teachers as teacher (teacher.tag_id)}
-            <TagBadge tag={teacher} small />
-          {:else}
-            <span class="text-sm text-gray-500">{t("festival_no_teachers")}</span>
-          {/each}
-        </div>
-        <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("move_plural")}</p>
-        <ul class="mt-2 space-y-3">
-          {#each festivalClass.moves as move (move.move_id)}
-            <li>
-              <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{move.name}</span>
-              <div class="flex flex-wrap gap-1.5 mt-1">
-                {#each move.tags ?? [] as tag (tag.tag_id)}<TagBadge {tag} small />{/each}
-              </div>
-            </li>
-          {/each}
-        </ul>
-      </article>
+      <FestivalClassCard video={festivalClass.video} moves={festivalClass.moves} teachers={festivalClass.teachers} timelineMoves={videoMoves[festivalClass.video.video_id] ?? []} />
     {:else}
       <p class="text-sm text-gray-500 dark:text-gray-400">{t("festival_no_classes")}</p>
     {/each}

@@ -31,7 +31,15 @@ function parseTime(value: string | null): number | null {
 	if (!value) return null;
 	const text = value.trim();
 	if (!/^\d+(?::[0-5]\d){0,2}$/.test(text)) return null;
-	return text.split(':').reduce((seconds, part) => seconds * 60 + Number(part), 0);
+	const seconds = text.split(':').reduce((total, part) => total * 60 + Number(part), 0);
+	return Number.isSafeInteger(seconds) ? seconds : null;
+}
+
+export function getMovePlayback(move: TimelineMove): { start: number; end: number | null } | null {
+	const start = parseTime(move.start_time);
+	if (start === null) return null;
+	const end = parseTime(move.end_time);
+	return { start, end: end !== null && end > start ? end : null };
 }
 
 export function getMoveInterval(move: TimelineMove, duration: number | null): { start: number; end: number } | null {
@@ -59,7 +67,7 @@ export function youtubeEmbedUrl(id: string, start: number, end: number | null, a
 	if (start > 0) params.set('start', String(start));
 	if (end !== null) params.set('end', String(end));
 	if (autoplay) params.set('autoplay', '1');
-	if (autoplay && end !== null) params.set('playsinline', '1');
+	if (autoplay) params.set('playsinline', '1');
 	const query = params.toString();
 	return `https://www.youtube.com/embed/${id}${query ? `?${query}` : ''}`;
 }

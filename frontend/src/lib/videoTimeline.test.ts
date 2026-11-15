@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildVideoTimeline, formatVideoTime, getMoveInterval, groupTimelineMoves, sortTimelineMoves, youtubeEmbedUrl, type TimelineMove } from './videoTimeline.js';
+import { buildVideoTimeline, formatVideoTime, getMoveInterval, getMovePlayback, groupTimelineMoves, sortTimelineMoves, youtubeEmbedUrl, type TimelineMove } from './videoTimeline.js';
 import type { Move } from './types.js';
 
 const move = (id: number, start_time: string | null, end_time: string | null): TimelineMove =>
@@ -27,6 +27,13 @@ describe('groupTimelineMoves', () => {
 });
 
 describe('buildVideoTimeline', () => {
+	it('uses a move start even when the end is missing or invalid, and rejects invalid starts', () => {
+		expect(getMovePlayback(move(1, '1:05', '1:20'))).toEqual({ start: 65, end: 80 });
+		expect(getMovePlayback(move(2, '0:00', null))).toEqual({ start: 0, end: null });
+		expect(getMovePlayback(move(3, '0:15', '0:10'))).toEqual({ start: 15, end: null });
+		expect(getMovePlayback(move(4, null, '0:20'))).toBeNull();
+		expect(getMovePlayback(move(5, 'bad', '0:20'))).toBeNull();
+	});
 	it('covers the entire duration, including gaps and overlapping assignments', () => {
 		const a = move(1, '0:10', '0:40');
 		const b = move(2, '0:30', '1:00');
@@ -81,6 +88,13 @@ describe('buildVideoTimeline', () => {
 		it('does not retain an end boundary when playing the full video', () => {
 			const url = new URL(youtubeEmbedUrl('M7lc1UVf-VE', 0, null, false));
 			expect(url.search).toBe('');
+		});
+
+		it('keeps start-only playback inline on mobile', () => {
+			const url = new URL(youtubeEmbedUrl('M7lc1UVf-VE', 65, null, true));
+			expect(url.searchParams.get('start')).toBe('65');
+			expect(url.searchParams.get('end')).toBeNull();
+			expect(url.searchParams.get('playsinline')).toBe('1');
 		});
 	});
 
