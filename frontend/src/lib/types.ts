@@ -42,6 +42,7 @@ export interface Video {
 	url: string;
 	description: string | null;
 	created_at: string;
+	duration_seconds?: number | null;
 	// Joined fields
 	tags?: Tag[];
 }
@@ -168,6 +169,7 @@ interface DbVideoRow {
 	url: string;
 	description: string | null;
 	created_at: string;
+	duration_seconds: number | null;
 }
 
 interface DbMoveToVideoRow {
@@ -223,7 +225,7 @@ export interface Database {
 			};
 			videos: {
 				Row: DbVideoRow;
-				Insert: Omit<DbVideoRow, 'video_id' | 'created_at'> & { video_id?: number; created_at?: string };
+				Insert: Omit<DbVideoRow, 'video_id' | 'created_at' | 'duration_seconds'> & { video_id?: number; created_at?: string; duration_seconds?: number | null };
 				Update: Partial<Omit<DbVideoRow, 'video_id' | 'created_at'>>;
 				Relationships: [];
 			};
