@@ -2,6 +2,8 @@
   import { tick } from "svelte";
   import type { Move, Tag, Video } from "#lib/types.js";
   import { extractYouTubeId, getDropboxDirectUrl } from "#lib/utils.js";
+  import { tagDisplayOrder } from "#lib/stores.js";
+  import { sortMoveTags } from "#lib/services/moves.js";
   import { getMovePlayback, youtubeEmbedUrl, type TimelineMove } from "#lib/videoTimeline.js";
   import { t } from "#lib/i18n.js";
   import TagBadge from "./TagBadge.svelte";
@@ -158,7 +160,7 @@
           <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">{canPlay ? t("timeline_timing_unavailable") : t("festival_inline_unavailable")}</span>
         {/if}
         <div class="flex flex-wrap gap-1.5 mt-1">
-          {#each move.tags ?? [] as tag (tag.tag_id)}<TagBadge {tag} small />{/each}
+          {#each sortMoveTags(move.tags ?? [], $tagDisplayOrder) as tag (tag.tag_id)}<TagBadge {tag} small />{/each}
         </div>
       </li>
     {/each}

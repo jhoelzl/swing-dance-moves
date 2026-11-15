@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { allMoves, allVideos, isLoading, tagGroups } from "#lib/stores.js";
+  import { allMoves, allVideos, isLoading, tagGroups, tagDisplayOrder } from "#lib/stores.js";
   import { buildFestivalOverviews } from "#lib/festivals.js";
+  import { sortMoveTags } from "#lib/services/moves.js";
   import { getAllVideoMoveLinks, type VideoMoveLink } from "#lib/services/videos.js";
   import TagBadge from "#lib/components/TagBadge.svelte";
   import FestivalClassCard from "#lib/components/FestivalClassCard.svelte";
@@ -96,7 +97,7 @@
           <li>
             <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{move.name}</span>
             <div class="flex flex-wrap gap-1.5 mt-1">
-              {#each move.tags ?? [] as tag (tag.tag_id)}<TagBadge {tag} small />{/each}
+              {#each sortMoveTags(move.tags ?? [], $tagDisplayOrder) as tag (tag.tag_id)}<TagBadge {tag} small />{/each}
             </div>
           </li>
         {/each}
