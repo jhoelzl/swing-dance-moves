@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { allVideos, allMoves, isLoading, isAdmin, activeTab } from "#lib/stores.js";
   import SkeletonCard from "#lib/components/SkeletonCard.svelte";
-  import { searchVideos, getAllVideoMoveLinks, type VideoMoveLink } from "#lib/services/videos.js";
+  import { searchVideos, filterVideosByTagPresence, getAllVideoMoveLinks, type VideoMoveLink, type VideoTagFilter } from "#lib/services/videos.js";
   import { groupTimelineMoves } from "#lib/videoTimeline.js";
   import VideoCard from "#lib/components/VideoCard.svelte";
   import VideoGridCard from "#lib/components/VideoGridCard.svelte";
@@ -19,6 +19,10 @@
 
   // Filter: 'all' | 'with-moves' | 'without-moves'
   let moveFilter = $state<"all" | "with-moves" | "without-moves">("all");
+  let tagFilter = $state<VideoTagFilter>("all");
+  const activeFilterCount = $derived(
+    Number(moveFilter !== "all") + Number(tagFilter !== "all"),
+  );
 
   let links = $state<VideoMoveLink[]>([]);
   let linksLoading = $state(true);
@@ -32,7 +36,7 @@
     } else if (moveFilter === "without-moves") {
       result = result.filter((v) => !videoMoves[v.video_id]?.length);
     }
-    return result;
+    return filterVideosByTagPresence(result, tagFilter);
   });
 
   onMount(async () => {
@@ -65,6 +69,7 @@
 
   function clearFilters() {
     moveFilter = "all";
+    tagFilter = "all";
   }
 
   async function handleVideoDeleted() {
@@ -135,16 +140,16 @@
           />
         </svg>
         {t("filter")}
-        {#if moveFilter !== "all"}
+        {#if activeFilterCount > 0}
           <span
             class="inline-flex items-center justify-center w-5 h-5 text-[11px] font-bold bg-blue-500 text-white rounded-full"
           >
-            1
+            {activeFilterCount}
           </span>
         {/if}
       </button>
 
-      {#if moveFilter !== "all"}
+      {#if activeFilterCount > 0}
         <button
           onclick={clearFilters}
           class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
@@ -287,6 +292,21 @@
             />
           </svg>
           {t("without_moves")}
+        </button>
+      </div>
+      <h3 class="mt-5 text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">
+        {t("nav_tags")}
+      </h3>
+      <div class="flex flex-wrap gap-2">
+        <button
+          onclick={() => (tagFilter = tagFilter === "without-tags" ? "all" : "without-tags")}
+          aria-pressed={tagFilter === "without-tags"}
+          class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border
+          {tagFilter === 'without-tags'
+            ? 'bg-purple-500 dark:bg-purple-600 text-white border-transparent shadow-sm'
+            : 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 hover:shadow-sm'}"
+        >
+          {t("without_tags")}
         </button>
       </div>
     </div>

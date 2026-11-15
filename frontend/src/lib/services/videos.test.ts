@@ -9,7 +9,7 @@ vi.mock('#lib/supabase.js', () => ({
 }));
 
 import type { Video } from '#lib/types.js';
-import { getAllVideoMoveLinks, searchVideos } from '#lib/services/videos.js';
+import { filterVideosByTagPresence, getAllVideoMoveLinks, searchVideos } from '#lib/services/videos.js';
 
 const videos: Video[] = [
 	{
@@ -31,6 +31,16 @@ const videos: Video[] = [
 describe('searchVideos', () => {
 	it('returns all videos for an empty query', () => {
 		expect(searchVideos(videos, '   ')).toEqual(videos);
+	});
+
+	it('filters videos that have no assigned tags', () => {
+		const taggedVideos = [
+			{ ...videos[0], tags: [{ tag_id: 1, tag_type_id: 1, tag_name: 'Festival', tag_label: '', tag_css: '', tag_sort: 0 }] },
+			{ ...videos[1], tags: [] }
+		];
+		expect(filterVideosByTagPresence(taggedVideos, 'without-tags')).toEqual([taggedVideos[1]]);
+		expect(filterVideosByTagPresence([videos[0], taggedVideos[0]], 'without-tags')).toEqual([videos[0]]);
+		expect(filterVideosByTagPresence(taggedVideos, 'all')).toBe(taggedVideos);
 	});
 
 	describe('getAllVideoMoveLinks', () => {
