@@ -95,6 +95,14 @@ CREATE TABLE IF NOT EXISTS videos (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- N:M junction table: videos <-> tags
+CREATE TABLE IF NOT EXISTS videos_to_tags (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    video_id integer NOT NULL REFERENCES videos(video_id) ON DELETE CASCADE,
+    tag_id integer NOT NULL REFERENCES tags(tag_id) ON DELETE CASCADE,
+    UNIQUE(video_id, tag_id)
+);
+
 -- N:M junction table: moves <-> videos (with optional time markers)
 CREATE TABLE IF NOT EXISTS moves_to_videos (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -212,6 +220,8 @@ CREATE INDEX IF NOT EXISTS idx_moves_to_tags_move_id ON moves_to_tags(move_id);
 CREATE INDEX IF NOT EXISTS idx_moves_to_tags_tag_id ON moves_to_tags(tag_id);
 CREATE INDEX IF NOT EXISTS idx_moves_to_videos_move_id ON moves_to_videos(move_id);
 CREATE INDEX IF NOT EXISTS idx_moves_to_videos_video_id ON moves_to_videos(video_id);
+CREATE INDEX IF NOT EXISTS idx_videos_to_tags_video_id ON videos_to_tags(video_id);
+CREATE INDEX IF NOT EXISTS idx_videos_to_tags_tag_id ON videos_to_tags(tag_id);
 CREATE INDEX IF NOT EXISTS idx_user_settings_user_id ON user_settings(user_id);
 CREATE INDEX IF NOT EXISTS idx_training_sessions_date ON training_sessions(session_date);
 CREATE INDEX IF NOT EXISTS idx_session_to_moves_session_id ON session_to_moves(session_id);
@@ -247,6 +257,7 @@ ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE moves ENABLE ROW LEVEL SECURITY;
 ALTER TABLE moves_to_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE videos_to_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE moves_to_videos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
 
@@ -279,6 +290,12 @@ CREATE POLICY "Allow authenticated read videos" ON videos FOR SELECT TO authenti
 CREATE POLICY "Allow authenticated insert videos" ON videos FOR INSERT TO authenticated WITH CHECK (true);
 CREATE POLICY "Allow authenticated update videos" ON videos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "Allow authenticated delete videos" ON videos FOR DELETE TO authenticated USING (true);
+
+-- videos_to_tags: authenticated read/write
+CREATE POLICY "Allow authenticated read videos_to_tags" ON videos_to_tags FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Allow authenticated insert videos_to_tags" ON videos_to_tags FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Allow authenticated update videos_to_tags" ON videos_to_tags FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated delete videos_to_tags" ON videos_to_tags FOR DELETE TO authenticated USING (true);
 
 -- moves_to_videos: authenticated read/write
 CREATE POLICY "Allow authenticated read moves_to_videos" ON moves_to_videos FOR SELECT TO authenticated USING (true);

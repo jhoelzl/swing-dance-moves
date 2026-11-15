@@ -16,20 +16,35 @@ const groups: TagGroup[] = [
 const move = (id: number, tags: Tag[]): Move => ({
 	move_id: id, name: `Move ${id}`, synonyms: null, description: null, learned_on: null, tags
 });
-const video = (id: number): Video => ({
-	video_id: id, title: `Class ${id}`, url: 'https://example.com', description: null, created_at: ''
+const video = (id: number, tags: Tag[] = []): Video => ({
+	video_id: id, title: `Class ${id}`, url: 'https://example.com', description: null, created_at: '', tags
 });
 const link = (id: number, moveId: number, videoId: number): VideoMoveLink => ({
 	id, move_id: moveId, video_id: videoId, start_time: null, end_time: null
 });
 
 describe('buildFestivalOverviews', () => {
-	it('groups videos and their festival-tagged moves, deduplicating teacher tags', () => {
+	it('groups videos by their own festival and teacher tags', () => {
 		const moves = [move(1, [festivalA, teacher]), move(2, [festivalA, teacher]), move(3, [festivalA])];
-		const result = buildFestivalOverviews(groups, moves, [video(1)], [link(1, 1, 1), link(2, 2, 1)]);
-		expect(result[0].classes).toEqual([{ video: video(1), moves: moves.slice(0, 2), teachers: [teacher] }]);
+		const taggedVideo = video(1, [festivalA, teacher]);
+		const result = buildFestivalOverviews(groups, moves, [taggedVideo], [link(1, 1, 1), link(2, 2, 1)]);
+		expect(result[0].classes).toEqual([{ video: taggedVideo, moves: moves.slice(0, 2), teachers: [teacher] }]);
 		expect(result[0].unassignedMoves).toEqual([moves[2]]);
 		expect(result[1].classes).toEqual([]);
+	});
+
+	it('shows a festival-tagged video without any linked moves', () => {
+		const taggedVideo = video(1, [festivalA, teacher]);
+		const result = buildFestivalOverviews(groups, [], [taggedVideo], []);
+		expect(result[0].classes).toEqual([{ video: taggedVideo, moves: [], teachers: [teacher] }]);
+	});
+
+	it('supports the existing Festival / Classes tag group name', () => {
+		const legacyGroups = [
+			{ ...groups[0], tagType: { ...groups[0].tagType, tag_type_name: 'Festival / Classes' } },
+			groups[1]
+		];
+		expect(buildFestivalOverviews(legacyGroups, [], [video(1, [festivalA])], [])[0].classes).toHaveLength(1);
 	});
 
 	describe('festival URL selection', () => {
@@ -57,21 +72,20 @@ describe('buildFestivalOverviews', () => {
 		});
 	});
 
-	it('flags videos linked to multiple festivals without presenting them as classes', () => {
-		const moves = [move(1, [festivalA]), move(2, [festivalB]), move(3, [festivalA, festivalB])];
-		const videos = [video(1), video(2)];
-		const result = buildFestivalOverviews(groups, moves, videos, [link(1, 1, 1), link(2, 2, 1), link(3, 3, 2)]);
-		for (const overview of result) {
-			expect(overview.classes).toEqual([]);
-			expect(overview.ambiguousVideos).toEqual(videos);
-			expect(overview.unassignedMoves.length).toBe(2);
-		}
+	it('shows a video under every festival tag instead of inferring ambiguity from moves', () => {
+		const moves = [move(1, [festivalA]), move(2, [festivalB])];
+		const taggedVideo = video(1, [festivalA, festivalB]);
+		const result = buildFestivalOverviews(groups, moves, [taggedVideo], [link(1, 1, 1), link(2, 2, 1)]);
+		expect(result[0].classes[0].video).toEqual(taggedVideo);
+		expect(result[1].classes[0].video).toEqual(taggedVideo);
+		expect(result[0].classes[0].moves).toEqual([moves[0]]);
+		expect(result[1].classes[0].moves).toEqual([moves[1]]);
 	});
 
-	it('does not infer a class for untagged moves or without a Festivals group', () => {
+	it('does not infer a class without a video festival tag or without a Festivals group', () => {
 		const moves = [move(1, [festivalA]), move(2, [])];
 		const links = [link(1, 1, 1), link(2, 2, 1)];
-		expect(buildFestivalOverviews(groups, moves, [video(1)], links)[0].classes[0].moves).toEqual([moves[0]]);
+		expect(buildFestivalOverviews(groups, moves, [video(1)], links)[0].classes).toEqual([]);
 		expect(buildFestivalOverviews([], moves, [video(1)], links)).toEqual([]);
 	});
 });

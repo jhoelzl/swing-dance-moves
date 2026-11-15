@@ -129,7 +129,7 @@ export function exportMovesAsCsv(moves: Move[]) {
 // ── Full Database Export ──
 
 interface FullExportPayload {
-	version: 3;
+	version: 4;
 	exported_at: string;
 	tag_types: any[];
 	tags: any[];
@@ -137,13 +137,14 @@ interface FullExportPayload {
 	moves_to_tags: any[];
 	videos: any[];
 	moves_to_videos: any[];
+	videos_to_tags: any[];
 	training_sessions: any[];
 	session_to_moves: any[];
 }
 
 /**
  * Export ALL database tables as a single JSON file.
- * Includes: tag_types, tags, moves, moves_to_tags, videos, moves_to_videos,
+ * Includes: tag_types, tags, moves, moves_to_tags, videos, moves_to_videos, videos_to_tags,
  *           training_sessions, session_to_moves
  */
 export async function exportAllData() {
@@ -154,6 +155,7 @@ export async function exportAllData() {
 		movesToTagsRes,
 		videosRes,
 		movesToVideosRes,
+		videosToTagsRes,
 		trainingSessionsRes,
 		sessionToMovesRes
 	] = await Promise.all([
@@ -163,6 +165,7 @@ export async function exportAllData() {
 		supabase.from('moves_to_tags').select('*'),
 		supabase.from('videos').select('*').order('created_at'),
 		supabase.from('moves_to_videos').select('*'),
+		supabase.from('videos_to_tags').select('*'),
 		supabase.from('training_sessions').select('*').order('session_date'),
 		supabase.from('session_to_moves').select('*')
 	]);
@@ -175,6 +178,7 @@ export async function exportAllData() {
 		movesToTagsRes,
 		videosRes,
 		movesToVideosRes,
+		videosToTagsRes,
 		trainingSessionsRes,
 		sessionToMovesRes
 	]) {
@@ -182,7 +186,7 @@ export async function exportAllData() {
 	}
 
 	const payload: FullExportPayload = {
-		version: 3,
+		version: 4,
 		exported_at: new Date().toISOString(),
 		tag_types: tagTypesRes.data ?? [],
 		tags: tagsRes.data ?? [],
@@ -190,6 +194,7 @@ export async function exportAllData() {
 		moves_to_tags: movesToTagsRes.data ?? [],
 		videos: videosRes.data ?? [],
 		moves_to_videos: movesToVideosRes.data ?? [],
+		videos_to_tags: videosToTagsRes.data ?? [],
 		training_sessions: trainingSessionsRes.data ?? [],
 		session_to_moves: sessionToMovesRes.data ?? []
 	};

@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
-  import { isAdmin, allVideos, activeTab, addToast } from "#lib/stores.js";
+  import { isAdmin, allVideos, activeTab, addToast, tagGroups } from "#lib/stores.js";
   import { createVideo, getAllVideos } from "#lib/services/videos.js";
   import type { VideoFormData } from "#lib/types.js";
   import VideoForm from "#lib/components/VideoForm.svelte";
@@ -15,6 +15,7 @@
     title: "",
     url: "",
     description: "",
+    tagIds: [],
   });
 
   onMount(() => {
@@ -58,6 +59,7 @@
 
     <VideoForm
       {formData}
+      tagGroups={$tagGroups}
       onsubmit={handleSubmit}
       {loading}
       title={t("new_video_title")}

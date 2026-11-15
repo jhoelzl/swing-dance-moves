@@ -3,7 +3,7 @@
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
-  import { isAdmin, allVideos, activeTab, addToast } from "#lib/stores.js";
+  import { isAdmin, allVideos, activeTab, addToast, tagGroups } from "#lib/stores.js";
   import {
     getVideoById,
     updateVideo,
@@ -23,6 +23,7 @@
     title: "",
     url: "",
     description: "",
+    tagIds: [],
   });
   let videoId = $derived(Number(page.params.id));
   let loaded = $state(false);
@@ -50,6 +51,7 @@
       title: video.title,
       url: video.url,
       description: video.description ?? "",
+      tagIds: video.tags?.map((tag) => tag.tag_id) ?? [],
     };
     loaded = true;
   });
@@ -113,6 +115,7 @@
     {#if loaded}
       <VideoForm
         {formData}
+        tagGroups={$tagGroups}
         onsubmit={handleSubmit}
         {loading}
         title={t("edit_video_title")}
