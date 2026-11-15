@@ -98,13 +98,18 @@
 
   const descriptionSegments = $derived(parseDescription(video.description));
 
-  function seekTo(seconds: number) {
+  async function seekTo(seconds: number) {
     currentEndTime = null;
     pendingStartTime = null;
     // For Dropbox videos, seek directly on the HTML5 video element
     if (isDropbox && videoElement) {
-      videoElement.currentTime = seconds;
-      videoElement.play();
+      try {
+        videoElement.currentTime = seconds;
+        await videoElement.play();
+      } catch (error) {
+        console.error("Failed to seek video:", error);
+        addToast(t("timeline_play_failed"), "error");
+      }
       return;
     }
     // For YouTube, reload iframe with new start time
@@ -184,7 +189,7 @@
 </script>
 
 <div
-  class="move-card rounded-xl bg-white dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/50 overflow-hidden"
+  class="move-card rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden"
 >
   <div class="flex items-start">
   <button
@@ -244,6 +249,7 @@
           {linkedMoves.length}
         </span>
       </div>
+      <span class="mt-2 block text-sm font-medium text-green-700 dark:text-green-400">{isOpen ? t("festival_close_video") : `▶ ${t("festival_watch")}`}</span>
     </div>
 
     <div class="flex items-center gap-2 mt-0.5 shrink-0">
@@ -344,9 +350,10 @@
               {#if seg.type === "timestamp" && (youtubeId || isDropbox)}
                 <button
                   onclick={() => seekTo(seg.seconds!)}
-                  class="inline-flex items-center gap-0.5 font-mono text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded transition-colors cursor-pointer border-none text-sm"
-                  title="Jump to {seg.value}"
-                >{seg.value}</button>
+                  class="inline-flex min-h-11 items-center gap-1 font-mono text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 bg-blue-50 dark:bg-blue-950/40 px-2 rounded transition-colors cursor-pointer border-none text-sm"
+                  aria-label="{t('play_at')} {seg.value}"
+                  title="{t('play_at')} {seg.value}"
+                ><span aria-hidden="true">▶</span>{seg.value}</button>
               {:else}
                 {seg.value}
               {/if}

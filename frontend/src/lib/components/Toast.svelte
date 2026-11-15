@@ -1,5 +1,6 @@
 <script lang="ts">
   import { toasts, removeToast } from "#lib/stores.js";
+  import { t } from "#lib/i18n.js";
 </script>
 
 {#if $toasts.length > 0}
@@ -65,7 +66,8 @@
         <!-- Close button -->
         <button
           onclick={() => removeToast(toast.id)}
-          class="ml-1 p-0.5 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+          aria-label={t("dismiss_notification")}
+          class="ml-1 min-w-11 min-h-11 grid place-items-center rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
         >
           <svg
             class="w-4 h-4"

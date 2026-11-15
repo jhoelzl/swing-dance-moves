@@ -23,6 +23,7 @@
 		"ci": "npm run audit && npm run spellcheck && npm run lint && npm run check && npm run test && npm run build"
 	},
 	"devDependencies": {
+		"@electric-sql/pglite": "^0.5.16",
 		"@capacitor/cli": "^8.6.2",
 		"@eslint/js": "^10.0.1",
 		"@katama-labs/vite-pwa-sveltekit": "^2.0.0",

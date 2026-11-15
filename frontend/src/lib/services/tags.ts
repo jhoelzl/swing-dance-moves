@@ -1,5 +1,5 @@
 import { supabase } from '#lib/supabase.js';
-import type { Tag, TagType } from '#lib/types.js';
+import type { Database, Tag, TagType } from '#lib/types.js';
 
 function createDeleteConstraintError(message: string): Error {
 	const error = new Error(message);
@@ -45,6 +45,13 @@ export async function updateTagType(
 		.single();
 	if (error) throw error;
 	return data as TagType;
+}
+
+export async function moveTagGroup(id: number, direction: -1 | 1): Promise<void> {
+	const args: Database['public']['Functions']['move_tag_group']['Args'] = { p_group_id: id, p_direction: direction };
+	// @ts-expect-error – Supabase's schema generic resolves to never for the existing interface-based row types
+	const { error } = await supabase.rpc('move_tag_group', args);
+	if (error) throw error;
 }
 
 export async function deleteTagType(id: number): Promise<void> {

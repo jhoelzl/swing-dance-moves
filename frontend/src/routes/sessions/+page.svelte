@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import { allMoves, allSessions, activeTab, addToast } from "#lib/stores.js";
   import ConfirmModal from "#lib/components/ConfirmModal.svelte";
+  import SkeletonCard from "#lib/components/SkeletonCard.svelte";
+  import LoadError from "#lib/components/LoadError.svelte";
   import { t } from "#lib/i18n.js";
   import type { Session, Move } from "#lib/types.js";
   import {
@@ -16,6 +18,7 @@
   // ── local state ──────────────────────────────────────────────
   let sessions = $state<Session[]>([]);
   let loading = $state(true);
+  let loadError = $state(false);
 
   // Create-form visibility and data
   let showCreateForm = $state(false);
@@ -120,24 +123,25 @@
   }
 
   // ── lifecycle ─────────────────────────────────────────────────
+  async function loadSessions() {
+    loading = true;
+    loadError = false;
+    try {
+      sessions = await getAllSessions();
+      allSessions.set(sessions);
+      expandSessionFromHash(window.location.hash);
+    } catch (err) {
+      console.error("Failed to load sessions:", err);
+      loadError = true;
+    } finally {
+      loading = false;
+    }
+  }
+
   onMount(() => {
     const handleHashChange = () => expandSessionFromHash(window.location.hash);
     window.addEventListener("hashchange", handleHashChange);
-
-    async function loadSessions() {
-      activeTab.set("sessions");
-      try {
-        sessions = await getAllSessions();
-        allSessions.set(sessions);
-        expandSessionFromHash(window.location.hash);
-      } catch (err) {
-        console.error("Failed to load sessions:", err);
-        addToast(t("session_create_failed"), "error");
-      } finally {
-        loading = false;
-      }
-    }
-
+    activeTab.set("sessions");
     void loadSessions();
 
     return () => {
@@ -307,12 +311,12 @@
     <h2 class="text-xl font-bold text-gray-900 dark:text-white">
       {t("sessions_title")}
     </h2>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+    {#if !loading && !loadError}<p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
       {sessions.length}
       {sessions.length === 1 ? t("session_singular") : t("sessions_plural")}
-    </p>
+    </p>{/if}
   </div>
-  {#if !showCreateForm}
+  {#if !showCreateForm && !loading && !loadError}
     <button
       onclick={() => (showCreateForm = true)}
       class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm cursor-pointer"
@@ -428,18 +432,11 @@
 
 <!-- Loading skeleton -->
 {#if loading}
-  <div class="space-y-3">
-    {#each [1, 2, 3] as _}
-      <div
-        class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 animate-pulse"
-      >
-        <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2"></div>
-        <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/4"></div>
-      </div>
-    {/each}
-  </div>
+  <SkeletonCard count={3} variant="video" />
 
   <!-- Empty state -->
+{:else if loadError}
+  <LoadError message={t("session_load_failed")} retry={loadSessions} />
 {:else if sessions.length === 0}
   <div class="text-center py-20">
     <span class="text-5xl">📅</span>

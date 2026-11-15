@@ -8,6 +8,8 @@
   import { getAllVideoMoveLinks, type VideoMoveLink } from "#lib/services/videos.js";
   import TagBadge from "#lib/components/TagBadge.svelte";
   import FestivalClassCard from "#lib/components/FestivalClassCard.svelte";
+  import SkeletonCard from "#lib/components/SkeletonCard.svelte";
+  import LoadError from "#lib/components/LoadError.svelte";
   import { groupTimelineMoves } from "#lib/videoTimeline.js";
   import { t } from "#lib/i18n.js";
 
@@ -55,12 +57,9 @@
 </div>
 
 {#if $isLoading || linksLoading}
-  <p class="text-sm text-gray-500">{t("festival_loading")}</p>
+  <div role="status" aria-label={t("festival_loading")}><SkeletonCard count={3} variant="video" /></div>
 {:else if linksError}
-  <div role="alert" class="rounded-xl bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-700 dark:text-red-300">
-    <p>{t("video_links_load_failed")}</p>
-    <button class="mt-2 underline cursor-pointer" onclick={loadLinks}>{t("try_again")}</button>
-  </div>
+  <LoadError message={t("video_links_load_failed")} retry={loadLinks} />
 {:else if !festivals.length}
   <p class="text-sm text-gray-500 dark:text-gray-400">{t("festival_none")}</p>
 {:else}

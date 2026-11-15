@@ -6,6 +6,7 @@
     allVideos,
     tagGroups,
     activeFilters,
+    toggleFilter,
     searchQuery,
     isLoading,
     clearFilters,
@@ -34,6 +35,7 @@
   let searchInputValue = $state("");
   let expandMoves = $state(false);
   let urlSyncReady = $state(false);
+  const activeTagNames = $derived(new Map($tagGroups.flatMap((group) => group.tags.map((tag) => [tag.tag_id, tag.tag_name.trim()] as const))));
 
   const sortOptions: { value: SortOrder; label: string; key: string }[] = [
     { value: "a-z", label: "A – Z", key: "" },
@@ -60,7 +62,7 @@
         .map(Number)
         .filter((n) => !isNaN(n) && n > 0);
       if (tagIds.length > 0) {
-        activeFilters.set(tagIds);
+        activeFilters.set([...new Set(tagIds)]);
       }
     }
 
@@ -126,6 +128,12 @@
   function handleSearchInput(e: Event) {
     const target = e.target as HTMLInputElement;
     debouncedSearch(target.value);
+  }
+
+  function resetAllFilters() {
+    searchInputValue = "";
+    debouncedSearch("");
+    clearFilters();
   }
 </script>
 
@@ -210,7 +218,7 @@
 
       {#if $activeFilters.length > 0 || $videoFilter !== "all"}
         <button
-          onclick={clearFilters}
+          onclick={resetAllFilters}
           class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
         >
           {t("reset")}
@@ -221,6 +229,7 @@
     <div class="flex items-center gap-3">
       <select
         onchange={handleSortChange}
+        aria-label={t("sort_moves")}
         value={$sortOrder}
         class="px-3 py-2 text-xs font-medium rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-500 dark:text-gray-400 outline-none cursor-pointer shadow-sm appearance-none pr-7 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239CA3AF%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.168l3.71-3.938a.75.75%200%20111.08%201.04l-4.25%204.5a.75.75%200%2001-1.08%200l-4.25-4.5a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1rem]"
       >
@@ -257,6 +266,30 @@
       {/if}
     </div>
   </div>
+
+  {#if $activeFilters.length > 0 || $videoFilter !== "all"}
+    <div class="mb-5" aria-label={t("active_filters")}>
+      <p class="mb-2 text-sm font-semibold text-gray-600 dark:text-gray-300">{t("active_filters")}</p>
+      <div class="flex flex-wrap gap-2">
+        {#each $activeFilters as tagId (tagId)}
+          {@const name = activeTagNames.get(tagId) ?? `#${tagId}`}
+          <button type="button" onclick={() => toggleFilter(tagId)}
+            aria-label="{t('remove_filter')}: {name}"
+            class="inline-flex min-h-11 items-center gap-2 rounded-full border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/40 px-3 text-sm font-medium text-green-800 dark:text-green-300 cursor-pointer">
+            {name}<span aria-hidden="true">×</span>
+          </button>
+        {/each}
+        {#if $videoFilter !== "all"}
+          {@const name = t($videoFilter === "with" ? "with_video" : "without_video")}
+          <button type="button" onclick={() => videoFilter.set("all")}
+            aria-label="{t('remove_filter')}: {name}"
+            class="inline-flex min-h-11 items-center gap-2 rounded-full border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/40 px-3 text-sm font-medium text-green-800 dark:text-green-300 cursor-pointer">
+            {name}<span aria-hidden="true">×</span>
+          </button>
+        {/if}
+      </div>
+    </div>
+  {/if}
 
   <!-- Filters Panel -->
   {#if showFilters}
