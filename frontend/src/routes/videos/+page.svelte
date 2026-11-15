@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { replaceState } from "$app/navigation";
+  import { page } from "$app/state";
   import { allVideos, allMoves, isLoading, isAdmin, activeTab } from "#lib/stores.js";
   import SkeletonCard from "#lib/components/SkeletonCard.svelte";
   import { searchVideos, filterVideosByTagPresence, getAllVideoMoveLinks, type VideoMoveLink, type VideoTagFilter } from "#lib/services/videos.js";
@@ -9,6 +11,7 @@
   import LoadError from "#lib/components/LoadError.svelte";
   import { getAllVideos } from "#lib/services/videos.js";
   import { debounce } from "#lib/utils.js";
+  import { readVideoFilters, videoFiltersUrl, type VideoMoveFilter } from "#lib/videoFilters.js";
   import { resolve } from "$app/paths";
   import { t } from "#lib/i18n.js";
 
@@ -17,9 +20,9 @@
   let showFilters = $state(false);
   let viewMode = $state<"list" | "grid">("list");
 
-  // Filter: 'all' | 'with-moves' | 'without-moves'
-  let moveFilter = $state<"all" | "with-moves" | "without-moves">("all");
+  let moveFilter = $state<VideoMoveFilter>("all");
   let tagFilter = $state<VideoTagFilter>("all");
+  let urlSyncReady = $state(false);
   const activeFilterCount = $derived(
     Number(moveFilter !== "all") + Number(tagFilter !== "all"),
   );
@@ -39,9 +42,30 @@
     return filterVideosByTagPresence(result, tagFilter);
   });
 
-  onMount(async () => {
+  function restoreFilters() {
+    const filters = readVideoFilters(new URL(window.location.href));
+    searchInputValue = filters.query;
+    searchQuery = filters.query;
+    debouncedSearch(filters.query);
+    moveFilter = filters.moves;
+    tagFilter = filters.tags;
+  }
+
+  onMount(() => {
     activeTab.set("videos");
-    await loadVideoMoveLinks();
+    restoreFilters();
+    urlSyncReady = true;
+    window.addEventListener("popstate", restoreFilters);
+    void loadVideoMoveLinks();
+    return () => window.removeEventListener("popstate", restoreFilters);
+  });
+
+  $effect(() => {
+    if (!urlSyncReady) return;
+    const filters = { query: searchInputValue, moves: moveFilter, tags: tagFilter };
+    const current = new URL(window.location.href);
+    const next = videoFiltersUrl(current, filters);
+    if (next.href !== current.href) replaceState(next, page.state);
   });
 
   async function loadVideoMoveLinks() {
@@ -122,7 +146,7 @@
         onclick={() => (showFilters = !showFilters)}
         aria-expanded={showFilters}
         class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer
-        {moveFilter !== 'all'
+        {activeFilterCount > 0
           ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
           : 'bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 shadow-sm'}"
       >
