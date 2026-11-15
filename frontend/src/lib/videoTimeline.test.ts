@@ -1,8 +1,30 @@
 import { describe, expect, it } from 'vitest';
-import { buildVideoTimeline, formatVideoTime, getMoveInterval, sortTimelineMoves, youtubeEmbedUrl, type TimelineMove } from './videoTimeline.js';
+import { buildVideoTimeline, formatVideoTime, getMoveInterval, groupTimelineMoves, sortTimelineMoves, youtubeEmbedUrl, type TimelineMove } from './videoTimeline.js';
+import type { Move } from './types.js';
 
 const move = (id: number, start_time: string | null, end_time: string | null): TimelineMove =>
 	({ id, move_id: id, move_name: `Move ${id}`, start_time, end_time });
+
+describe('groupTimelineMoves', () => {
+	it('includes all video links, even moves without a festival tag, and preserves timestamps', () => {
+		const moves: Move[] = [
+			{ move_id: 1, name: 'Festival move', synonyms: null, description: null, learned_on: null },
+			{ move_id: 2, name: 'Other move', synonyms: null, description: null, learned_on: null }
+		];
+		const links = [
+			{ id: 1, video_id: 10, move_id: 1, start_time: '0:10', end_time: '0:20' },
+			{ id: 2, video_id: 10, move_id: 2, start_time: '0:30', end_time: '0:40' },
+			{ id: 3, video_id: 11, move_id: 99, start_time: null, end_time: null }
+		];
+		const grouped = groupTimelineMoves(links, moves);
+		expect(grouped[10]).toEqual([
+			{ ...links[0], move_name: 'Festival move' },
+			{ ...links[1], move_name: 'Other move' }
+		]);
+		expect(grouped[11]).toEqual([{ ...links[2], move_name: '#99' }]);
+		expect(buildVideoTimeline(60, grouped[10]).ranges.filter((range) => range.moves.length)).toHaveLength(2);
+	});
+});
 
 describe('buildVideoTimeline', () => {
 	it('covers the entire duration, including gaps and overlapping assignments', () => {

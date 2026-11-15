@@ -12,7 +12,7 @@
     moves: TimelineMove[];
     expanded: boolean;
     canPlay: boolean;
-    onPlayRange: (start: number, end: number) => void;
+    onPlayRange?: (start: number, end: number) => void;
   }
   let { video, moves, expanded, canPlay, onPlayRange }: Props = $props();
   let root: HTMLDivElement;
@@ -73,7 +73,7 @@
   function playSelectedRange() {
     if (!selected) return;
     selectedMoveId = null;
-    onPlayRange(selected.start, selected.end);
+    onPlayRange?.(selected.start, selected.end);
   }
 </script>
 
@@ -114,7 +114,7 @@
       <div class="mt-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 px-3 py-3 text-xs text-gray-600 dark:text-gray-300">
       <p aria-live="polite">{rangeLabel(selected)}</p>
       {#if selected.moves.length}
-        {#if canPlay}
+        {#if canPlay && onPlayRange}
         <button
           type="button"
           onclick={playSelectedRange}
@@ -157,7 +157,7 @@
                   <span class="text-gray-500 dark:text-gray-400">–</span>
                 {/if}
               </span>
-              {#if interval && canPlay}
+              {#if interval && canPlay && onPlayRange}
                 <button type="button" onclick={() => onPlayRange(interval.start, interval.end)}
                   aria-label="{t('timeline_play_chapter')}: {move.move_name.trim()}"
                   class="min-w-0 flex-1 min-h-11 text-left cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">

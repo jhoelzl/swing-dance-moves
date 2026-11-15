@@ -1,9 +1,24 @@
+import type { Move } from '#lib/types.js';
+import type { VideoMoveLink } from '#lib/services/videos.js';
+
 export interface TimelineMove {
 	id: number;
 	move_id: number;
 	move_name: string;
 	start_time: string | null;
 	end_time: string | null;
+}
+
+export function groupTimelineMoves(links: VideoMoveLink[], moves: Move[]): Record<number, TimelineMove[]> {
+	const names = new Map(moves.map((move) => [move.move_id, move.name]));
+	const byVideo: Record<number, TimelineMove[]> = {};
+	for (const link of links) {
+		(byVideo[link.video_id] ??= []).push({
+			...link,
+			move_name: names.get(link.move_id) ?? `#${link.move_id}`
+		});
+	}
+	return byVideo;
 }
 
 export interface TimelineRange {
