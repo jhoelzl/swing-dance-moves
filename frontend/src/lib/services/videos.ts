@@ -175,6 +175,12 @@ export function searchVideos(videos: Video[], query: string): Video[] {
 	);
 }
 
+export type VideoTagFilter = 'all' | 'without-tags';
+
+export function filterVideosByTagPresence(videos: Video[], filter: VideoTagFilter): Video[] {
+	return filter === 'without-tags' ? videos.filter((video) => !video.tags?.length) : videos;
+}
+
 /**
  * Get video references for a move (with joined video data).
  */

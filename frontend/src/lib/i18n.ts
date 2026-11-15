@@ -123,6 +123,7 @@ const translations: Record<string, { de: string; en: string }> = {
   'all': { de: 'Alle', en: 'All' },
   'with_moves': { de: 'Mit Moves', en: 'With Moves' },
   'without_moves': { de: 'Ohne Moves', en: 'Without Moves' },
+  'without_tags': { de: 'Ohne Tags', en: 'Without tags' },
   'no_videos_found': { de: 'Keine Videos gefunden', en: 'No videos found' },
   'video_singular': { de: 'Video', en: 'Video' },
   'video_plural': { de: 'Videos', en: 'Videos' },
