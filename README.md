@@ -11,7 +11,7 @@ A **Progressive Web App (PWA)** for browsing, filtering, and discovering swing d
 - **Swing dance moves** with descriptions, synonyms, and YouTube video embeds
 - **Multi-tag filtering** — filter by dance style, level, technical type, rating, and festival/class origin simultaneously
 - **Custom tag-group order** — use the up/down controls on the Tags page to change the shared order used throughout the app.
-- **Festival overview** — browse the `Festivals` tag group by festival, with inline YouTube and Dropbox class videos, move-coverage timelines, linked moves, and teacher tags. Festival and teacher assignments belong directly to videos; move links are only used for timelines and move details. The selected festival is saved in the URL for refreshes and bookmarks. Select a move with a valid start timestamp to play it in the class video.
+- **Festival overview** — browse the `Festivals` tag group by festival, with a video grid or detailed view featuring inline YouTube and Dropbox class videos, move-coverage timelines, linked moves, and teacher tags. Festival and teacher assignments belong directly to videos; move links are only used for timelines and move details. The selected festival is saved in the URL for refreshes and bookmarks. Select a move with a valid start timestamp to play it in the class video.
 - **Full-text search** — search across move names, synonyms, and descriptions
 - **"Out of moves!" button** — get 2 random moves matching your current filters
 - **Video (Youtube/Dropbox) filter** — filter for moves that have a linked video
