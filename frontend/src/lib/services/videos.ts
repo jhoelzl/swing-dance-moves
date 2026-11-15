@@ -1,5 +1,5 @@
 import { supabase } from '#lib/supabase.js';
-import type { Tag, Video, VideoFormData, MoveToVideo } from '#lib/types.js';
+import type { Tag, TagGroup, Video, VideoFormData, MoveToVideo } from '#lib/types.js';
 
 const db: any = supabase;
 
@@ -175,10 +175,22 @@ export function searchVideos(videos: Video[], query: string): Video[] {
 	);
 }
 
-export type VideoTagFilter = 'all' | 'without-tags';
+export type VideoTagFilter = 'all' | 'missing-tags';
 
-export function filterVideosByTagPresence(videos: Video[], filter: VideoTagFilter): Video[] {
-	return filter === 'without-tags' ? videos.filter((video) => !video.tags?.length) : videos;
+export function filterVideosByTagPresence(videos: Video[], filter: VideoTagFilter, groups: TagGroup[]): Video[] {
+	if (filter === 'all') return videos;
+	const festivalTypes = new Set<number>();
+	const teacherTypes = new Set<number>();
+	for (const group of groups) {
+		const name = group.tagType.tag_type_name.trim().toLowerCase();
+		if (name === 'festivals' || name === 'festival / classes') festivalTypes.add(group.tagType.tag_type_id);
+		if (name === 'teachers') teacherTypes.add(group.tagType.tag_type_id);
+	}
+	return videos.filter((video) => {
+		const tags = video.tags ?? [];
+		return !tags.some((tag) => festivalTypes.has(tag.tag_type_id)) ||
+			!tags.some((tag) => teacherTypes.has(tag.tag_type_id));
+	});
 }
 
 /**

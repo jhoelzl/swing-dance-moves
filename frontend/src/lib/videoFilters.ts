@@ -14,7 +14,7 @@ export function readVideoFilters(url: URL): VideoFilters {
 	return {
 		query: url.searchParams.get('q') ?? '',
 		moves: moves === 'with-moves' || moves === 'without-moves' ? moves : 'all',
-		tags: tags === 'without-tags' ? tags : 'all'
+		tags: tags === 'missing-tags' || tags === 'without-tags' ? 'missing-tags' : 'all'
 	};
 }
 
