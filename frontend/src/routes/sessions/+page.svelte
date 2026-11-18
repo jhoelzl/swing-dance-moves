@@ -6,6 +6,7 @@
   import LoadError from "#lib/components/LoadError.svelte";
   import { t } from "#lib/i18n.js";
   import type { Session, Move } from "#lib/types.js";
+  import { readPreference, sortPreference, writePreference } from "#lib/pagePreferences.js";
   import {
     getAllSessions,
     createSession,
@@ -47,6 +48,7 @@
   let selectedMoveId = $state<number | null>(null);
   let addingMove = $state(false);
   let moveSortOrder = $state<"a-z" | "z-a" | "newest" | "oldest">("a-z");
+  let preferencesReady = $state(false);
   let today = $derived(todayIso());
   let tomorrow = $derived(addDays(today, 1));
   let upcomingSessions = $derived(
@@ -139,6 +141,8 @@
   }
 
   onMount(() => {
+    moveSortOrder = sortPreference(readPreference("page-options:sessions-sort"));
+    preferencesReady = true;
     const handleHashChange = () => expandSessionFromHash(window.location.hash);
     window.addEventListener("hashchange", handleHashChange);
     activeTab.set("sessions");
@@ -147,6 +151,10 @@
     return () => {
       window.removeEventListener("hashchange", handleHashChange);
     };
+  });
+
+  $effect(() => {
+    if (preferencesReady) writePreference("page-options:sessions-sort", moveSortOrder);
   });
 
   // ── create session ────────────────────────────────────────────

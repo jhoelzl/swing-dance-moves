@@ -14,12 +14,13 @@ A **Progressive Web App (PWA)** for browsing, filtering, and discovering swing d
 - **Festival overview** — browse the `Festivals` tag group by festival, with a video grid or detailed view featuring inline YouTube and Dropbox class videos, move-coverage timelines, linked moves, and teacher tags. Festival and teacher assignments belong directly to videos; move links are only used for timelines and move details. The selected festival is saved in the URL for refreshes and bookmarks. Select a move with a valid start timestamp to play it in the class video.
 - **Video grid coverage** — view move-coverage timelines beneath videos in both the Videos and Festivals grids.
 - **Full-text search** — search across move names, synonyms, and descriptions
-- **"Out of moves!" button** — get 2 random moves matching your current filters
+- **Random moves** — get random moves matching the Random page's filters
 - **Video (Youtube/Dropbox) filter** — filter for moves that have a linked video
 - **Missing video tags** — find videos missing a festival or teacher tag so they can be completed.
 - **Video tag filtering** — filter by festival and teacher tags (any within a group, all selected groups).
 - **Video timelines** — list cards show timestamped move assignments in green and unassigned time in red, with dividers between adjacent assigned sections. Hover or tap an assigned segment to play it or view its moves. Expanded cards show a chronological chapter list with playback and move details, including moves without valid timestamps. Red does not necessarily mean a move is missing. Incomplete timestamps are flagged; duration is fetched from YouTube or Dropbox as cards come into view and may be unavailable for restricted or unsupported videos.
 - **Bookmarkable filters** — move and video search and filter state is synced to the URL and restored on refresh.
+- **Remembered page options** — filters, search, sorting, and list/grid views are saved on this device for each page. Explicit move or video URL filters take precedence over saved filters.
 - **Dark mode** — toggle or auto-detect from system preference, persisted in localStorage
 - **Reload app** — refresh the current page from the header, including in the installed app
 - **PWA / installable** — works offline, installable on iOS and Android home screens

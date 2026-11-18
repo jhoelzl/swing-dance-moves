@@ -72,6 +72,17 @@ describe('timecodeToSeconds', () => {
 });
 
 describe('debounce', () => {
+	it('cancels a pending search when navigating away', () => {
+		vi.useFakeTimers();
+		const callback = vi.fn();
+		const debounced = debounce(callback, 200);
+		debounced('pending');
+		debounced.cancel();
+		vi.runAllTimers();
+		expect(callback).not.toHaveBeenCalled();
+		vi.useRealTimers();
+	});
+
 	it('only invokes the wrapped function once with the latest arguments', () => {
 		vi.useFakeTimers();
 

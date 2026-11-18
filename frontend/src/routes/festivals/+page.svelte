@@ -14,11 +14,13 @@
   import LoadError from "#lib/components/LoadError.svelte";
   import { groupTimelineMoves } from "#lib/videoTimeline.js";
   import { t } from "#lib/i18n.js";
+  import { readPreference, viewPreference, writePreference } from "#lib/pagePreferences.js";
 
   let links = $state<VideoMoveLink[]>([]);
   let linksError = $state(false);
   let linksLoading = $state(true);
   let viewMode = $state<"list" | "grid">("list");
+  let preferencesReady = $state(false);
   const festivals = $derived(buildFestivalOverviews($tagGroups, $allMoves, $allVideos, links));
   const videoMoves = $derived(groupTimelineMoves(links, $allMoves));
   const STORAGE_KEY = "festival-selection";
@@ -61,7 +63,13 @@
 
   onMount(() => {
     storedId = readStored();
+    viewMode = viewPreference(readPreference("page-options:festivals-view"));
+    preferencesReady = true;
     void loadLinks();
+  });
+
+  $effect(() => {
+    if (preferencesReady) writePreference("page-options:festivals-view", viewMode);
   });
 </script>
 
