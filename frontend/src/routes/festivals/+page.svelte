@@ -21,10 +21,22 @@
   let viewMode = $state<"list" | "grid">("list");
   const festivals = $derived(buildFestivalOverviews($tagGroups, $allMoves, $allVideos, links));
   const videoMoves = $derived(groupTimelineMoves(links, $allMoves));
-  const selected = $derived(selectFestival(festivals, page.url.searchParams.get("festival")));
+  const STORAGE_KEY = "festival-selection";
+  let storedId = $state<string | null>(null);
+  const selected = $derived(selectFestival(festivals, page.url.searchParams.get("festival") ?? storedId));
+
+  function readStored(): string | null {
+    try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+  }
+
+  function saveStored(id: string) {
+    storedId = id;
+    try { localStorage.setItem(STORAGE_KEY, id); } catch { /* storage unavailable */ }
+  }
 
   async function changeFestival(event: Event) {
     const select = event.currentTarget as HTMLSelectElement;
+    saveStored(select.value);
     try {
       await goto(festivalSelectionUrl(page.url.href, select.value), { reset: false });
     } catch (error) {
@@ -47,7 +59,10 @@
     }
   }
 
-  onMount(() => { void loadLinks(); });
+  onMount(() => {
+    storedId = readStored();
+    void loadLinks();
+  });
 </script>
 
 <svelte:head>
