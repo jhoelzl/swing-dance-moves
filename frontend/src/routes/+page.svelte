@@ -23,7 +23,10 @@
   import MoveCard from "#lib/components/MoveCard.svelte";
   import SkeletonCard from "#lib/components/SkeletonCard.svelte";
   import { debounce } from "#lib/utils.js";
+  import { movesPreferences, movesUrlPreferences, readPreference, sortPreference, writePreference } from "#lib/pagePreferences.js";
   import { resolve } from "$app/paths";
+  import { replaceState } from "$app/navigation";
+  import { page } from "$app/state";
   import { t } from "#lib/i18n.js";
 
   async function handleMoveDeleted() {
@@ -44,59 +47,54 @@
     { value: "oldest", label: "Oldest", key: "oldest" },
   ];
 
-  // Read filters from URL on mount
   onMount(() => {
     activeTab.set("moves");
-    const params = new URLSearchParams(window.location.search);
-
-    // Restore sort order from localStorage
-    const storedSort = localStorage.getItem("sortOrder");
-    if (storedSort && ["a-z", "z-a", "newest", "oldest"].includes(storedSort)) {
-      sortOrder.set(storedSort as SortOrder);
-    }
-
-    const tagsParam = params.get("tags");
-    if (tagsParam) {
-      const tagIds = tagsParam
-        .split(",")
-        .map(Number)
-        .filter((n) => !isNaN(n) && n > 0);
-      if (tagIds.length > 0) {
-        activeFilters.set([...new Set(tagIds)]);
+    const stored = readPreference("page-options:moves");
+    const saved = movesPreferences(stored);
+    if (stored === null) {
+      try {
+        saved.sort = sortPreference(localStorage.getItem("sortOrder"));
+      } catch (error) {
+        console.warn("Could not read the previous move sort order:", error);
       }
     }
-
-    const qParam = params.get("q");
-    if (qParam) {
-      searchQuery.set(qParam);
-      searchInputValue = qParam;
-    }
-
-    const expandParam = params.get("expand");
-    if (expandParam === "1") {
-      expandMoves = true;
-    }
-
-    const videoParam = params.get("video");
-    if (videoParam === "1") {
-      videoFilter.set("with");
-    } else if (videoParam === "0") {
-      videoFilter.set("without");
-    }
-
-    // Enable URL sync after initial state is restored
+    const restored = movesUrlPreferences(new URLSearchParams(window.location.search), saved);
+    activeFilters.set(restored.tags);
+    searchQuery.set(restored.query);
+    searchInputValue = restored.query;
+    videoFilter.set(restored.video);
+    sortOrder.set(restored.sort);
+    expandMoves = restored.expand;
     urlSyncReady = true;
+    const restoreUrl = () => {
+      debouncedSearch.cancel();
+      const current = movesUrlPreferences(new URLSearchParams(window.location.search), movesPreferences({ sort: $sortOrder }));
+      activeFilters.set(current.tags);
+      searchQuery.set(current.query);
+      searchInputValue = current.query;
+      videoFilter.set(current.video);
+      expandMoves = current.expand;
+    };
+    window.addEventListener("popstate", restoreUrl);
+    return () => {
+      debouncedSearch.cancel();
+      window.removeEventListener("popstate", restoreUrl);
+    };
   });
 
-  // Sync filter/search changes back to URL
   $effect(() => {
     if (!urlSyncReady) return;
 
     const filters = $activeFilters;
-    const query = $searchQuery;
+    const query = searchInputValue;
     const video = $videoFilter;
+    writePreference("page-options:moves", {
+      tags: filters, query, video, sort: $sortOrder, expand: expandMoves,
+    });
 
-    const params = new URLSearchParams();
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    for (const key of ["tags", "q", "video", "expand"]) params.delete(key);
     if (filters.length > 0) {
       params.set("tags", filters.join(","));
     }
@@ -108,17 +106,12 @@
     }
     if (expandMoves) params.set("expand", "1");
 
-    const search = params.toString();
-    const basePath = resolve("/");
-    const newUrl = search ? `${basePath}?${search}` : basePath;
-
-    window.history.replaceState(null, "", newUrl);
+    if (url.href !== window.location.href) replaceState(url, page.state);
   });
 
   function handleSortChange(e: Event) {
     const value = (e.target as HTMLSelectElement).value as SortOrder;
     sortOrder.set(value);
-    localStorage.setItem("sortOrder", value);
   }
 
   const debouncedSearch = debounce((value: string) => {
@@ -127,12 +120,13 @@
 
   function handleSearchInput(e: Event) {
     const target = e.target as HTMLInputElement;
+    searchInputValue = target.value;
     debouncedSearch(target.value);
   }
 
   function resetAllFilters() {
     searchInputValue = "";
-    debouncedSearch("");
+    debouncedSearch.cancel();
     clearFilters();
   }
 </script>

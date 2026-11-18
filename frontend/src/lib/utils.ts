@@ -121,12 +121,14 @@ export function getVideoSourceType(url: string): VideoSourceType {
 }
 
 /** Debounce function for search input */
-export function debounce<T extends (...args: any[]) => void>(fn: T, ms: number): (...args: Parameters<T>) => void {
+export function debounce<T extends (...args: any[]) => void>(fn: T, ms: number): ((...args: Parameters<T>) => void) & { cancel: () => void } {
 	let timer: ReturnType<typeof setTimeout>;
-	return (...args: Parameters<T>) => {
+	const debounced = (...args: Parameters<T>) => {
 		clearTimeout(timer);
 		timer = setTimeout(() => fn(...args), ms);
 	};
+	debounced.cancel = () => clearTimeout(timer);
+	return debounced;
 }
 
 /** Convert timecode string (e.g. "10:01" or "1:30:05") to seconds */

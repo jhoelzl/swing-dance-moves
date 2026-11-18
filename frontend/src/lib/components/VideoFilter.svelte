@@ -1,6 +1,14 @@
 <script lang="ts">
-  import { videoFilter } from "#lib/stores.js";
+  import { videoFilter, type VideoFilter } from "#lib/stores.js";
   import { t } from "#lib/i18n.js";
+
+  interface Props {
+    selected?: VideoFilter;
+    onchange?: (value: VideoFilter) => void;
+  }
+
+  let { selected, onchange }: Props = $props();
+  let current = $derived(selected ?? $videoFilter);
 
   const options = [
     { value: "with", label: "with_video" },
@@ -15,14 +23,18 @@
   <div class="flex flex-wrap gap-2">
     {#each options as option}
       <button
-        onclick={() => videoFilter.set($videoFilter === option.value ? "all" : option.value)}
-        aria-pressed={$videoFilter === option.value}
+        onclick={() => {
+          const value = current === option.value ? "all" : option.value;
+          if (onchange) onchange(value);
+          else videoFilter.set(value);
+        }}
+        aria-pressed={current === option.value}
         class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border
-          {$videoFilter === option.value
+          {current === option.value
             ? 'bg-red-500 dark:bg-red-600 text-white border-transparent shadow-sm'
             : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800 hover:shadow-sm'}"
       >
-        {#if $videoFilter === option.value}
+        {#if current === option.value}
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
           </svg>

@@ -14,6 +14,7 @@
   import { getAllVideos } from "#lib/services/videos.js";
   import { debounce } from "#lib/utils.js";
   import { readVideoFilters, videoFiltersUrl, type VideoMoveFilter } from "#lib/videoFilters.js";
+  import { readPreference, videoPreferences, writePreference } from "#lib/pagePreferences.js";
   import { resolve } from "$app/paths";
   import { t } from "#lib/i18n.js";
 
@@ -47,11 +48,9 @@
     return filterVideosByTags(result, selectedTagIds, videoTagGroups);
   });
 
-  function restoreFilters() {
-    const filters = readVideoFilters(new URL(window.location.href));
+  function applyFilters(filters: ReturnType<typeof readVideoFilters>) {
     searchInputValue = filters.query;
     searchQuery = filters.query;
-    debouncedSearch(filters.query);
     moveFilter = filters.moves;
     tagFilter = filters.tags;
     selectedTagIds = filters.tagIds;
@@ -59,16 +58,28 @@
 
   onMount(() => {
     activeTab.set("videos");
-    restoreFilters();
+    const saved = videoPreferences(readPreference("page-options:videos"));
+    const url = new URL(window.location.href);
+    const hasFilters = ["q", "moves", "tags", "tagIds"].some((key) => url.searchParams.has(key));
+    applyFilters(hasFilters ? readVideoFilters(url) : saved);
+    viewMode = saved.view;
     urlSyncReady = true;
+    const restoreFilters = () => {
+      debouncedSearch.cancel();
+      applyFilters(readVideoFilters(new URL(window.location.href)));
+    };
     window.addEventListener("popstate", restoreFilters);
     void loadVideoMoveLinks();
-    return () => window.removeEventListener("popstate", restoreFilters);
+    return () => {
+      debouncedSearch.cancel();
+      window.removeEventListener("popstate", restoreFilters);
+    };
   });
 
   $effect(() => {
     if (!urlSyncReady) return;
     const filters = { query: searchInputValue, moves: moveFilter, tags: tagFilter, tagIds: selectedTagIds };
+    writePreference("page-options:videos", { ...filters, view: viewMode });
     const current = new URL(window.location.href);
     const next = videoFiltersUrl(current, filters);
     if (next.href !== current.href) replaceState(next, page.state);

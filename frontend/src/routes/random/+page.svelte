@@ -2,16 +2,13 @@
   import { onMount } from "svelte";
   import {
     allMoves,
-    filteredMoves,
     tagGroups,
-    activeFilters,
     isLoading,
     activeTab,
-    videoFilter,
-    clearFilters,
     userSettings,
   } from "#lib/stores.js";
-  import { getRandomMoves } from "#lib/services/moves.js";
+  import type { VideoFilter as VideoFilterValue } from "#lib/stores.js";
+  import { filterMovesByTags, getRandomMoves } from "#lib/services/moves.js";
   import type { Move } from "#lib/types.js";
   import MoveCard from "#lib/components/MoveCard.svelte";
   import FilterChips from "#lib/components/FilterChips.svelte";
@@ -20,13 +17,31 @@
   import { getAllMoves, getAllTagsGrouped } from "#lib/services/moves.js";
   import { getAllVideos } from "#lib/services/videos.js";
   import { t } from "#lib/i18n.js";
+  import { randomPreferences, readPreference, writePreference } from "#lib/pagePreferences.js";
 
   let randomMoves = $state<Move[]>([]);
   let showFilters = $state(false);
   let isShuffling = $state(false);
+  let activeFilters = $state<number[]>([]);
+  let videoFilter = $state<VideoFilterValue>("all");
+  let preferencesReady = $state(false);
+  const filteredMoves = $derived.by(() => {
+    const moves = filterMovesByTags($allMoves, activeFilters);
+    return videoFilter === "all" ? moves : moves.filter((move) =>
+      videoFilter === "with" ? move.hasVideo === true : move.hasVideo === false,
+    );
+  });
 
   onMount(() => {
     activeTab.set("random");
+    const saved = randomPreferences(readPreference("page-options:random"));
+    activeFilters = saved.tags;
+    videoFilter = saved.video;
+    preferencesReady = true;
+  });
+
+  $effect(() => {
+    if (preferencesReady) writePreference("page-options:random", { tags: activeFilters, video: videoFilter });
   });
 
   // Re-shuffle when the available moves change.
@@ -37,11 +52,15 @@
   function shuffle() {
     isShuffling = true;
     const count = $userSettings?.random_moves_count ?? 2;
-    randomMoves = getRandomMoves($filteredMoves, count);
+    randomMoves = getRandomMoves(filteredMoves, count);
     // Brief animation delay
     setTimeout(() => {
       isShuffling = false;
     }, 300);
+  }
+
+  function toggleFilter(id: number) {
+    activeFilters = activeFilters.includes(id) ? activeFilters.filter((tag) => tag !== id) : [...activeFilters, id];
   }
 
   async function handleMoveDeleted() {
@@ -72,7 +91,7 @@
       <button
         onclick={() => (showFilters = !showFilters)}
         class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer
-        {$activeFilters.length > 0 || $videoFilter !== "all"
+        {activeFilters.length > 0 || videoFilter !== "all"
           ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
           : 'bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 shadow-sm'}"
       >
@@ -90,18 +109,19 @@
           />
         </svg>
         {t("filter")}
-        {#if $activeFilters.length > 0 || $videoFilter !== "all"}
+        {#if activeFilters.length > 0 || videoFilter !== "all"}
           <span
             class="inline-flex items-center justify-center w-5 h-5 text-[11px] font-bold bg-blue-500 text-white rounded-full"
           >
-            {$activeFilters.length + ($videoFilter !== "all" ? 1 : 0)}
+            {activeFilters.length + (videoFilter !== "all" ? 1 : 0)}
           </span>
         {/if}
       </button>
-      {#if $activeFilters.length > 0 || $videoFilter !== "all"}
+      {#if activeFilters.length > 0 || videoFilter !== "all"}
         <button
           onclick={() => {
-            clearFilters();
+            activeFilters = [];
+            videoFilter = "all";
             shuffle();
           }}
           class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
@@ -137,9 +157,9 @@
     <div
       class="mb-6 p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm"
     >
-      <FilterChips tagGroups={$tagGroups} />
+      <FilterChips tagGroups={$tagGroups} selectedTagIds={activeFilters} ontoggle={toggleFilter} />
 
-      <VideoFilter />
+      <VideoFilter selected={videoFilter} onchange={(value) => (videoFilter = value)} />
     </div>
   {/if}
 
