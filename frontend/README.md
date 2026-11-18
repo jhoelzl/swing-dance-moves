@@ -43,8 +43,20 @@ You can preview the production build with `npm run preview`.
 
 ## iOS
 
-The iOS app uses Capacitor to package the same web app. Install Xcode and
-the iOS platform, configure 1Password CLI access for `frontend/.env`, and run:
+The iOS app uses Capacitor to load the deployed GitHub Pages app. It checks the
+network for the page on launch and needs an internet connection to start. Web
+updates are available without rebuilding the iOS app; changes to native code or
+Capacitor configuration still require a rebuild and reinstall. The first launch
+after switching from the bundled app may require signing in again because the
+website uses a different storage origin. Subsequent sessions remain stored.
+
+Capacitor documents `server.url` as intended for live reload, not production;
+this remote-hosted setup is therefore not a supported production deployment
+mechanism. Only content from the configured site should be trusted with the
+native bridge.
+
+Install Xcode and the iOS platform, configure 1Password CLI access for
+`frontend/.env`, and run:
 
 ```sh
 npm install
@@ -53,6 +65,6 @@ npm run ios:open
 ```
 
 In Xcode, select your development team under Signing & Capabilities and run
-the `App` scheme on your iPhone. Run `npm run ios:sync` after changing the web
-app, before rebuilding in Xcode. Generated web assets in `ios/App/App/public`
-are local build output and must not be committed.
+the `App` scheme on your iPhone. Run `npm run ios:sync` before rebuilding in
+Xcode. Generated web assets in `ios/App/App/public` are local build output and
+must not be committed.
